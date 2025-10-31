@@ -1,0 +1,134 @@
+.search-bar {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 2rem;
+}
+
+.search-main {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.search-input-group {
+  flex: 1;
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+}
+
+.search-input-group input {
+  width: 100%;
+  padding-left: 3rem;
+  font-size: 1rem;
+}
+
+.search-btn {
+  background: var(--primary-color);
+  color: white;
+  padding: 0.85rem 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.search-btn:hover {
+  background: var(--primary-dark);
+}
+
+.advanced-btn {
+  background: var(--light-bg);
+  color: var(--text-dark);
+  padding: 0.85rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.advanced-btn:hover {
+  background: var(--border-color);
+}
+
+.search-advanced {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-group label {
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--text-dark);
+  font-size: 0.9rem;
+}
+
+.filter-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
+}
+
+.reset-btn {
+  background: white;
+  color: var(--text-dark);
+  padding: 0.75rem 1.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.reset-btn:hover {
+  background: var(--light-bg);
+}
+
+.apply-btn {
+  background: var(--primary-color);
+  color: white;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.apply-btn:hover {
+  background: var(--primary-dark);
+}
+
+@media (max-width: 768px) {
+  .search-main {
+    flex-direction: column;
+  }
+
+  .search-btn, .advanced-btn {
+    width: 100%;
+  }
+
+  .search-advanced {
+    grid-template-columns: 1fr;
+  }
+
+  .filter-actions {
+    flex-direction: column;
+  }
+
+  .reset-btn, .apply-btn {
+    width: 100%;
+  }
+}

@@ -1,0 +1,144 @@
+.my-reservations {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.my-reservation-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  transition: all 0.3s ease;
+}
+
+.my-reservation-card:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.reservation-image {
+  width: 200px;
+  height: auto;
+  flex-shrink: 0;
+}
+
+.reservation-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.reservation-content {
+  flex: 1;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.reservation-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.reservation-top h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.reservation-dates {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--light-bg);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.date-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.date-label {
+  font-size: 0.85rem;
+  color: var(--text-light);
+}
+
+.date-value {
+  font-weight: 500;
+}
+
+.date-separator {
+  font-size: 1.5rem;
+  color: var(--text-light);
+}
+
+.reservation-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+}
+
+.price-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.price-label {
+  font-size: 0.85rem;
+  color: var(--text-light);
+}
+
+.price-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.reservation-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.cancel-btn {
+  background: var(--danger-color);
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.review-btn {
+  background: var(--warning-color);
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .my-reservation-card {
+    flex-direction: column;
+  }
+
+  .reservation-image {
+    width: 100%;
+    height: 200px;
+  }
+
+  .reservation-dates {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .date-separator {
+    transform: rotate(90deg);
+  }
+}
