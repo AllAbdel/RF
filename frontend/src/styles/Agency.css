@@ -1,0 +1,31 @@
+.agency-dashboard {
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+}
+
+.vehicles-section,
+.reservations-section {
+  animation: slideUp var(--transition-base);
+}
+
+.vehicles-section h2,
+.reservations-section h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 2rem;
+  position: relative;
+  padding-bottom: 0.75rem;
+}
+
+.vehicles-section h2::after,
+.reservations-section h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 60px;
+  height: 4px;
+  background: var(--accent-gradient);
+  border-radius: var(--radius-full);
+}
