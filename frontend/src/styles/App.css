@@ -1,3 +1,106 @@
+/* Animated Background Styles */
+.App {
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Animated Background - Only in Light Theme */
+[data-theme="light"] .App::before,
+[data-theme="light"] .App::after {
+  content: '';
+  position: fixed;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Car-themed animated shapes for light theme */
+[data-theme="light"] .App::before {
+  width: 800px;
+  height: 800px;
+  top: -200px;
+  right: -200px;
+  background: radial-gradient(circle, rgba(255, 107, 53, 0.08) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float 20s ease-in-out infinite;
+}
+
+[data-theme="light"] .App::after {
+  width: 600px;
+  height: 600px;
+  bottom: -150px;
+  left: -150px;
+  background: radial-gradient(circle, rgba(255, 165, 0, 0.06) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float 25s ease-in-out infinite reverse;
+}
+
+/* Subtle tire track patterns */
+[data-theme="light"] .dashboard-content::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 20%;
+  width: 2px;
+  height: 100%;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 20px,
+    rgba(255, 107, 53, 0.05) 20px,
+    rgba(255, 107, 53, 0.05) 40px
+  );
+  animation: moveDown 2s linear infinite;
+  z-index: 0;
+  pointer-events: none;
+}
+
+[data-theme="light"] .dashboard-content::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  right: 20%;
+  width: 2px;
+  height: 100%;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 20px,
+    rgba(255, 165, 0, 0.05) 20px,
+    rgba(255, 165, 0, 0.05) 40px
+  );
+  animation: moveDown 2.5s linear infinite;
+  z-index: 0;
+  pointer-events: none;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-30px) rotate(5deg);
+  }
+}
+
+@keyframes moveDown {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 0 40px;
+  }
+}
+
+/* Ensure content is above background */
+[data-theme="light"] .dashboard-header,
+[data-theme="light"] .dashboard-nav,
+[data-theme="light"] .dashboard-content > * {
+  position: relative;
+  z-index: 1;
+}
+
 /* Theme Switcher Component */
 .theme-switcher {
   position: fixed;
@@ -80,6 +183,16 @@
   border-color: var(--accent-primary);
 }
 
+/* Color selector - only visible in dark mode */
+.theme-colors-section {
+  transition: all var(--transition-base);
+}
+
+[data-theme="light"] .theme-colors-section {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
 .theme-colors {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -136,6 +249,14 @@
   background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
 }
 
+.color-disabled-note {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  text-align: center;
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
 /* Dashboard Header */
 .dashboard-header {
   background: var(--bg-elevated);
@@ -165,11 +286,6 @@
   gap: 0.75rem;
 }
 
-.header-content h1::before {
-  content: '🚗';
-  font-size: 2rem;
-}
-
 .header-actions {
   display: flex;
   align-items: center;
@@ -188,11 +304,6 @@
   gap: 0.5rem;
 }
 
-.user-info::before {
-  content: '👤';
-  font-size: 1.1rem;
-}
-
 .logout-btn {
   background: var(--danger);
   color: white;
@@ -204,11 +315,6 @@
   align-items: center;
   gap: 0.5rem;
   box-shadow: var(--shadow-sm);
-}
-
-.logout-btn::before {
-  content: '🚪';
-  font-size: 1rem;
 }
 
 .logout-btn:hover {
@@ -315,12 +421,6 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-}
-
-.add-btn::before {
-  content: '+';
-  font-size: 1.5rem;
-  font-weight: bold;
 }
 
 .add-btn:hover {

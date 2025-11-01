@@ -62,14 +62,20 @@
 .vehicle-item-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+.vehicle-item-title {
+  flex: 1;
 }
 
 .vehicle-item-header h3 {
   font-size: 1.4rem;
   color: var(--text-primary);
   font-weight: 700;
+  margin-bottom: 0.5rem;
 }
 
 .vehicle-item-details {
