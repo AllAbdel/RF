@@ -7,7 +7,7 @@ import '../styles/VehicleDetails.css';
 const VehicleDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user, isClient } = useAuth();
+  const { isClient } = useAuth();
   const [vehicle, setVehicle] = useState(null);
   const [images, setImages] = useState([]);
   const [reviews, setReviews] = useState([]);
@@ -21,6 +21,7 @@ const VehicleDetails = () => {
 
   useEffect(() => {
     loadVehicleDetails();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const loadVehicleDetails = async () => {
@@ -56,7 +57,7 @@ const VehicleDetails = () => {
       }
 
       // Créer la réservation
-      const response = await reservationAPI.create({
+      await reservationAPI.create({
         vehicle_id: id,
         ...reservationData
       });
@@ -77,7 +78,7 @@ const VehicleDetails = () => {
     }
 
     try {
-      const response = await messageAPI.getOrCreateConversation(vehicle.agency_id);
+      await messageAPI.getOrCreateConversation(vehicle.agency_id);
       alert('Vous pouvez maintenant contacter l\'agence depuis votre messagerie');
       navigate('/client');
     } catch (error) {
@@ -88,11 +89,11 @@ const VehicleDetails = () => {
 
   const getFuelIcon = (fuelType) => {
     switch (fuelType) {
-      case 'essence': return '⛽';
-      case 'diesel': return '🛢️';
-      case 'electrique': return '🔋';
-      case 'hybride': return '🔌';
-      default: return '⛽';
+      case 'essence': return 'Essence';
+      case 'diesel': return 'Diesel';
+      case 'electrique': return 'Électrique';
+      case 'hybride': return 'Hybride';
+      default: return fuelType || 'N/A';
     }
   };
 
@@ -117,7 +118,7 @@ const VehicleDetails = () => {
   return (
     <div className="vehicle-details">
       <button className="back-btn" onClick={() => navigate(-1)}>
-        ← Retour
+        Retour
       </button>
 
       <div className="vehicle-details-container">
@@ -129,7 +130,7 @@ const VehicleDetails = () => {
                 alt={vehicle.brand}
               />
             ) : (
-              <div className="no-image">📷 Pas d'image</div>
+              <div className="no-image">Pas d'image</div>
             )}
           </div>
           
@@ -151,10 +152,10 @@ const VehicleDetails = () => {
         <div className="vehicle-info-details">
           <div className="vehicle-header-details">
             <h1>{vehicle.brand} {vehicle.model}</h1>
-            <p className="agency-name">📍 {vehicle.agency_name}</p>
+            <p className="agency-name">Agence: {vehicle.agency_name}</p>
             {vehicle.avg_rating && (
               <div className="rating">
-                ⭐ {parseFloat(vehicle.avg_rating).toFixed(1)} ({vehicle.review_count} avis)
+                {`${parseFloat(vehicle.avg_rating).toFixed(1)}/5`} ({vehicle.review_count} avis)
               </div>
             )}
           </div>
@@ -166,27 +167,27 @@ const VehicleDetails = () => {
 
           <div className="vehicle-specs-details">
             <div className="spec-item">
-              <span className="spec-label">👥 Places</span>
+              <span className="spec-label">Places</span>
               <span className="spec-value">{vehicle.seats}</span>
             </div>
             <div className="spec-item">
-              <span className="spec-label">{getFuelIcon(vehicle.fuel_type)} Carburant</span>
-              <span className="spec-value">{vehicle.fuel_type}</span>
+              <span className="spec-label">Carburant</span>
+              <span className="spec-value">{getFuelIcon(vehicle.fuel_type)}</span>
             </div>
             <div className="spec-item">
-              <span className="spec-label">🔧 Moteur</span>
+              <span className="spec-label">Moteur</span>
               <span className="spec-value">{vehicle.engine || 'N/A'}</span>
             </div>
             <div className="spec-item">
-              <span className="spec-label">⛽ Réservoir</span>
+              <span className="spec-label">Réservoir</span>
               <span className="spec-value">{vehicle.tank_capacity ? `${vehicle.tank_capacity}L` : 'N/A'}</span>
             </div>
             <div className="spec-item">
-              <span className="spec-label">📍 Localisation</span>
+              <span className="spec-label">Localisation</span>
               <span className="spec-value">{vehicle.location}</span>
             </div>
             <div className="spec-item">
-              <span className="spec-label">📅 Année</span>
+              <span className="spec-label">Année</span>
               <span className="spec-value">{vehicle.release_date ? new Date(vehicle.release_date).getFullYear() : 'N/A'}</span>
             </div>
           </div>
@@ -205,10 +206,10 @@ const VehicleDetails = () => {
                   className="reserve-btn"
                   onClick={() => setShowReservationForm(!showReservationForm)}
                 >
-                  {showReservationForm ? '✕ Annuler' : '📅 Réserver'}
+                  {showReservationForm ? 'Annuler' : 'Réserver'}
                 </button>
                 <button className="contact-btn" onClick={handleContactAgency}>
-                  💬 Contacter l'agence
+                  Contacter l'agence
                 </button>
               </>
             ) : (
@@ -274,7 +275,7 @@ const VehicleDetails = () => {
                     {review.first_name} {review.last_name}
                   </span>
                   <span className="review-rating">
-                    {'⭐'.repeat(review.rating)}
+                    {`${review.rating}/5`}
                   </span>
                 </div>
                 {review.comment && <p className="review-comment">{review.comment}</p>}

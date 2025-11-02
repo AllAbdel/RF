@@ -68,7 +68,7 @@ const AuthPage = () => {
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-header">
-          <h1>🚗 Location de Voitures</h1>
+          <h1>Location de Voitures</h1>
           <p>{isLogin ? 'Connectez-vous à votre compte' : 'Créez votre compte'}</p>
         </div>
 
@@ -77,13 +77,13 @@ const AuthPage = () => {
             className={`type-btn ${userType === 'client' ? 'active' : ''}`}
             onClick={() => setUserType('client')}
           >
-            👤 Client
+            Client
           </button>
           <button
             className={`type-btn ${userType === 'agency_member' ? 'active' : ''}`}
             onClick={() => setUserType('agency_member')}
           >
-            🏢 Agence
+            Agence
           </button>
         </div>
 

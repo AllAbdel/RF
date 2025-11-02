@@ -106,7 +106,7 @@
 }
 
 .rating-badge::before {
-  content: '⭐';
+  content: '';
   font-size: 1rem;
 }
 
@@ -139,7 +139,7 @@
 }
 
 .agency-name::before {
-  content: '🏢';
+  content: '';
   font-size: 0.9rem;
 }
 
@@ -175,19 +175,19 @@
 }
 
 .spec.fuel::before {
-  content: '⛽';
+  content: '';
 }
 
 .spec.transmission::before {
-  content: '⚙️';
+  content: '';
 }
 
 .spec.seats::before {
-  content: '👥';
+  content: '';
 }
 
 .spec.year::before {
-  content: '📅';
+  content: '';
 }
 
 /* Vehicle Footer */

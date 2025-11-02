@@ -76,7 +76,7 @@
 }
 
 .search-btn::before {
-  content: '🔍';
+  content: '';
   font-size: 1.25rem;
 }
 
@@ -100,7 +100,7 @@
 }
 
 .advanced-btn::before {
-  content: '⚙️';
+  content: '';
   font-size: 1.1rem;
 }
 

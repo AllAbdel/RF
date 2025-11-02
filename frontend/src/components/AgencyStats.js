@@ -9,11 +9,11 @@ const AgencyStats = ({ stats }) => {
 
   return (
     <div className="agency-stats">
-      <h2>📊 Statistiques de l'agence</h2>
+  <h2>Statistiques de l'agence</h2>
 
       <div className="stats-grid">
         <div className="stat-card">
-          <div className="stat-icon">🚗</div>
+          <div className="stat-icon">Véhicules</div>
           <div className="stat-content">
             <h3>Véhicules</h3>
             <p className="stat-value">{stats.vehicle_count}</p>
@@ -22,7 +22,7 @@ const AgencyStats = ({ stats }) => {
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon">💰</div>
+          <div className="stat-icon">Revenus</div>
           <div className="stat-content">
             <h3>Revenus</h3>
             <p className="stat-value">{stats.total_revenue.toFixed(2)}€</p>
@@ -31,7 +31,7 @@ const AgencyStats = ({ stats }) => {
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon">⭐</div>
+          <div className="stat-icon">Note</div>
           <div className="stat-content">
             <h3>Note moyenne</h3>
             <p className="stat-value">{stats.avg_rating ? stats.avg_rating.toFixed(1) : 'N/A'}</p>
@@ -40,7 +40,7 @@ const AgencyStats = ({ stats }) => {
         </div>
 
         <div className="stat-card">
-          <div className="stat-icon">📅</div>
+          <div className="stat-icon">Réservations</div>
           <div className="stat-content">
             <h3>Réservations</h3>
             <p className="stat-value">

@@ -82,7 +82,7 @@ const VehicleForm = ({ vehicle, onSubmit, onCancel }) => {
     <div className="vehicle-form-container">
       <div className="form-header">
         <h2>{vehicle ? 'Modifier le véhicule' : 'Ajouter un véhicule'}</h2>
-        <button className="close-btn" onClick={onCancel}>✕</button>
+        <button className="close-btn" onClick={onCancel}>Fermer</button>
       </div>
 
       <form onSubmit={handleSubmit} className="vehicle-form">
@@ -251,7 +251,7 @@ const VehicleForm = ({ vehicle, onSubmit, onCancel }) => {
                 id="image-input"
               />
               <label htmlFor="image-input" className="upload-label">
-                📷 Choisir des images
+                Choisir des images
               </label>
               <span className="image-count">{images.length}/10 images sélectionnées</span>
             </div>
@@ -266,7 +266,7 @@ const VehicleForm = ({ vehicle, onSubmit, onCancel }) => {
                       className="remove-img-btn"
                       onClick={() => removeImage(index)}
                     >
-                      ✕
+                      Supprimer
                     </button>
                   </div>
                 ))}

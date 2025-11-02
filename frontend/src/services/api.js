@@ -73,7 +73,7 @@ export const agencyAPI = {
   updateInfo: (data) => axios.put('/agency/info', data)
 };
 
-export default {
+const api = {
   vehicleAPI,
   reservationAPI,
   messageAPI,
@@ -81,3 +81,5 @@ export default {
   notificationAPI,
   agencyAPI
 };
+
+export default api;

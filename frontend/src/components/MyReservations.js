@@ -50,7 +50,7 @@ const MyReservations = ({ reservations, onCancel, onRefresh }) => {
                   alt={`${reservation.brand} ${reservation.model}`}
                 />
               ) : (
-                <div className="no-image">📷</div>
+                <div className="no-image">Pas d'image</div>
               )}
             </div>
 
@@ -58,7 +58,7 @@ const MyReservations = ({ reservations, onCancel, onRefresh }) => {
               <div className="reservation-top">
                 <div>
                   <h3>{reservation.brand} {reservation.model}</h3>
-                  <p className="agency-name">📍 {reservation.agency_name}</p>
+                  <p className="agency-name">Agence: {reservation.agency_name}</p>
                 </div>
                 <span className={`status-badge ${statusInfo.class}`}>
                   {statusInfo.text}
@@ -94,7 +94,7 @@ const MyReservations = ({ reservations, onCancel, onRefresh }) => {
                   )}
                   {reservation.status === 'completed' && (
                     <button className="review-btn">
-                      ⭐ Laisser un avis
+                      Laisser un avis
                     </button>
                   )}
                 </div>

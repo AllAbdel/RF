@@ -55,13 +55,13 @@ const ThemeSwitcher = () => {
               className={`mode-btn ${themeMode === 'light' ? 'active' : ''}`}
               onClick={() => handleModeChange('light')}
             >
-              ☀ Clair
+              Clair
             </button>
             <button
               className={`mode-btn ${themeMode === 'dark' ? 'active' : ''}`}
               onClick={() => handleModeChange('dark')}
             >
-              ☾ Sombre
+              Sombre
             </button>
           </div>
 
@@ -120,7 +120,7 @@ const ThemeSwitcher = () => {
         onClick={() => setShowMenu(!showMenu)}
         title="Changer le thème"
       >
-        {themeMode === 'dark' ? '☾' : '☀'}
+        {themeMode === 'dark' ? 'Sombre' : 'Clair'}
       </button>
     </div>
   );

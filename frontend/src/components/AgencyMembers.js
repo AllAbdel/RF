@@ -93,7 +93,7 @@ const AgencyMembers = () => {
   return (
     <div className="agency-members">
       <div className="members-header">
-        <h2>👥 Gestion des membres</h2>
+        <h2>Gestion des membres</h2>
         {user.isAdmin && (
           <button className="invite-btn" onClick={() => setShowInviteForm(!showInviteForm)}>
             {showInviteForm ? 'Annuler' : '+ Inviter un membre'}
@@ -212,7 +212,7 @@ const AgencyMembers = () => {
                     className="remove-btn"
                     onClick={() => handleRemoveMember(member.id)}
                   >
-                    🗑️ Retirer
+                    Retirer
                   </button>
                 )}
               </div>
