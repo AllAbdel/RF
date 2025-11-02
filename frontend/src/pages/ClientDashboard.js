@@ -5,9 +5,12 @@ import VehicleCard from '../components/VehicleCard';
 import SearchBar from '../components/SearchBar';
 import MyReservations from '../components/MyReservations';
 import '../styles/Client.css';
+import { useNavigate } from 'react-router-dom';
+
 
 const ClientDashboard = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('search');
   const [vehicles, setVehicles] = useState([]);
   const [reservations, setReservations] = useState([]);
@@ -97,6 +100,12 @@ const ClientDashboard = () => {
           onClick={() => setActiveTab('reservations')}
         >
           📅 Mes réservations
+        </button>
+        <button
+          className={`nav-btn ${activeTab === 'messages' ? 'active' : ''}`}
+          onClick={() => navigate('/messages')}
+        >
+          💬 Messages
         </button>
       </nav>
 

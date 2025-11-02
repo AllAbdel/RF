@@ -41,10 +41,16 @@ const AuthPage = () => {
           setError(result.error);
         }
       } else {
-        const result = await register({
-          ...formData,
-          user_type: userType
+        // Créer FormData pour l'upload
+        const submitData = new FormData();
+        Object.keys(formData).forEach(key => {
+          if (formData[key]) {
+            submitData.append(key, formData[key]);
+          }
         });
+        submitData.append('user_type', userType);
+
+        const result = await register(submitData);
         if (result.success) {
           navigate(userType === 'client' ? '/client' : '/agency');
         } else {
@@ -110,17 +116,28 @@ const AuthPage = () => {
               </div>
 
               {userType === 'agency_member' && (
-                <div className="form-group">
-                  <label>Nom de l'agence</label>
-                  <input
-                    type="text"
-                    name="agency_name"
-                    value={formData.agency_name}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-              )}
+            <>
+              <div className="form-group">
+                <label>Nom de l'agence</label>
+                <input
+                  type="text"
+                  name="agency_name"
+                  value={formData.agency_name}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>Logo de l'agence</label>
+                <input
+                  type="file"
+                  name="logo"
+                  accept="image/*"
+                  onChange={(e) => setFormData({...formData, logo: e.target.files[0]})}
+                />
+              </div>
+            </>
+          )}
 
               <div className="form-group">
                 <label>Téléphone</label>

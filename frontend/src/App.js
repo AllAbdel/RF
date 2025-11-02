@@ -4,6 +4,10 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import AuthPage from './pages/AuthPage';
 import ClientDashboard from './pages/ClientDashboard';
 import AgencyDashboard from './pages/AgencyDashboard';
+import ThemeSwitcher from './components/ThemeSwitcher';
+import VehicleDetails from './pages/VehicleDetails';
+import MessagesPage from './pages/MessagesPage';
+
 import './styles/App.css';
 
 // Composant pour protéger les routes
@@ -53,7 +57,7 @@ const AuthRedirect = ({ children }) => {
 
   return children;
 };
-
+// Route
 function App() {
   return (
     <AuthProvider>
@@ -70,6 +74,15 @@ function App() {
               }
             />
 
+            <Route
+              path="/messages"
+              element={
+                <ProtectedRoute>
+                  <MessagesPage />
+                </ProtectedRoute>
+              }
+            />
+
             {/* Routes Client */}
             <Route
               path="/client"
@@ -79,6 +92,14 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+            {/* Route des détails de véhicule */}
+            <Route 
+              path="/vehicle/:id" 
+              element={
+              <VehicleDetails />
+              } 
+              />
 
             {/* Routes Agence */}
             <Route
@@ -93,6 +114,10 @@ function App() {
             {/* Route par défaut */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+
+          {/* ⬇️ AJOUT DU THEME SWITCHER (NOUVEAU) */}
+          {/* Le bouton flottant apparaîtra en bas à droite sur toutes les pages */}
+          <ThemeSwitcher />
         </div>
       </Router>
     </AuthProvider>
