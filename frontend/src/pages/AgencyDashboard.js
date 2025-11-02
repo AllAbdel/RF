@@ -7,9 +7,11 @@ import ReservationList from '../components/ReservationList';
 import AgencyMembers from '../components/AgencyMembers';
 import AgencyStats from '../components/AgencyStats';
 import '../styles/Agency.css';
+import { useNavigate } from 'react-router-dom';
 
 const AgencyDashboard = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('vehicles');
   const [vehicles, setVehicles] = useState([]);
   const [reservations, setReservations] = useState([]);
