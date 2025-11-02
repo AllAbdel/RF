@@ -33,7 +33,6 @@ const SearchBar = ({ filters, onFilterChange }) => {
       <form onSubmit={handleSubmit}>
         <div className="search-main">
           <div className="search-input-group">
-            <span className="search-icon">🔍</span>
             <input
               type="text"
               name="search"

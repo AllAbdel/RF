@@ -19,9 +19,10 @@ const register = async (req, res) => {
 
     // Si c'est un membre d'agence, créer l'agence
     if (user_type === 'agency_member') {
+      const logoPath = req.file ? `/uploads/agencies/${req.file.filename}` : null;
       const [agencyResult] = await db.query(
-        'INSERT INTO agencies (name, email) VALUES (?, ?)',
-        [agency_name, email]
+        'INSERT INTO agencies (name, email, logo) VALUES (?, ?, ?)',
+        [agency_name, email, logoPath]
       );
       agencyId = agencyResult.insertId;
     }

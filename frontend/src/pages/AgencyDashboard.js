@@ -7,9 +7,11 @@ import ReservationList from '../components/ReservationList';
 import AgencyMembers from '../components/AgencyMembers';
 import AgencyStats from '../components/AgencyStats';
 import '../styles/Agency.css';
+import { useNavigate } from 'react-router-dom';
 
 const AgencyDashboard = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('vehicles');
   const [vehicles, setVehicles] = useState([]);
   const [reservations, setReservations] = useState([]);
@@ -122,6 +124,12 @@ const AgencyDashboard = () => {
         >
           📊 Statistiques
         </button>
+        <button
+          className={`nav-btn ${activeTab === 'messages' ? 'active' : ''}`}
+          onClick={() => navigate('/messages')}
+        >
+          💬 Messages
+        </button>
         {user?.isAdmin && (
           <button
             className={`nav-btn ${activeTab === 'members' ? 'active' : ''}`}
@@ -129,6 +137,7 @@ const AgencyDashboard = () => {
           >
             👥 Membres
           </button>
+          
         )}
       </nav>
 

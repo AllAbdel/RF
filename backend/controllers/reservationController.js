@@ -116,7 +116,7 @@ const updateReservationStatus = async (req, res) => {
 
     // Vérifier que la réservation appartient à l'agence
     const [reservations] = await db.query(
-      `SELECT r.*, v.agency_id, r.client_id
+      `SELECT r.*, v.agency_id, r.client_id, r.vehicle_id
        FROM reservations r
        JOIN vehicles v ON r.vehicle_id = v.id
        WHERE r.id = ? AND v.agency_id = ?`,
@@ -127,7 +127,28 @@ const updateReservationStatus = async (req, res) => {
       return res.status(404).json({ error: 'Réservation non trouvée ou accès refusé' });
     }
 
+    const reservation = reservations[0];
+
+    // Mettre à jour le statut de la réservation
     await db.query('UPDATE reservations SET status = ? WHERE id = ?', [status, id]);
+
+    // Mettre à jour le statut du véhicule selon le statut de la réservation
+    if (status === 'accepted') {
+      // Véhicule devient loué quand réservation acceptée
+      await db.query('UPDATE vehicles SET status = ? WHERE id = ?', ['rented', reservation.vehicle_id]);
+    } else if (status === 'completed' || status === 'rejected' || status === 'cancelled') {
+      // Vérifier s'il y a d'autres réservations actives pour ce véhicule
+      const [activeReservations] = await db.query(
+        `SELECT COUNT(*) as count FROM reservations 
+         WHERE vehicle_id = ? AND status = 'accepted' AND id != ?`,
+        [reservation.vehicle_id, id]
+      );
+
+      // Si aucune autre réservation active, remettre disponible
+      if (activeReservations[0].count === 0) {
+        await db.query('UPDATE vehicles SET status = ? WHERE id = ?', ['available', reservation.vehicle_id]);
+      }
+    }
 
     // Créer une notification pour le client
     const notificationMessages = {
@@ -139,7 +160,7 @@ const updateReservationStatus = async (req, res) => {
     await db.query(
       `INSERT INTO notifications (user_id, type, title, message, related_id)
        VALUES (?, 'reservation_update', 'Mise à jour de réservation', ?, ?)`,
-      [reservations[0].client_id, notificationMessages[status], id]
+      [reservation.client_id, notificationMessages[status], id]
     );
 
     res.json({ message: 'Statut de la réservation mis à jour avec succès' });
