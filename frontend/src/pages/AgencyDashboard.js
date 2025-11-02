@@ -122,6 +122,12 @@ const AgencyDashboard = () => {
         >
           📊 Statistiques
         </button>
+        <button
+          className={`nav-btn ${activeTab === 'messages' ? 'active' : ''}`}
+          onClick={() => navigate('/messages')}
+        >
+          💬 Messages
+        </button>
         {user?.isAdmin && (
           <button
             className={`nav-btn ${activeTab === 'members' ? 'active' : ''}`}
@@ -129,6 +135,7 @@ const AgencyDashboard = () => {
           >
             👥 Membres
           </button>
+          
         )}
       </nav>
 

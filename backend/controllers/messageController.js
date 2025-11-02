@@ -109,6 +109,8 @@ const getMessages = async (req, res) => {
 const sendMessage = async (req, res) => {
   try {
     const { conversation_id, message } = req.body;
+    const file_url = req.file ? `/uploads/messages/${req.file.filename}` : null;
+    const file_name = req.file ? req.file.originalname : null;
 
     // Vérifier l'accès à la conversation
     const [conversations] = await db.query(
@@ -121,8 +123,8 @@ const sendMessage = async (req, res) => {
     }
 
     const [result] = await db.query(
-      'INSERT INTO messages (conversation_id, sender_id, message) VALUES (?, ?, ?)',
-      [conversation_id, req.user.id, message]
+      'INSERT INTO messages (conversation_id, sender_id, message, file_url, file_name) VALUES (?, ?, ?, ?, ?)',
+      [conversation_id, req.user.id, message || '', file_url, file_name]
     );
 
     // Mettre à jour la conversation
@@ -130,19 +132,35 @@ const sendMessage = async (req, res) => {
 
     // Créer une notification pour le destinataire
     const conversation = conversations[0];
-    const recipientId = req.user.user_type === 'client' ? 
-      (await db.query('SELECT id FROM users WHERE agency_id = ? LIMIT 1', [conversation.agency_id]))[0][0].id :
-      conversation.client_id;
-
-    await db.query(
-      `INSERT INTO notifications (user_id, type, title, message, related_id)
-       VALUES (?, 'new_message', 'Nouveau message', 'Vous avez reçu un nouveau message', ?)`,
-      [recipientId, conversation_id]
-    );
+    
+    // Si l'expéditeur est un client, notifier tous les membres de l'agence
+    if (req.user.user_type === 'client') {
+      const [agencyMembers] = await db.query(
+        'SELECT id FROM users WHERE agency_id = ?',
+        [conversation.agency_id]
+      );
+      
+      for (const member of agencyMembers) {
+        await db.query(
+          `INSERT INTO notifications (user_id, type, title, message, related_id)
+           VALUES (?, 'new_message', 'Nouveau message', 'Vous avez reçu un nouveau message', ?)`,
+          [member.id, conversation_id]
+        );
+      }
+    } else {
+      // Notifier le client
+      await db.query(
+        `INSERT INTO notifications (user_id, type, title, message, related_id)
+         VALUES (?, 'new_message', 'Nouveau message', 'Vous avez reçu un nouveau message de l\'agence', ?)`,
+        [conversation.client_id, conversation_id]
+      );
+    }
 
     res.status(201).json({
       message: 'Message envoyé avec succès',
-      message_id: result.insertId
+      message_id: result.insertId,
+      file_url,
+      file_name
     });
   } catch (error) {
     console.error('Erreur envoi message:', error);

@@ -98,6 +98,12 @@ const ClientDashboard = () => {
         >
           📅 Mes réservations
         </button>
+        <button
+          className={`nav-btn ${activeTab === 'messages' ? 'active' : ''}`}
+          onClick={() => navigate('/messages')}
+        >
+          💬 Messages
+        </button>
       </nav>
 
       <main className="dashboard-content">
