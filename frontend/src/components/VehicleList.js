@@ -13,12 +13,12 @@ const VehicleList = ({ vehicles, onEdit, onDelete }) => {
 
   const getFuelIcon = (fuelType) => {
     const icons = {
-      essence: '⛽',
-      diesel: '🛢️',
-      electrique: '🔋',
-      hybride: '🔌'
+      essence: 'Essence',
+      diesel: 'Diesel',
+      electrique: 'Électrique',
+      hybride: 'Hybride'
     };
-    return icons[fuelType] || '⛽';
+    return icons[fuelType] || (fuelType || 'N/A');
   };
 
   if (vehicles.length === 0) {
@@ -40,7 +40,7 @@ const VehicleList = ({ vehicles, onEdit, onDelete }) => {
               {vehicle.primary_image ? (
                 <img src={`http://localhost:5000${vehicle.primary_image}`} alt={vehicle.model} />
               ) : (
-                <div className="no-image">📷</div>
+                <div className="no-image">Pas d'image</div>
               )}
             </div>
 
@@ -53,25 +53,25 @@ const VehicleList = ({ vehicles, onEdit, onDelete }) => {
               </div>
 
               <div className="vehicle-item-details">
-                <span>👥 {vehicle.seats} places</span>
-                <span>{getFuelIcon(vehicle.fuel_type)} {vehicle.fuel_type}</span>
-                <span>📍 {vehicle.location}</span>
-                <span className="price">💰 {vehicle.price_per_hour}€/h</span>
+                <span>{vehicle.seats} places</span>
+                <span>{getFuelIcon(vehicle.fuel_type)}</span>
+                <span>{vehicle.location}</span>
+                <span className="price">{vehicle.price_per_hour}€/h</span>
               </div>
 
               {vehicle.active_reservations > 0 && (
                 <div className="reservations-info">
-                  📅 {vehicle.active_reservations} réservation(s) active(s)
+                  {vehicle.active_reservations} réservation(s) active(s)
                 </div>
               )}
             </div>
 
             <div className="vehicle-item-actions">
               <button className="edit-btn" onClick={() => onEdit(vehicle)}>
-                ✏️ Modifier
+                Modifier
               </button>
               <button className="delete-btn" onClick={() => onDelete(vehicle.id)}>
-                🗑️ Supprimer
+                Supprimer
               </button>
             </div>
           </div>

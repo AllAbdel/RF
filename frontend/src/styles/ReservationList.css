@@ -62,8 +62,7 @@
 
 .client-name::before,
 .agency-name::before {
-  content: '👤';
-  font-size: 1rem;
+  content: '';
 }
 
 .reservation-details {
@@ -118,8 +117,7 @@
 }
 
 .accept-btn::before {
-  content: '✓';
-  font-size: 1.25rem;
+  content: '';
 }
 
 .accept-btn:hover {
@@ -140,8 +138,7 @@
 }
 
 .reject-btn::before {
-  content: '✕';
-  font-size: 1.25rem;
+  content: '';
 }
 
 .reject-btn:hover {
@@ -162,8 +159,7 @@
 }
 
 .complete-btn::before {
-  content: '🏁';
-  font-size: 1rem;
+  content: '';
 }
 
 .complete-btn:hover {

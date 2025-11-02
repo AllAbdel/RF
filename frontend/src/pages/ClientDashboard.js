@@ -30,7 +30,7 @@ const ClientDashboard = () => {
     } else if (activeTab === 'reservations') {
       loadReservations();
     }
-  }, [activeTab, filters]);
+  }, [activeTab, filters]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadVehicles = async () => {
     setLoading(true);
@@ -76,7 +76,7 @@ const ClientDashboard = () => {
     <div className="client-dashboard">
       <header className="dashboard-header">
         <div className="header-content">
-          <h1>🚗 Location de Voitures</h1>
+          <h1>Location de Voitures</h1>
           <div className="header-actions">
             <span className="user-info">
               Bonjour, {user?.first_name} {user?.last_name}
@@ -93,19 +93,19 @@ const ClientDashboard = () => {
           className={`nav-btn ${activeTab === 'search' ? 'active' : ''}`}
           onClick={() => setActiveTab('search')}
         >
-          🔍 Rechercher
+          Rechercher
         </button>
         <button
           className={`nav-btn ${activeTab === 'reservations' ? 'active' : ''}`}
           onClick={() => setActiveTab('reservations')}
         >
-          📅 Mes réservations
+          Mes réservations
         </button>
         <button
           className={`nav-btn ${activeTab === 'messages' ? 'active' : ''}`}
           onClick={() => navigate('/messages')}
         >
-          💬 Messages
+          Messages
         </button>
       </nav>
 

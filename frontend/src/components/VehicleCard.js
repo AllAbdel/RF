@@ -14,11 +14,11 @@ const VehicleCard = ({ vehicle }) => {
 
   const getFuelIcon = (fuelType) => {
     switch (fuelType) {
-      case 'essence': return '⛽';
-      case 'diesel': return '🛢️';
-      case 'electrique': return '🔋';
-      case 'hybride': return '🔌';
-      default: return '⛽';
+      case 'essence': return 'Essence';
+      case 'diesel': return 'Diesel';
+      case 'electrique': return 'Électrique';
+      case 'hybride': return 'Hybride';
+      default: return fuelType || 'N/A';
     }
   };
 
@@ -35,7 +35,7 @@ const VehicleCard = ({ vehicle }) => {
         )}
         {vehicle.avg_rating && (
           <div className="rating-badge">
-            ⭐ {parseFloat(vehicle.avg_rating).toFixed(1)}
+            {`${parseFloat(vehicle.avg_rating).toFixed(1)}/5`}
           </div>
         )}
       </div>
@@ -48,13 +48,13 @@ const VehicleCard = ({ vehicle }) => {
 
         <div className="vehicle-specs">
           <span className="spec">
-            👥 {vehicle.seats} places
+            {vehicle.seats} places
           </span>
           <span className="spec">
-            {getFuelIcon(vehicle.fuel_type)} {vehicle.fuel_type}
+            {getFuelIcon(vehicle.fuel_type)}
           </span>
           <span className="spec">
-            📍 {vehicle.location}
+            {vehicle.location}
           </span>
         </div>
 

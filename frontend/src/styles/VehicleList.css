@@ -141,7 +141,7 @@
 }
 
 .edit-btn::before {
-  content: '✏️';
+  content: '';
   font-size: 1rem;
 }
 
@@ -164,7 +164,7 @@
 }
 
 .delete-btn::before {
-  content: '🗑️';
+  content: '';
   font-size: 1rem;
 }
 

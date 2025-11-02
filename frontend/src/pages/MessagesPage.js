@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { messageAPI } from '../services/api';
 import socketService from '../services/socket';
 import '../styles/Messages.css';
+import { useNavigate } from 'react-router-dom';
 
 const MessagesPage = () => {
   const { user } = useAuth();
@@ -14,6 +15,7 @@ const MessagesPage = () => {
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadConversations();
@@ -32,7 +34,7 @@ const MessagesPage = () => {
     return () => {
       socketService.disconnect();
     };
-  }, [user.id]);
+  }, [user.id, selectedConversation]);
 
   useEffect(() => {
     if (selectedConversation) {
@@ -119,14 +121,14 @@ const MessagesPage = () => {
   };
 
   const getFileIcon = (fileName) => {
-    if (!fileName) return '📄';
+    if (!fileName) return '[Fichier]';
     const ext = fileName.split('.').pop().toLowerCase();
-    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) return '🖼️';
-    if (['pdf'].includes(ext)) return '📕';
-    if (['doc', 'docx'].includes(ext)) return '📘';
-    if (['xls', 'xlsx'].includes(ext)) return '📗';
-    if (['zip', 'rar'].includes(ext)) return '📦';
-    return '📄';
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) return 'Image';
+    if (['pdf'].includes(ext)) return 'PDF';
+    if (['doc', 'docx'].includes(ext)) return 'DOC';
+    if (['xls', 'xlsx'].includes(ext)) return 'XLS';
+    if (['zip', 'rar'].includes(ext)) return 'Archive';
+    return '[Fichier]';
   };
 
   if (loading) {
@@ -137,7 +139,7 @@ const MessagesPage = () => {
     <div className="messages-page">
       <div className="messages-sidebar">
         <div className="sidebar-header">
-          <h2>💬 Messages</h2>
+          <h2>Messages</h2>
         </div>
         
         <div className="conversations-list">
@@ -153,7 +155,7 @@ const MessagesPage = () => {
                 onClick={() => setSelectedConversation(conv)}
               >
                 <div className="conversation-avatar">
-                  {user.user_type === 'client' ? '🏢' : '👤'}
+                  {user.user_type === 'client' ? 'Agence' : 'Utilisateur'}
                 </div>
                 <div className="conversation-info">
                   <div className="conversation-name">
@@ -175,16 +177,27 @@ const MessagesPage = () => {
       </div>
 
       <div className="messages-content">
+        <div className="messages-topbar">
+          <button
+                type="button"
+                className="back-btn"
+                onClick={() => navigate(-1)}
+                aria-label="Retour"
+              >
+                Retour
+              </button>
+
+          <h3>
+            {selectedConversation
+              ? (user.user_type === 'client'
+                  ? selectedConversation.agency_name
+                  : `${selectedConversation.first_name} ${selectedConversation.last_name}`)
+              : 'Messages'}
+          </h3>
+        </div>
+
         {selectedConversation ? (
           <>
-            <div className="messages-header">
-              <h3>
-                {user.user_type === 'client' 
-                  ? selectedConversation.agency_name 
-                  : `${selectedConversation.first_name} ${selectedConversation.last_name}`}
-              </h3>
-            </div>
-
             <div className="messages-list">
               {messages.map((msg) => (
                 <div
@@ -225,7 +238,7 @@ const MessagesPage = () => {
                       if (fileInputRef.current) fileInputRef.current.value = '';
                     }}
                   >
-                    ✕
+                    Supprimer
                   </button>
                 </div>
               )}
@@ -243,7 +256,7 @@ const MessagesPage = () => {
                   onClick={() => fileInputRef.current?.click()}
                   title="Joindre un fichier"
                 >
-                  📎
+                  Joindre
                 </button>
                 
                 <input
@@ -255,7 +268,7 @@ const MessagesPage = () => {
                 />
                 
                 <button type="submit" className="send-btn" disabled={!newMessage.trim() && !selectedFile}>
-                  ➤
+                  Envoyer
                 </button>
               </div>
             </form>

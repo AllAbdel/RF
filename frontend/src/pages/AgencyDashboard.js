@@ -22,7 +22,7 @@ const AgencyDashboard = () => {
 
   useEffect(() => {
     loadData();
-  }, [activeTab]);
+  }, [activeTab]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadData = async () => {
     setLoading(true);
@@ -91,7 +91,7 @@ const AgencyDashboard = () => {
     <div className="agency-dashboard">
       <header className="dashboard-header">
         <div className="header-content">
-          <h1>🏢 {user?.agency_name || 'Mon Agence'}</h1>
+          <h1>{user?.agency_name || 'Mon Agence'}</h1>
           <div className="header-actions">
             <span className="user-info">
               {user?.first_name} {user?.last_name} 
@@ -110,32 +110,32 @@ const AgencyDashboard = () => {
           className={`nav-btn ${activeTab === 'vehicles' ? 'active' : ''}`}
           onClick={() => setActiveTab('vehicles')}
         >
-          🚗 Véhicules
+          Véhicules
         </button>
         <button
           className={`nav-btn ${activeTab === 'reservations' ? 'active' : ''}`}
           onClick={() => setActiveTab('reservations')}
         >
-          📅 Réservations
+          Réservations
         </button>
         <button
           className={`nav-btn ${activeTab === 'stats' ? 'active' : ''}`}
           onClick={() => setActiveTab('stats')}
         >
-          📊 Statistiques
+          Statistiques
         </button>
         <button
           className={`nav-btn ${activeTab === 'messages' ? 'active' : ''}`}
           onClick={() => navigate('/messages')}
         >
-          💬 Messages
+          Messages
         </button>
         {user?.isAdmin && (
-          <button
+            <button
             className={`nav-btn ${activeTab === 'members' ? 'active' : ''}`}
             onClick={() => setActiveTab('members')}
           >
-            👥 Membres
+            Membres
           </button>
           
         )}

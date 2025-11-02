@@ -65,25 +65,25 @@ const ReservationList = ({ reservations, onStatusUpdate, isAgency }) => {
 
             <div className="reservation-details">
               <div className="detail-item">
-                <span className="label">📅 Début:</span>
+                <span className="label">Début:</span>
                 <span className="value">{formatDate(reservation.start_date)}</span>
               </div>
               <div className="detail-item">
-                <span className="label">📅 Fin:</span>
+                <span className="label">Fin:</span>
                 <span className="value">{formatDate(reservation.end_date)}</span>
               </div>
               <div className="detail-item">
-                <span className="label">💰 Prix total:</span>
+                <span className="label">Prix total:</span>
                 <span className="value">{reservation.total_price}€</span>
               </div>
               {isAgency && (
                 <>
                   <div className="detail-item">
-                    <span className="label">📞 Téléphone:</span>
+                    <span className="label">Téléphone:</span>
                     <span className="value">{reservation.phone || 'Non renseigné'}</span>
                   </div>
                   <div className="detail-item">
-                    <span className="label">✉️ Email:</span>
+                    <span className="label">Email:</span>
                     <span className="value">{reservation.email}</span>
                   </div>
                 </>
@@ -96,13 +96,13 @@ const ReservationList = ({ reservations, onStatusUpdate, isAgency }) => {
                   className="accept-btn"
                   onClick={() => onStatusUpdate(reservation.id, 'accepted')}
                 >
-                  ✅ Accepter
+                  Accepter
                 </button>
                 <button
                   className="reject-btn"
                   onClick={() => onStatusUpdate(reservation.id, 'rejected')}
                 >
-                  ❌ Refuser
+                  Refuser
                 </button>
               </div>
             )}
@@ -113,7 +113,7 @@ const ReservationList = ({ reservations, onStatusUpdate, isAgency }) => {
                   className="complete-btn"
                   onClick={() => onStatusUpdate(reservation.id, 'completed')}
                 >
-                  ✔️ Marquer comme terminée
+                  Marquer comme terminée
                 </button>
               </div>
             )}

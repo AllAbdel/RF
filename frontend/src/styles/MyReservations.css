@@ -71,8 +71,7 @@
 }
 
 .reservation-top .agency-name::before {
-  content: '🏢';
-  font-size: 0.95rem;
+  content: '';
 }
 
 .reservation-dates {
@@ -160,8 +159,7 @@
 }
 
 .cancel-btn::before {
-  content: '✕';
-  font-size: 1.25rem;
+  content: '';
 }
 
 .cancel-btn:hover {
@@ -182,8 +180,7 @@
 }
 
 .review-btn::before {
-  content: '⭐';
-  font-size: 1rem;
+  content: '';
 }
 
 .review-btn:hover {
