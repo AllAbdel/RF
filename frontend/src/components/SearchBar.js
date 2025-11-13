@@ -1,9 +1,16 @@
 import React, { useState } from 'react';
 import '../styles/SearchBar.css';
 
-const SearchBar = ({ filters, onFilterChange }) => {
+const SearchBar = ({ filters = {}, onFilterChange }) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
-  const [localFilters, setLocalFilters] = useState(filters);
+  const [localFilters, setLocalFilters] = useState({
+    search: filters.search || '',
+    fuel_type: filters.fuel_type || '',
+    min_price: filters.min_price || '',
+    max_price: filters.max_price || '',
+    location: filters.location || '',
+    sort: filters.sort || 'recent'
+  });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
