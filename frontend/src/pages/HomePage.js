@@ -14,6 +14,7 @@ const HomePage = () => {
   const [vehicles, setVehicles] = useState([]);
   const [filteredVehicles, setFilteredVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState('all');
 
   useEffect(() => {
     loadVehicles();
@@ -30,6 +31,31 @@ const HomePage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Catégoriser les véhicules
+  const getNewestVehicles = () => {
+    return [...filteredVehicles]
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      .slice(0, 8);
+  };
+
+  const getTopRatedVehicles = () => {
+    return [...filteredVehicles]
+      .filter(v => v.avg_rating > 0)
+      .sort((a, b) => (b.avg_rating || 0) - (a.avg_rating || 0))
+      .slice(0, 8);
+  };
+
+  const getVehiclesByAgency = () => {
+    const byAgency = {};
+    filteredVehicles.forEach(v => {
+      if (!byAgency[v.agency_name]) {
+        byAgency[v.agency_name] = [];
+      }
+      byAgency[v.agency_name].push(v);
+    });
+    return byAgency;
   };
 
   const handleSearch = (filters) => {
@@ -119,20 +145,118 @@ const HomePage = () => {
           {filteredVehicles.length} véhicule{filteredVehicles.length > 1 ? 's' : ''} disponible{filteredVehicles.length > 1 ? 's' : ''}
         </div>
 
+        {/* Tabs de catégories */}
+        <div className="category-tabs">
+          <button 
+            className={activeCategory === 'all' ? 'tab active' : 'tab'}
+            onClick={() => setActiveCategory('all')}
+          >
+            Tous les véhicules
+          </button>
+          <button 
+            className={activeCategory === 'newest' ? 'tab active' : 'tab'}
+            onClick={() => setActiveCategory('newest')}
+          >
+            Nouveautés
+          </button>
+          <button 
+            className={activeCategory === 'top-rated' ? 'tab active' : 'tab'}
+            onClick={() => setActiveCategory('top-rated')}
+          >
+            Les mieux notés
+          </button>
+          <button 
+            className={activeCategory === 'by-agency' ? 'tab active' : 'tab'}
+            onClick={() => setActiveCategory('by-agency')}
+          >
+            Par agence
+          </button>
+        </div>
+
         {filteredVehicles.length === 0 ? (
           <div className="no-vehicles">
             <p>Aucun véhicule trouvé avec ces critères</p>
           </div>
         ) : (
-          <div className="vehicles-grid">
-            {filteredVehicles.map((vehicle) => (
-              <VehicleCard
-                key={vehicle.id}
-                vehicle={vehicle}
-                onClick={() => handleVehicleClick(vehicle.id)}
-              />
-            ))}
-          </div>
+          <>
+            {/* Affichage selon la catégorie */}
+            {activeCategory === 'all' && (
+              <div className="vehicles-grid">
+                {filteredVehicles.map((vehicle) => (
+                  <VehicleCard
+                    key={vehicle.id}
+                    vehicle={vehicle}
+                    onClick={() => handleVehicleClick(vehicle.id)}
+                  />
+                ))}
+              </div>
+            )}
+
+            {activeCategory === 'newest' && (
+              <div className="vehicles-section">
+                <h3 className="section-title">Dernières Nouveautés</h3>
+                <div className="vehicles-grid">
+                  {getNewestVehicles().map((vehicle) => (
+                    <VehicleCard
+                      key={vehicle.id}
+                      vehicle={vehicle}
+                      onClick={() => handleVehicleClick(vehicle.id)}
+                      badge="Nouveau"
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeCategory === 'top-rated' && (
+              <div className="vehicles-section">
+                <h3 className="section-title">Les Mieux Notés</h3>
+                <div className="vehicles-grid">
+                  {getTopRatedVehicles().map((vehicle) => (
+                    <VehicleCard
+                      key={vehicle.id}
+                      vehicle={vehicle}
+                      onClick={() => handleVehicleClick(vehicle.id)}
+                      badge={vehicle.avg_rating ? `⭐ ${vehicle.avg_rating.toFixed(1)}` : null}
+                    />
+                  ))}
+                </div>
+                {getTopRatedVehicles().length === 0 && (
+                  <p className="no-rated">Aucun véhicule noté pour le moment</p>
+                )}
+              </div>
+            )}
+
+            {activeCategory === 'by-agency' && (
+              <div className="agencies-section">
+                {Object.entries(getVehiclesByAgency()).map(([agencyName, agencyVehicles]) => (
+                  <div key={agencyName} className="agency-group">
+                    <h3 className="agency-title">{agencyName}</h3>
+                    <div className="vehicles-grid">
+                      {agencyVehicles.slice(0, 4).map((vehicle) => (
+                        <VehicleCard
+                          key={vehicle.id}
+                          vehicle={vehicle}
+                          onClick={() => handleVehicleClick(vehicle.id)}
+                        />
+                      ))}
+                    </div>
+                    {agencyVehicles.length > 4 && (
+                      <button 
+                        className="view-more-btn"
+                        onClick={() => {
+                          setActiveCategory('all');
+                          handleSearch({ search: agencyName });
+                        }}
+                      >
+                        Voir tous les véhicules de {agencyName} ({agencyVehicles.length})
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
 

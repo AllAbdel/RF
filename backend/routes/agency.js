@@ -6,7 +6,10 @@ const {
   updateMemberRole,
   removeMember,
   getAgencyStats,
-  updateAgencyInfo
+  updateAgencyInfo,
+  verifyInvitation,
+  acceptInvitation,
+  getPendingInvitations
 } = require('../controllers/agencyController');
 const { authMiddleware, isAgencyMember, isAgencyAdmin, isSuperAdmin } = require('../middleware/auth');
 
@@ -16,5 +19,10 @@ router.put('/members/:member_id/role', authMiddleware, isSuperAdmin, updateMembe
 router.delete('/members/:member_id', authMiddleware, isAgencyAdmin, removeMember);
 router.get('/stats', authMiddleware, isAgencyMember, getAgencyStats);
 router.put('/info', authMiddleware, isAgencyAdmin, updateAgencyInfo);
+
+// Routes d'invitation (publiques)
+router.get('/invitation/:token/verify', verifyInvitation);
+router.post('/invitation/:token/accept', acceptInvitation);
+router.get('/invitations/pending', authMiddleware, isAgencyAdmin, getPendingInvitations);
 
 module.exports = router;

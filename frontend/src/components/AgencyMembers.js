@@ -42,7 +42,21 @@ const AgencyMembers = () => {
 
     try {
       const response = await agencyAPI.inviteMember(formData);
-      alert(`Membre invité avec succès! Mot de passe temporaire: ${response.data.temp_password}`);
+      const invitationLink = response.data.invitation_link;
+      
+      // Afficher le lien d'invitation
+      alert(
+        `Invitation envoyée avec succès!\n\n` +
+        `Copiez et envoyez ce lien à votre nouveau membre :\n\n` +
+        `${invitationLink}\n\n` +
+        `Ce lien expire dans 7 jours.`
+      );
+      
+      // Copier automatiquement le lien
+      navigator.clipboard.writeText(invitationLink).then(() => {
+        console.log('Lien copié dans le presse-papiers');
+      });
+
       setShowInviteForm(false);
       setFormData({
         email: '',

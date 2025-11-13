@@ -14,6 +14,7 @@ import PartnerPage from './pages/PartnerPage';
 import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
 import CookiesPage from './pages/CookiesPage';
+import JoinAgencyPage from './pages/JoinAgencyPage';
 
 import './styles/App.css';
 
@@ -88,6 +89,9 @@ function App() {
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/cookies" element={<CookiesPage />} />
+            
+            {/* Route d'invitation agence - publique */}
+            <Route path="/join-agency/:token" element={<JoinAgencyPage />} />
 
             {/* Routes protégées - Messages */}
             <Route

@@ -1,5 +1,6 @@
 const db = require('../config/database');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 const getAgencyMembers = async (req, res) => {
   try {
@@ -28,20 +29,36 @@ const inviteMember = async (req, res) => {
       return res.status(400).json({ error: 'Cet email est déjà utilisé' });
     }
 
-    // Générer un mot de passe temporaire
-    const tempPassword = Math.random().toString(36).slice(-8);
-    const hashedPassword = await bcrypt.hash(tempPassword, 10);
+    // Vérifier si une invitation existe déjà pour cet email
+    const [existingInvitation] = await db.query(
+      'SELECT id FROM agency_invitations WHERE email = ? AND agency_id = ? AND status = ?',
+      [email, req.user.agency_id, 'pending']
+    );
+    if (existingInvitation.length > 0) {
+      return res.status(400).json({ error: 'Une invitation est déjà en attente pour cet email' });
+    }
 
-    const [result] = await db.query(
-      `INSERT INTO users (email, password, first_name, last_name, phone, user_type, agency_id, role)
-       VALUES (?, ?, ?, ?, ?, 'agency_member', ?, ?)`,
-      [email, hashedPassword, first_name, last_name, phone, req.user.agency_id, role || 'member']
+    // Générer un token unique
+    const token = crypto.randomBytes(32).toString('hex');
+    
+    // Expiration dans 7 jours
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+
+    // Créer l'invitation
+    await db.query(
+      `INSERT INTO agency_invitations (agency_id, email, first_name, last_name, phone, role, token, invited_by, expires_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [req.user.agency_id, email, first_name, last_name, phone, role || 'member', token, req.user.id, expiresAt]
     );
 
+    // Récupérer le nom de l'agence
+    const [agency] = await db.query('SELECT name FROM agencies WHERE id = ?', [req.user.agency_id]);
+
     res.status(201).json({
-      message: 'Membre invité avec succès',
-      user_id: result.insertId,
-      temp_password: tempPassword
+      message: 'Invitation envoyée avec succès',
+      invitation_link: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/join-agency/${token}`,
+      agency_name: agency[0].name
     });
   } catch (error) {
     console.error('Erreur invitation membre:', error);
@@ -195,11 +212,126 @@ const updateAgencyInfo = async (req, res) => {
   }
 };
 
+// Vérifier une invitation
+const verifyInvitation = async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    const [invitations] = await db.query(
+      `SELECT i.*, a.name as agency_name
+       FROM agency_invitations i
+       JOIN agencies a ON i.agency_id = a.id
+       WHERE i.token = ? AND i.status = ?`,
+      [token, 'pending']
+    );
+
+    if (invitations.length === 0) {
+      return res.status(404).json({ error: 'Invitation introuvable ou déjà utilisée' });
+    }
+
+    const invitation = invitations[0];
+
+    // Vérifier expiration
+    if (new Date(invitation.expires_at) < new Date()) {
+      await db.query('UPDATE agency_invitations SET status = ? WHERE id = ?', ['expired', invitation.id]);
+      return res.status(400).json({ error: 'Cette invitation a expiré' });
+    }
+
+    res.json({
+      invitation: {
+        email: invitation.email,
+        first_name: invitation.first_name,
+        last_name: invitation.last_name,
+        phone: invitation.phone,
+        role: invitation.role,
+        agency_name: invitation.agency_name
+      }
+    });
+  } catch (error) {
+    console.error('Erreur vérification invitation:', error);
+    res.status(500).json({ error: 'Erreur lors de la vérification de l\'invitation' });
+  }
+};
+
+// Accepter une invitation
+const acceptInvitation = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    // Récupérer l'invitation
+    const [invitations] = await db.query(
+      'SELECT * FROM agency_invitations WHERE token = ? AND status = ?',
+      [token, 'pending']
+    );
+
+    if (invitations.length === 0) {
+      return res.status(404).json({ error: 'Invitation introuvable ou déjà utilisée' });
+    }
+
+    const invitation = invitations[0];
+
+    // Vérifier expiration
+    if (new Date(invitation.expires_at) < new Date()) {
+      await db.query('UPDATE agency_invitations SET status = ? WHERE id = ?', ['expired', invitation.id]);
+      return res.status(400).json({ error: 'Cette invitation a expiré' });
+    }
+
+    // Vérifier si l'email existe déjà
+    const [existingUser] = await db.query('SELECT id FROM users WHERE email = ?', [invitation.email]);
+    if (existingUser.length > 0) {
+      return res.status(400).json({ error: 'Cet email est déjà utilisé' });
+    }
+
+    // Créer le compte
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const [result] = await db.query(
+      `INSERT INTO users (email, password, first_name, last_name, phone, user_type, agency_id, role)
+       VALUES (?, ?, ?, ?, ?, 'agency_member', ?, ?)`,
+      [invitation.email, hashedPassword, invitation.first_name, invitation.last_name, 
+       invitation.phone, invitation.agency_id, invitation.role]
+    );
+
+    // Marquer l'invitation comme acceptée
+    await db.query('UPDATE agency_invitations SET status = ? WHERE id = ?', ['accepted', invitation.id]);
+
+    res.status(201).json({
+      message: 'Compte créé avec succès',
+      user_id: result.insertId
+    });
+  } catch (error) {
+    console.error('Erreur acceptation invitation:', error);
+    res.status(500).json({ error: 'Erreur lors de la création du compte' });
+  }
+};
+
+// Lister les invitations en attente
+const getPendingInvitations = async (req, res) => {
+  try {
+    const [invitations] = await db.query(
+      `SELECT i.*, u.first_name as inviter_first_name, u.last_name as inviter_last_name
+       FROM agency_invitations i
+       JOIN users u ON i.invited_by = u.id
+       WHERE i.agency_id = ? AND i.status = ?
+       ORDER BY i.created_at DESC`,
+      [req.user.agency_id, 'pending']
+    );
+
+    res.json({ invitations });
+  } catch (error) {
+    console.error('Erreur récupération invitations:', error);
+    res.status(500).json({ error: 'Erreur lors de la récupération des invitations' });
+  }
+};
+
 module.exports = {
   getAgencyMembers,
   inviteMember,
   updateMemberRole,
   removeMember,
   getAgencyStats,
-  updateAgencyInfo
+  updateAgencyInfo,
+  verifyInvitation,
+  acceptInvitation,
+  getPendingInvitations
 };

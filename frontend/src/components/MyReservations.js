@@ -1,9 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import '../styles/MyReservations.css';
 
-const MyReservations = ({ reservations, onCancel, onRefresh }) => {
+const MyReservations = ({ reservations, onCancel, onRefresh, onSubmitReview }) => {
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [selectedReservation, setSelectedReservation] = useState(null);
+  const [reviewData, setReviewData] = useState({
+    rating: 5,
+    comment: ''
+  });
   const getStatusInfo = (status) => {
     const statusMap = {
       pending: { text: 'En attente', class: 'status-pending' },
@@ -25,6 +31,25 @@ const MyReservations = ({ reservations, onCancel, onRefresh }) => {
 
   const canCancel = (reservation) => {
     return reservation.status === 'pending' || reservation.status === 'accepted';
+  };
+
+  const handleOpenReviewModal = (reservation) => {
+    setSelectedReservation(reservation);
+    setReviewData({ rating: 5, comment: '' });
+    setShowReviewModal(true);
+  };
+
+  const handleCloseReviewModal = () => {
+    setShowReviewModal(false);
+    setSelectedReservation(null);
+    setReviewData({ rating: 5, comment: '' });
+  };
+
+  const handleSubmitReview = async () => {
+    if (selectedReservation) {
+      await onSubmitReview(selectedReservation.id, reviewData);
+      handleCloseReviewModal();
+    }
   };
 
   if (reservations.length === 0) {
@@ -92,10 +117,16 @@ const MyReservations = ({ reservations, onCancel, onRefresh }) => {
                       Annuler
                     </button>
                   )}
-                  {reservation.status === 'completed' && (
-                    <button className="review-btn">
+                  {reservation.status === 'completed' && !reservation.has_review && (
+                    <button 
+                      className="review-btn"
+                      onClick={() => handleOpenReviewModal(reservation)}
+                    >
                       Laisser un avis
                     </button>
+                  )}
+                  {reservation.status === 'completed' && reservation.has_review && (
+                    <span className="already-reviewed">✓ Avis laissé</span>
                   )}
                 </div>
               </div>
@@ -103,6 +134,54 @@ const MyReservations = ({ reservations, onCancel, onRefresh }) => {
           </div>
         );
       })}
+
+      {/* Modal d'avis */}
+      {showReviewModal && selectedReservation && (
+        <div className="review-modal-overlay" onClick={handleCloseReviewModal}>
+          <div className="review-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Laisser un avis</h3>
+            <p className="modal-vehicle-name">
+              {selectedReservation.brand} {selectedReservation.model}
+            </p>
+
+            <div className="form-group">
+              <label>Note</label>
+              <div className="rating-selector">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    className={`star-btn ${reviewData.rating >= star ? 'active' : ''}`}
+                    onClick={() => setReviewData({ ...reviewData, rating: star })}
+                  >
+                    ★
+                  </button>
+                ))}
+              </div>
+              <span className="rating-text">{reviewData.rating}/5</span>
+            </div>
+
+            <div className="form-group">
+              <label>Commentaire (optionnel)</label>
+              <textarea
+                value={reviewData.comment}
+                onChange={(e) => setReviewData({ ...reviewData, comment: e.target.value })}
+                placeholder="Partagez votre expérience..."
+                rows="4"
+              />
+            </div>
+
+            <div className="modal-actions">
+              <button className="cancel-modal-btn" onClick={handleCloseReviewModal}>
+                Annuler
+              </button>
+              <button className="submit-review-btn" onClick={handleSubmitReview}>
+                Publier l'avis
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

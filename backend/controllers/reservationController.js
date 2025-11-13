@@ -73,7 +73,8 @@ const getClientReservations = async (req, res) => {
   try {
     const [reservations] = await db.query(
       `SELECT r.*, v.brand, v.model, v.fuel_type, a.name as agency_name,
-              (SELECT image_url FROM vehicle_images WHERE vehicle_id = v.id AND is_primary = 1 LIMIT 1) as vehicle_image
+              (SELECT image_url FROM vehicle_images WHERE vehicle_id = v.id AND is_primary = 1 LIMIT 1) as vehicle_image,
+              (SELECT COUNT(*) FROM reviews WHERE reservation_id = r.id) > 0 as has_review
        FROM reservations r
        JOIN vehicles v ON r.vehicle_id = v.id
        JOIN agencies a ON v.agency_id = a.id
