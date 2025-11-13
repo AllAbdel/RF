@@ -33,6 +33,7 @@ const Header = () => {
               
               {isAgency && (
                 <>
+                  <Link to="/" className="nav-link">Recherche Véhicules</Link>
                   <Link to="/agency" className="nav-link">Dashboard</Link>
                   <Link to="/messages" className="nav-link">Messages</Link>
                 </>

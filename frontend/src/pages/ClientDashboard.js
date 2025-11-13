@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { vehicleAPI, reservationAPI } from '../services/api';
+import axios from 'axios';
 import VehicleCard from '../components/VehicleCard';
 import SearchBar from '../components/SearchBar';
 import MyReservations from '../components/MyReservations';
@@ -69,6 +70,28 @@ const ClientDashboard = () => {
         console.error('Erreur annulation réservation:', error);
         alert('Erreur lors de l\'annulation de la réservation');
       }
+    }
+  };
+
+  const handleSubmitReview = async (reservationId, reviewData) => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post(
+        'http://localhost:5000/api/review',
+        {
+          reservation_id: reservationId,
+          rating: reviewData.rating,
+          comment: reviewData.comment
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      alert('Avis publié avec succès !');
+      loadReservations();
+    } catch (error) {
+      console.error('Erreur publication avis:', error);
+      alert('Erreur lors de la publication de l\'avis');
     }
   };
 
@@ -152,6 +175,7 @@ const ClientDashboard = () => {
                 reservations={reservations}
                 onCancel={handleCancelReservation}
                 onRefresh={loadReservations}
+                onSubmitReview={handleSubmitReview}
               />
             )}
           </div>

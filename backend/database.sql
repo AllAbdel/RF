@@ -123,6 +123,24 @@ CREATE TABLE notifications (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- Table des invitations d'agence
+CREATE TABLE agency_invitations (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  agency_id INT NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  first_name VARCHAR(100) NOT NULL,
+  last_name VARCHAR(100) NOT NULL,
+  phone VARCHAR(20),
+  role ENUM('admin', 'member') NOT NULL DEFAULT 'member',
+  token VARCHAR(255) UNIQUE NOT NULL,
+  invited_by INT NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  status ENUM('pending', 'accepted', 'expired') DEFAULT 'pending',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (agency_id) REFERENCES agencies(id) ON DELETE CASCADE,
+  FOREIGN KEY (invited_by) REFERENCES users(id) ON DELETE CASCADE
+);
+
 -- Index pour améliorer les performances
 CREATE INDEX idx_vehicles_agency ON vehicles(agency_id);
 CREATE INDEX idx_vehicles_status ON vehicles(status);
