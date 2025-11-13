@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import '../styles/Footer.css';
 
 const Footer = () => {
@@ -19,10 +20,10 @@ const Footer = () => {
           <div className="footer-section">
             <h4 className="footer-subtitle">Liens rapides</h4>
             <ul className="footer-links">
-              <li><a href="/">Accueil</a></li>
-              <li><a href="/#about">À propos</a></li>
-              <li><a href="/#how-it-works">Comment ça marche</a></li>
-              <li><a href="/auth">Devenir partenaire</a></li>
+              <li><Link to="/">Accueil</Link></li>
+              <li><Link to="/about">À propos</Link></li>
+              <li><Link to="/how-it-works">Comment ça marche</Link></li>
+              <li><Link to="/partner">Devenir partenaire</Link></li>
             </ul>
           </div>
 
@@ -59,9 +60,9 @@ const Footer = () => {
             © {currentYear} RentFlow. Tous droits réservés.
           </p>
           <div className="footer-bottom-links">
-            <a href="/privacy">Politique de confidentialité</a>
-            <a href="/terms">Conditions d'utilisation</a>
-            <a href="/cookies">Cookies</a>
+            <Link to="/privacy">Politique de confidentialité</Link>
+            <Link to="/terms">Conditions d'utilisation</Link>
+            <Link to="/cookies">Cookies</Link>
           </div>
         </div>
       </div>

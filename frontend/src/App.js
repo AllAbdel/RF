@@ -8,6 +8,12 @@ import AgencyDashboard from './pages/AgencyDashboard';
 import ThemeSwitcher from './components/ThemeSwitcher';
 import VehicleDetails from './pages/VehicleDetails';
 import MessagesPage from './pages/MessagesPage';
+import AboutPage from './pages/AboutPage';
+import HowItWorksPage from './pages/HowItWorksPage';
+import PartnerPage from './pages/PartnerPage';
+import PrivacyPage from './pages/PrivacyPage';
+import TermsPage from './pages/TermsPage';
+import CookiesPage from './pages/CookiesPage';
 
 import './styles/App.css';
 
@@ -74,6 +80,14 @@ function App() {
 
             {/* Route des détails de véhicule - accessible à tous */}
             <Route path="/vehicle/:id" element={<VehicleDetails />} />
+
+            {/* Pages publiques */}
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/how-it-works" element={<HowItWorksPage />} />
+            <Route path="/partner" element={<PartnerPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+            <Route path="/cookies" element={<CookiesPage />} />
 
             {/* Routes protégées - Messages */}
             <Route
