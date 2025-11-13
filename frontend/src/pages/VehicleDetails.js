@@ -7,7 +7,7 @@ import '../styles/VehicleDetails.css';
 const VehicleDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isClient } = useAuth();
+  const { isClient, isAuthenticated } = useAuth();
   const [vehicle, setVehicle] = useState(null);
   const [images, setImages] = useState([]);
   const [reviews, setReviews] = useState([]);
@@ -41,9 +41,16 @@ const VehicleDetails = () => {
   const handleReservation = async (e) => {
     e.preventDefault();
     
+    // Si pas authentifié, rediriger vers la page de connexion
+    if (!isAuthenticated) {
+      alert('Veuillez vous connecter pour réserver ce véhicule');
+      navigate('/auth', { state: { returnTo: `/vehicle/${id}` } });
+      return;
+    }
+
+    // Si authentifié mais pas client
     if (!isClient) {
       alert('Vous devez être connecté en tant que client pour réserver');
-      navigate('/');
       return;
     }
 
@@ -71,9 +78,14 @@ const VehicleDetails = () => {
   };
 
   const handleContactAgency = async () => {
+    if (!isAuthenticated) {
+      alert('Veuillez vous connecter pour contacter l\'agence');
+      navigate('/auth', { state: { returnTo: `/vehicle/${id}` } });
+      return;
+    }
+
     if (!isClient) {
-      alert('Vous devez être connecté pour contacter l\'agence');
-      navigate('/');
+      alert('Vous devez être connecté en tant que client pour contacter l\'agence');
       return;
     }
 
@@ -200,20 +212,28 @@ const VehicleDetails = () => {
           )}
 
           <div className="vehicle-actions">
-            {isClient ? (
-              <>
-                <button 
-                  className="reserve-btn"
-                  onClick={() => setShowReservationForm(!showReservationForm)}
-                >
-                  {showReservationForm ? 'Annuler' : 'Réserver'}
-                </button>
-                <button className="contact-btn" onClick={handleContactAgency}>
-                  Contacter l'agence
-                </button>
-              </>
-            ) : (
-              <p className="login-message">Connectez-vous en tant que client pour réserver</p>
+            <button 
+              className="reserve-btn"
+              onClick={() => {
+                if (!isAuthenticated) {
+                  navigate('/auth', { state: { returnTo: `/vehicle/${id}` } });
+                } else {
+                  setShowReservationForm(!showReservationForm);
+                }
+              }}
+            >
+              {showReservationForm ? 'Annuler' : 'Réserver'}
+            </button>
+            <button 
+              className="contact-btn" 
+              onClick={handleContactAgency}
+            >
+              Contacter l'agence
+            </button>
+            {!isAuthenticated && (
+              <p className="login-message">
+                Connectez-vous pour réserver ce véhicule
+              </p>
             )}
           </div>
 
