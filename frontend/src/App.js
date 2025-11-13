@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import HomePage from './pages/HomePage';
 import AuthPage from './pages/AuthPage';
 import ClientDashboard from './pages/ClientDashboard';
 import AgencyDashboard from './pages/AgencyDashboard';
@@ -57,6 +58,7 @@ const AuthRedirect = ({ children }) => {
 
   return children;
 };
+
 // Route
 function App() {
   return (
@@ -64,16 +66,16 @@ function App() {
       <Router>
         <div className="App">
           <Routes>
-            {/* Route de connexion/inscription */}
-            <Route
-              path="/"
-              element={
-                <AuthRedirect>
-                  <AuthPage />
-                </AuthRedirect>
-              }
-            />
+            {/* Route d'accueil publique - accessible à tous */}
+            <Route path="/" element={<HomePage />} />
 
+            {/* Route de connexion/inscription */}
+            <Route path="/auth" element={<AuthPage />} />
+
+            {/* Route des détails de véhicule - accessible à tous */}
+            <Route path="/vehicle/:id" element={<VehicleDetails />} />
+
+            {/* Routes protégées - Messages */}
             <Route
               path="/messages"
               element={
@@ -92,14 +94,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
-            {/* Route des détails de véhicule */}
-            <Route 
-              path="/vehicle/:id" 
-              element={
-              <VehicleDetails />
-              } 
-              />
 
             {/* Routes Agence */}
             <Route

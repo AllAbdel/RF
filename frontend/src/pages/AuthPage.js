@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import '../styles/Auth.css';
 
@@ -19,6 +19,10 @@ const AuthPage = () => {
 
   const { login, register } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Récupérer l'URL de retour depuis le state
+  const returnTo = location.state?.returnTo;
 
   const handleChange = (e) => {
     setFormData({
@@ -36,7 +40,12 @@ const AuthPage = () => {
       if (isLogin) {
         const result = await login(formData.email, formData.password, userType);
         if (result.success) {
-          navigate(userType === 'client' ? '/client' : '/agency');
+          // Rediriger vers la page de retour ou le dashboard approprié
+          if (returnTo) {
+            navigate(returnTo);
+          } else {
+            navigate(userType === 'client' ? '/client' : '/agency');
+          }
         } else {
           setError(result.error);
         }
@@ -52,7 +61,12 @@ const AuthPage = () => {
 
         const result = await register(submitData);
         if (result.success) {
-          navigate(userType === 'client' ? '/client' : '/agency');
+          // Rediriger vers la page de retour ou le dashboard approprié
+          if (returnTo) {
+            navigate(returnTo);
+          } else {
+            navigate(userType === 'client' ? '/client' : '/agency');
+          }
         } else {
           setError(result.error);
         }
@@ -67,6 +81,14 @@ const AuthPage = () => {
   return (
     <div className="auth-container">
       <div className="auth-card">
+        <button 
+          className="back-to-home-btn" 
+          onClick={() => navigate('/')}
+          title="Retour à l'accueil"
+        >
+          ← Retour
+        </button>
+
         <div className="auth-header">
           <h1>Location de Voitures</h1>
           <p>{isLogin ? 'Connectez-vous à votre compte' : 'Créez votre compte'}</p>
