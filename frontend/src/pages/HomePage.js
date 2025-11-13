@@ -4,6 +4,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { vehicleAPI } from '../services/api';
 import VehicleCard from '../components/VehicleCard';
 import SearchBar from '../components/SearchBar';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 import '../styles/HomePage.css';
 
 const HomePage = () => {
@@ -103,22 +105,7 @@ const HomePage = () => {
 
   return (
     <div className="home-page">
-      <header className="home-header">
-        <div className="header-content">
-          <h1 className="logo">RentFlow</h1>
-          <nav className="header-nav">
-            {isAuthenticated ? (
-              <button className="nav-btn dashboard-btn" onClick={goToDashboard}>
-                Mon espace
-              </button>
-            ) : (
-              <button className="nav-btn auth-btn" onClick={goToAuthPage}>
-                Connexion / Inscription
-              </button>
-            )}
-          </nav>
-        </div>
-      </header>
+      <Header />
 
       <section className="hero-section">
         <h2>Trouvez votre véhicule idéal</h2>
@@ -148,6 +135,8 @@ const HomePage = () => {
           </div>
         )}
       </div>
+
+      <Footer />
     </div>
   );
 };

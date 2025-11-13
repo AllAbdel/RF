@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { vehicleAPI, reservationAPI, messageAPI } from '../services/api';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 import '../styles/VehicleDetails.css';
 
 const VehicleDetails = () => {
@@ -129,9 +131,12 @@ const VehicleDetails = () => {
 
   return (
     <div className="vehicle-details">
-      <button className="back-btn" onClick={() => navigate(-1)}>
-        Retour
-      </button>
+      <Header />
+      
+      <div className="vehicle-details-wrapper">
+        <button className="back-btn" onClick={() => navigate(-1)}>
+          Retour
+        </button>
 
       <div className="vehicle-details-container">
         <div className="vehicle-images">
@@ -307,6 +312,9 @@ const VehicleDetails = () => {
           </div>
         </div>
       )}
+      </div>
+
+      <Footer />
     </div>
   );
 };
