@@ -33,32 +33,49 @@ const HomePage = () => {
   const handleSearch = (filters) => {
     let filtered = [...vehicles];
 
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      filtered = filtered.filter(v => 
+        v.brand.toLowerCase().includes(searchLower) ||
+        v.model.toLowerCase().includes(searchLower)
+      );
+    }
+
     if (filters.location) {
       filtered = filtered.filter(v => 
         v.location.toLowerCase().includes(filters.location.toLowerCase())
       );
     }
 
-    if (filters.brand) {
-      filtered = filtered.filter(v => 
-        v.brand.toLowerCase().includes(filters.brand.toLowerCase())
-      );
+    if (filters.fuel_type && filters.fuel_type !== '') {
+      filtered = filtered.filter(v => v.fuel_type === filters.fuel_type);
     }
 
-    if (filters.minPrice) {
-      filtered = filtered.filter(v => v.price_per_hour >= parseFloat(filters.minPrice));
+    if (filters.min_price) {
+      filtered = filtered.filter(v => v.price_per_hour >= parseFloat(filters.min_price));
     }
 
-    if (filters.maxPrice) {
-      filtered = filtered.filter(v => v.price_per_hour <= parseFloat(filters.maxPrice));
+    if (filters.max_price) {
+      filtered = filtered.filter(v => v.price_per_hour <= parseFloat(filters.max_price));
     }
 
-    if (filters.fuelType && filters.fuelType !== 'all') {
-      filtered = filtered.filter(v => v.fuel_type === filters.fuelType);
-    }
-
-    if (filters.minSeats) {
-      filtered = filtered.filter(v => v.seats >= parseInt(filters.minSeats));
+    // Tri
+    if (filters.sort) {
+      switch (filters.sort) {
+        case 'price_asc':
+          filtered.sort((a, b) => a.price_per_hour - b.price_per_hour);
+          break;
+        case 'price_desc':
+          filtered.sort((a, b) => b.price_per_hour - a.price_per_hour);
+          break;
+        case 'rating':
+          filtered.sort((a, b) => (b.avg_rating || 0) - (a.avg_rating || 0));
+          break;
+        case 'recent':
+        default:
+          filtered.sort((a, b) => b.id - a.id);
+          break;
+      }
     }
 
     setFilteredVehicles(filtered);
@@ -109,7 +126,7 @@ const HomePage = () => {
       </section>
 
       <div className="home-content">
-        <SearchBar onSearch={handleSearch} />
+        <SearchBar onFilterChange={handleSearch} />
         
         <div className="vehicles-count">
           {filteredVehicles.length} véhicule{filteredVehicles.length > 1 ? 's' : ''} disponible{filteredVehicles.length > 1 ? 's' : ''}
