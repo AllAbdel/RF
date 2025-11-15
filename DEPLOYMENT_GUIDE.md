@@ -1,4 +1,4 @@
-# 🚀 Guide de Déploiement RentFlow en Production
+# 🚀 Guide de Déploiement Rentflow en Production
 
 ## ⚠️ Important
 Les scripts `start.ps1` et `stop.ps1` sont **uniquement pour le développement local**.
@@ -69,7 +69,7 @@ En production, le site tournera **automatiquement 24/7** sans intervention.
 ```bash
 # PM2 démarre automatiquement au boot du serveur
 pm2 startup
-pm2 start backend/server.js --name rentflow-backend
+pm2 start backend/server.js --name Rentflow-backend
 pm2 save
 
 # MySQL est configuré comme service système
@@ -98,8 +98,8 @@ JWT_SECRET=cle_secrete_tres_longue_et_complexe
 JWT_EXPIRE=7d
 
 # URLs
-FRONTEND_URL=https://rentflow.com
-BACKEND_URL=https://api.rentflow.com
+FRONTEND_URL=https://Rentflow.com
+BACKEND_URL=https://api.Rentflow.com
 
 # Upload
 UPLOAD_PATH=./uploads
@@ -119,7 +119,7 @@ UPLOAD_PATH=./uploads
 ```javascript
 module.exports = {
   apps: [{
-    name: 'rentflow-backend',
+    name: 'Rentflow-backend',
     script: './backend/server.js',
     instances: 1,
     autorestart: true,
@@ -140,7 +140,7 @@ server {
 
     # Frontend
     location / {
-        root /var/www/rentflow/frontend/build;
+        root /var/www/Rentflow/frontend/build;
         try_files $uri /index.html;
     }
 

@@ -10,7 +10,7 @@ const Footer = () => {
       <div className="footer-container">
         <div className="footer-content">
           <div className="footer-section">
-            <h3 className="footer-title">RentFlow</h3>
+            <h3 className="footer-title">Rentflow</h3>
             <p className="footer-description">
               Votre plateforme de location de véhicules de confiance.
               Trouvez le véhicule parfait pour tous vos déplacements.
@@ -48,7 +48,7 @@ const Footer = () => {
           <div className="footer-section">
             <h4 className="footer-subtitle">Contact</h4>
             <ul className="footer-contact">
-              <li>Email: contact@rentflow.com</li>
+              <li>Email: contact@Rentflow.com</li>
               <li>Tél: +33 1 23 45 67 89</li>
               <li>Adresse: Paris, France</li>
             </ul>
@@ -57,7 +57,7 @@ const Footer = () => {
 
         <div className="footer-bottom">
           <p className="copyright">
-            © {currentYear} RentFlow. Tous droits réservés.
+            © {currentYear} Rentflow. Tous droits réservés.
           </p>
           <div className="footer-bottom-links">
             <Link to="/privacy">Politique de confidentialité</Link>

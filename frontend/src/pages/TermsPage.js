@@ -18,7 +18,7 @@ const TermsPage = () => {
           <h2>1. Objet</h2>
           <p>
             Les présentes Conditions Générales d'Utilisation (CGU) définissent les règles 
-            d'utilisation de la plateforme RentFlow accessible à l'adresse www.rentflow.com. 
+            d'utilisation de la plateforme Rentflow accessible à l'adresse www.Rentflow.com. 
             En utilisant notre plateforme, vous acceptez sans réserve les présentes CGU.
           </p>
         </section>
@@ -26,7 +26,7 @@ const TermsPage = () => {
         <section className="content-section">
           <h2>2. Définitions</h2>
           <ul>
-            <li><strong>Plateforme :</strong> le site web et l'application RentFlow</li>
+            <li><strong>Plateforme :</strong> le site web et l'application Rentflow</li>
             <li><strong>Utilisateur :</strong> toute personne utilisant la plateforme</li>
             <li><strong>Client :</strong> utilisateur cherchant à louer un véhicule</li>
             <li><strong>Agence :</strong> professionnel proposant des véhicules à la location</li>
@@ -124,7 +124,7 @@ const TermsPage = () => {
           <h2>7. Paiement</h2>
           <p>
             Les paiements se font directement entre le client et l'agence. 
-            RentFlow n'intervient pas dans les transactions financières.
+            Rentflow n'intervient pas dans les transactions financières.
           </p>
         </section>
 
@@ -140,7 +140,7 @@ const TermsPage = () => {
             <li>Conformes aux lois en vigueur</li>
           </ul>
           <p>
-            RentFlow se réserve le droit de modérer ou supprimer tout avis inapproprié.
+            Rentflow se réserve le droit de modérer ou supprimer tout avis inapproprié.
           </p>
         </section>
 
@@ -154,9 +154,9 @@ const TermsPage = () => {
 
         <section className="content-section">
           <h2>10. Responsabilité</h2>
-          <h3>10.1 Responsabilité de RentFlow</h3>
+          <h3>10.1 Responsabilité de Rentflow</h3>
           <p>
-            RentFlow est un intermédiaire entre clients et agences. Nous ne sommes pas responsables :
+            Rentflow est un intermédiaire entre clients et agences. Nous ne sommes pas responsables :
           </p>
           <ul>
             <li>De la qualité des véhicules proposés</li>
@@ -174,7 +174,7 @@ const TermsPage = () => {
         <section className="content-section">
           <h2>11. Suspension et Résiliation</h2>
           <p>
-            RentFlow se réserve le droit de suspendre ou fermer un compte en cas de :
+            Rentflow se réserve le droit de suspendre ou fermer un compte en cas de :
           </p>
           <ul>
             <li>Non-respect des présentes CGU</li>
@@ -187,7 +187,7 @@ const TermsPage = () => {
         <section className="content-section">
           <h2>12. Modifications des CGU</h2>
           <p>
-            RentFlow peut modifier les présentes CGU à tout moment. 
+            Rentflow peut modifier les présentes CGU à tout moment. 
             Les nouvelles conditions prennent effet dès leur publication. 
             L'utilisation continue de la plateforme vaut acceptation des nouvelles CGU.
           </p>
@@ -207,9 +207,9 @@ const TermsPage = () => {
             Pour toute question concernant ces conditions d'utilisation :
           </p>
           <ul>
-            <li>Email : <strong>legal@rentflow.com</strong></li>
+            <li>Email : <strong>legal@Rentflow.com</strong></li>
             <li>Téléphone : <strong>+33 1 23 45 67 89</strong></li>
-            <li>Adresse : <strong>RentFlow, Paris, France</strong></li>
+            <li>Adresse : <strong>Rentflow, Paris, France</strong></li>
           </ul>
         </section>
       </div>

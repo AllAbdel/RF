@@ -98,7 +98,7 @@ const HowItWorksPage = () => {
               <p>
                 Accédez à une large base de clients, 
                 consultez vos statistiques de performance, 
-                et développez votre chiffre d'affaires avec RentFlow.
+                et développez votre chiffre d'affaires avec Rentflow.
               </p>
             </div>
           </div>
@@ -143,7 +143,7 @@ const HowItWorksPage = () => {
 
         <section className="content-section cta-section">
           <h2>Prêt à commencer ?</h2>
-          <p>Rejoignez des milliers d'utilisateurs qui font confiance à RentFlow</p>
+          <p>Rejoignez des milliers d'utilisateurs qui font confiance à Rentflow</p>
           <div className="cta-buttons">
             <a href="/" className="cta-btn primary">Trouver un véhicule</a>
             <a href="/auth" className="cta-btn secondary">Devenir partenaire</a>

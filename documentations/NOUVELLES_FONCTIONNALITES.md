@@ -1,4 +1,4 @@
-# 🚀 Nouvelles Fonctionnalités RentFlow
+# 🚀 Nouvelles Fonctionnalités Rentflow
 
 ## 📋 Résumé des améliorations
 
