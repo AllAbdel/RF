@@ -26,7 +26,7 @@ const CookiesPage = () => {
         <section className="content-section">
           <h2>2. Comment Utilisons-nous les Cookies ?</h2>
           <p>
-            RentFlow utilise des cookies pour améliorer votre expérience sur notre plateforme et 
+            Rentflow utilise des cookies pour améliorer votre expérience sur notre plateforme et 
             pour nous aider à comprendre comment nos utilisateurs interagissent avec notre site.
           </p>
         </section>
@@ -246,7 +246,7 @@ const CookiesPage = () => {
             Pour toute question concernant notre utilisation des cookies :
           </p>
           <ul>
-            <li>Email : <strong>privacy@rentflow.com</strong></li>
+            <li>Email : <strong>privacy@Rentflow.com</strong></li>
             <li>Téléphone : <strong>+33 1 23 45 67 89</strong></li>
           </ul>
         </section>

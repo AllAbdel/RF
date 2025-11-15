@@ -1,0 +1,4 @@
+- ajouter les voitures pour les clients en indiquant que c'est reservé et combien de temps il reste
+- Ajouter l'age de la personne lors de la création du compte + age du permis de conduire
+- changer le texte blanc sur blanc etc.. taille des boutons, icone calendrier noir sur noir à changer.
+- réflichir sur comment faire le paiement, à quel moment 

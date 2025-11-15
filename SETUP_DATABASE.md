@@ -71,8 +71,8 @@ Ouvrez MySQL Workbench ou le terminal MySQL :
 ```sql
 CREATE DATABASE car_rental CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 USE car_rental;
-SOURCE E:/Perso/RentFlow-V2/backend/database.sql;
-SOURCE E:/Perso/RentFlow-V2/backend/test-data.sql;
+SOURCE E:/Perso/Rentflow-V2/backend/database.sql;
+SOURCE E:/Perso/Rentflow-V2/backend/test-data.sql;
 ```
 
 ## ✅ Vérification

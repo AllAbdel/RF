@@ -17,7 +17,7 @@ const PrivacyPage = () => {
         <section className="content-section">
           <h2>1. Introduction</h2>
           <p>
-            RentFlow accorde une grande importance à la protection de vos données personnelles. 
+            Rentflow accorde une grande importance à la protection de vos données personnelles. 
             Cette politique de confidentialité explique quelles informations nous collectons, 
             comment nous les utilisons et quels sont vos droits.
           </p>
@@ -104,7 +104,7 @@ const PrivacyPage = () => {
             <li><strong>Droit d'opposition :</strong> vous opposer au traitement de vos données</li>
           </ul>
           <p>
-            Pour exercer vos droits, contactez-nous à : <strong>privacy@rentflow.com</strong>
+            Pour exercer vos droits, contactez-nous à : <strong>privacy@Rentflow.com</strong>
           </p>
         </section>
 
@@ -147,9 +147,9 @@ const PrivacyPage = () => {
             Pour toute question concernant cette politique de confidentialité ou vos données personnelles :
           </p>
           <ul>
-            <li>Email : <strong>privacy@rentflow.com</strong></li>
+            <li>Email : <strong>privacy@Rentflow.com</strong></li>
             <li>Téléphone : <strong>+33 1 23 45 67 89</strong></li>
-            <li>Adresse : <strong>RentFlow, Paris, France</strong></li>
+            <li>Adresse : <strong>Rentflow, Paris, France</strong></li>
           </ul>
         </section>
       </div>

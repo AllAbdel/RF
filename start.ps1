@@ -1,5 +1,5 @@
 # Script pour démarrer MySQL (UniServerZ), le frontend et le backend
-Write-Host "Démarrage de RentFlow..." -ForegroundColor Green
+Write-Host "Démarrage de Rentflow..." -ForegroundColor Green
 
 # Lire la configuration personnalisée si elle existe
 $configPath = Join-Path $PSScriptRoot ".config"
@@ -82,7 +82,7 @@ Start-Sleep -Seconds 2
 Write-Host "Démarrage du frontend..." -ForegroundColor Yellow
 Start-Process powershell -ArgumentList "-NoProfile", "-WindowStyle Hidden", "-Command `"cd '$PSScriptRoot\frontend'; npm start`"" -PassThru | Out-File -FilePath "$PSScriptRoot\.frontend-pid.txt"
 
-Write-Host "`nRentFlow est en cours de démarrage!" -ForegroundColor Green
+Write-Host "`nRentflow est en cours de démarrage!" -ForegroundColor Green
 Write-Host "MySQL: localhost:3306" -ForegroundColor Cyan
 Write-Host "Backend: http://localhost:5000" -ForegroundColor Cyan
 Write-Host "Frontend: http://localhost:3000" -ForegroundColor Cyan

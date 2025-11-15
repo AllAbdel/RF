@@ -1,5 +1,5 @@
 # Script pour arrêter le frontend, le backend et MySQL
-Write-Host "Arrêt de RentFlow..." -ForegroundColor Red
+Write-Host "Arrêt de Rentflow..." -ForegroundColor Red
 
 # Arrêter tous les processus Node.js liés au projet
 Write-Host "Arrêt du backend et du frontend..." -ForegroundColor Yellow
@@ -27,4 +27,4 @@ if (Test-Path "$PSScriptRoot\.frontend-pid.txt") {
     Remove-Item "$PSScriptRoot\.frontend-pid.txt" -Force
 }
 
-Write-Host "`nRentFlow a été arrêté avec succès!" -ForegroundColor Green
+Write-Host "`nRentflow a été arrêté avec succès!" -ForegroundColor Green

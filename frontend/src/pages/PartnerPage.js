@@ -10,12 +10,12 @@ const PartnerPage = () => {
       
       <div className="page-content">
         <div className="page-hero">
-          <h1>Devenez Partenaire RentFlow</h1>
+          <h1>Devenez Partenaire Rentflow</h1>
           <p>Développez votre activité de location avec notre plateforme</p>
         </div>
 
         <section className="content-section">
-          <h2>Pourquoi choisir RentFlow ?</h2>
+          <h2>Pourquoi choisir Rentflow ?</h2>
           <div className="benefits-grid">
             <div className="benefit-card">
               <h3>Visibilité accrue</h3>
@@ -152,7 +152,7 @@ const PartnerPage = () => {
         </section>
 
         <section className="content-section cta-section">
-          <h2>Prêt à rejoindre RentFlow ?</h2>
+          <h2>Prêt à rejoindre Rentflow ?</h2>
           <p>Inscrivez-vous dès maintenant et commencez à développer votre activité</p>
           <div className="cta-buttons">
             <a href="/auth" className="cta-btn primary">S'inscrire comme agence</a>

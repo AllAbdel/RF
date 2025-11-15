@@ -1,4 +1,4 @@
-# 🚀 Scripts de Démarrage RentFlow
+# 🚀 Scripts de Démarrage Rentflow
 
 ## Démarrage Rapide
 

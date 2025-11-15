@@ -16,7 +16,7 @@ const Header = () => {
     <header className="main-header">
       <div className="header-container">
         <Link to="/" className="logo">
-          <span className="logo-text">RentFlow</span>
+          <span className="logo-text">Rentflow</span>
         </Link>
 
         <nav className="nav-menu">

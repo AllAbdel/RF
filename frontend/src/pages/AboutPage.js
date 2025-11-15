@@ -10,14 +10,14 @@ const AboutPage = () => {
       
       <div className="page-content">
         <div className="page-hero">
-          <h1>À propos de RentFlow</h1>
+          <h1>À propos de Rentflow</h1>
           <p>Votre partenaire de confiance pour la location de véhicules</p>
         </div>
 
         <section className="content-section">
           <h2>Notre Mission</h2>
           <p>
-            RentFlow est né d'une vision simple : rendre la location de véhicules accessible, 
+            Rentflow est né d'une vision simple : rendre la location de véhicules accessible, 
             transparente et efficace pour tous. Nous connectons les propriétaires de véhicules 
             avec des clients en quête de mobilité, créant ainsi une communauté basée sur la 
             confiance et le partage.
@@ -61,7 +61,7 @@ const AboutPage = () => {
         <section className="content-section">
           <h2>Notre Histoire</h2>
           <p>
-            Fondée en 2024, RentFlow est rapidement devenue une référence dans le secteur 
+            Fondée en 2024, Rentflow est rapidement devenue une référence dans le secteur 
             de la location de véhicules en France. Notre plateforme met en relation des 
             milliers d'utilisateurs chaque mois, facilitant l'accès à une mobilité flexible 
             et économique.
@@ -73,7 +73,7 @@ const AboutPage = () => {
         </section>
 
         <section className="content-section stats-section">
-          <h2>RentFlow en Chiffres</h2>
+          <h2>Rentflow en Chiffres</h2>
           <div className="stats-grid">
             <div className="stat-card">
               <div className="stat-number">500+</div>
@@ -95,10 +95,10 @@ const AboutPage = () => {
         </section>
 
         <section className="content-section cta-section">
-          <h2>Rejoignez l'Aventure RentFlow</h2>
+          <h2>Rejoignez l'Aventure Rentflow</h2>
           <p>
             Que vous soyez un particulier à la recherche d'un véhicule ou une agence 
-            souhaitant élargir sa clientèle, RentFlow est fait pour vous.
+            souhaitant élargir sa clientèle, Rentflow est fait pour vous.
           </p>
           <div className="cta-buttons">
             <a href="/auth" className="cta-btn primary">Commencer maintenant</a>
