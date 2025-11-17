@@ -7,18 +7,17 @@ const searchAgencies = async (req, res) => {
   try {
     const { search } = req.query;
     
-    if (!search || search.length < 2) {
-      return res.json({ agencies: [] });
+    // Si la recherche est vide ou trop courte, retourner toutes les agences
+    let query, params;
+    if (!search || search.trim().length === 0) {
+      query = `SELECT id, name, logo, email FROM agencies ORDER BY name ASC LIMIT 10`;
+      params = [];
+    } else {
+      query = `SELECT id, name, logo, email FROM agencies WHERE name LIKE ? ORDER BY name ASC LIMIT 10`;
+      params = [`%${search}%`];
     }
 
-    const [agencies] = await db.query(
-      `SELECT id, name, logo, email 
-       FROM agencies 
-       WHERE name LIKE ? 
-       ORDER BY name ASC 
-       LIMIT 10`,
-      [`%${search}%`]
-    );
+    const [agencies] = await db.query(query, params);
 
     res.json({ agencies });
   } catch (error) {
