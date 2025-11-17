@@ -1,11 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import AgencySearch from '../components/AgencySearch';
+import { agencyAPI } from '../services/api';
 import '../styles/Auth.css';
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [userType, setUserType] = useState('client');
+  const [agencyMode, setAgencyMode] = useState('create'); // 'create' ou 'join'
+  const [agencySearch, setAgencySearch] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [selectedAgency, setSelectedAgency] = useState(null);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -52,25 +58,58 @@ const AuthPage = () => {
           setError(result.error);
         }
       } else {
-        // Créer FormData pour l'upload
-        const submitData = new FormData();
-        Object.keys(formData).forEach(key => {
-          if (formData[key]) {
-            submitData.append(key, formData[key]);
+        // Mode inscription
+        if (userType === 'agency_member' && agencyMode === 'join') {
+          // Rejoindre une agence existante
+          if (!selectedAgency) {
+            setError('Veuillez sélectionner une agence');
+            setLoading(false);
+            return;
           }
-        });
-        submitData.append('user_type', userType);
 
-        const result = await register(submitData);
-        if (result.success) {
-          // Rediriger vers la page de retour ou le dashboard approprié
-          if (returnTo) {
-            navigate(returnTo);
+          // Créer d'abord l'utilisateur en tant que client temporaire
+          const submitData = new FormData();
+          submitData.append('email', formData.email);
+          submitData.append('password', formData.password);
+          submitData.append('first_name', formData.first_name);
+          submitData.append('last_name', formData.last_name);
+          submitData.append('phone', formData.phone);
+          submitData.append('user_type', 'client'); // Temporairement client
+
+          const registerResult = await register(submitData);
+          if (registerResult.success) {
+            // Envoyer la demande pour rejoindre l'agence
+            try {
+              await agencyAPI.requestToJoin(selectedAgency.id);
+              alert('Votre demande a été envoyée à l\'agence. Vous serez notifié une fois accepté.');
+              navigate('/');
+            } catch (joinError) {
+              setError('Erreur lors de l\'envoi de la demande');
+            }
           } else {
-            navigate(userType === 'client' ? '/client' : '/agency');
+            setError(registerResult.error);
           }
         } else {
-          setError(result.error);
+          // Créer FormData pour l'upload (création agence ou inscription client)
+          const submitData = new FormData();
+          Object.keys(formData).forEach(key => {
+            if (formData[key]) {
+              submitData.append(key, formData[key]);
+            }
+          });
+          submitData.append('user_type', userType);
+
+          const result = await register(submitData);
+          if (result.success) {
+            // Rediriger vers la page de retour ou le dashboard approprié
+            if (returnTo) {
+              navigate(returnTo);
+            } else {
+              navigate(userType === 'client' ? '/client' : '/agency');
+            }
+          } else {
+            setError(result.error);
+          }
         }
       }
     } catch (err) {
@@ -139,7 +178,63 @@ const AuthPage = () => {
                 </div>
               </div>
 
-              {userType === 'agency_member' && (
+              {userType === 'agency_member' && !isLogin && (
+                <>
+                  <div className="agency-mode-selector">
+                    <button
+                      type="button"
+                      className={`mode-btn ${agencyMode === 'create' ? 'active' : ''}`}
+                      onClick={() => {
+                        setAgencyMode('create');
+                        setSelectedAgency(null);
+                      }}
+                    >
+                      Créer une agence
+                    </button>
+                    <button
+                      type="button"
+                      className={`mode-btn ${agencyMode === 'join' ? 'active' : ''}`}
+                      onClick={() => {
+                        setAgencyMode('join');
+                        setFormData({...formData, agency_name: ''});
+                      }}
+                    >
+                      Rejoindre une agence
+                    </button>
+                  </div>
+
+                  {agencyMode === 'create' ? (
+                    <>
+                      <div className="form-group">
+                        <label>Nom de l'agence</label>
+                        <input
+                          type="text"
+                          name="agency_name"
+                          value={formData.agency_name}
+                          onChange={handleChange}
+                          required
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label>Logo de l'agence</label>
+                        <input
+                          type="file"
+                          name="logo"
+                          accept="image/*"
+                          onChange={(e) => setFormData({...formData, logo: e.target.files[0]})}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <AgencySearch
+                      onSelectAgency={setSelectedAgency}
+                      selectedAgency={selectedAgency}
+                    />
+                  )}
+                </>
+              )}
+
+              {userType === 'agency_member' && isLogin && (
             <>
               <div className="form-group">
                 <label>Nom de l'agence</label>

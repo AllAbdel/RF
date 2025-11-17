@@ -6,6 +6,7 @@ import VehicleList from '../components/VehicleList';
 import ReservationList from '../components/ReservationList';
 import AgencyMembers from '../components/AgencyMembers';
 import AgencyStats from '../components/AgencyStats';
+import AgencyJoinRequests from '../components/AgencyJoinRequests';
 import '../styles/Agency.css';
 import { useNavigate } from 'react-router-dom';
 
@@ -139,6 +140,14 @@ const AgencyDashboard = () => {
           </button>
           
         )}
+        {user?.isAdmin && (
+          <button
+            className={`nav-btn ${activeTab === 'join-requests' ? 'active' : ''}`}
+            onClick={() => setActiveTab('join-requests')}
+          >
+            Demandes d'adhésion
+          </button>
+        )}
       </nav>
 
       <main className="dashboard-content">
@@ -197,6 +206,10 @@ const AgencyDashboard = () => {
 
             {activeTab === 'members' && user?.isAdmin && (
               <AgencyMembers />
+            )}
+
+            {activeTab === 'join-requests' && user?.isAdmin && (
+              <AgencyJoinRequests onRequestHandled={loadData} />
             )}
           </>
         )}

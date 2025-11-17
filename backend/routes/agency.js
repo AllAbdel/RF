@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const {
+  searchAgencies,
+  requestToJoinAgency,
+  getPendingJoinRequests,
+  handleJoinRequest,
   getAgencyMembers,
   inviteMember,
   updateMemberRole,
@@ -12,6 +16,14 @@ const {
   getPendingInvitations
 } = require('../controllers/agencyController');
 const { authMiddleware, isAgencyMember, isAgencyAdmin, isSuperAdmin } = require('../middleware/auth');
+
+// Routes publiques pour rejoindre une agence
+router.get('/search', searchAgencies);
+router.post('/join-request', authMiddleware, requestToJoinAgency);
+
+// Routes pour gérer les demandes d'adhésion (admin/super_admin seulement)
+router.get('/join-requests', authMiddleware, isAgencyAdmin, getPendingJoinRequests);
+router.post('/join-requests/handle', authMiddleware, isAgencyAdmin, handleJoinRequest);
 
 router.get('/members', authMiddleware, isAgencyMember, getAgencyMembers);
 router.post('/members/invite', authMiddleware, isAgencyAdmin, inviteMember);
