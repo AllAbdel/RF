@@ -7,10 +7,38 @@ const AgencySearch = ({ onSelectAgency, selectedAgency }) => {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // Charger toutes les agences au démarrage
+  useEffect(() => {
+    const loadAllAgencies = async () => {
+      setLoading(true);
+      try {
+        const response = await agencyAPI.searchAgencies('');
+        setResults(response.data.agencies);
+      } catch (error) {
+        console.error('Erreur chargement agences:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (!selectedAgency) {
+      loadAllAgencies();
+    }
+  }, [selectedAgency]);
+
   useEffect(() => {
     const searchAgencies = async () => {
-      if (search.length < 2) {
-        setResults([]);
+      if (search.length === 0) {
+        // Recharger toutes les agences si la recherche est vide
+        setLoading(true);
+        try {
+          const response = await agencyAPI.searchAgencies('');
+          setResults(response.data.agencies);
+        } catch (error) {
+          console.error('Erreur recherche agences:', error);
+        } finally {
+          setLoading(false);
+        }
         return;
       }
 
