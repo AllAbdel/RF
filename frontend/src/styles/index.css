@@ -308,6 +308,18 @@ input:focus, select:focus, textarea:focus {
   box-shadow: 0 0 0 4px var(--accent-primary-light);
 }
 
+/* Date input calendar icon fix for dark mode */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
+[data-theme="light"] input[type="date"]::-webkit-calendar-picker-indicator,
+[data-theme="light"] input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(0);
+}
+
 input::placeholder, textarea::placeholder {
   color: var(--text-tertiary);
 }

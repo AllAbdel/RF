@@ -156,19 +156,19 @@ const CookiesPage = () => {
           <div className="browser-instructions">
             <div className="browser-item">
               <h4>Chrome</h4>
-              <p>Paramètres → Confidentialité et sécurité → Cookies</p>
+              <p>Paramètres - Confidentialité et sécurité - Cookies</p>
             </div>
             <div className="browser-item">
               <h4>Firefox</h4>
-              <p>Options → Vie privée et sécurité → Cookies et données de sites</p>
+              <p>Options - Vie privée et sécurité - Cookies et données de sites</p>
             </div>
             <div className="browser-item">
               <h4>Safari</h4>
-              <p>Préférences → Confidentialité → Cookies et données de sites web</p>
+              <p>Préférences - Confidentialité - Cookies et données de sites web</p>
             </div>
             <div className="browser-item">
               <h4>Edge</h4>
-              <p>Paramètres → Confidentialité, recherche et services → Cookies</p>
+              <p>Paramètres - Confidentialité, recherche et services - Cookies</p>
             </div>
           </div>
 

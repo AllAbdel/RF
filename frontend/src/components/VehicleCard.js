@@ -22,6 +22,28 @@ const VehicleCard = ({ vehicle }) => {
     }
   };
 
+  const getRemainingTime = (endDate) => {
+    if (!endDate) return null;
+    
+    const now = new Date();
+    const end = new Date(endDate);
+    const diff = end - now;
+    
+    if (diff <= 0) return null;
+    
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (hours > 24) {
+      const days = Math.floor(hours / 24);
+      return `${days}j ${hours % 24}h`;
+    }
+    
+    return `${hours}h ${minutes}m`;
+  };
+
+  const remainingTime = getRemainingTime(vehicle.current_reservation_end);
+
   return (
     <div className="vehicle-card" onClick={handleViewDetails}>
       <div className="vehicle-image">
@@ -32,6 +54,9 @@ const VehicleCard = ({ vehicle }) => {
         />
         {vehicle.status === 'rented' && (
           <div className="status-badge rented">Loué</div>
+        )}
+        {remainingTime && (
+          <div className="status-badge reserved">Réservé - reste {remainingTime}</div>
         )}
         {vehicle.avg_rating && (
           <div className="rating-badge">
@@ -64,7 +89,7 @@ const VehicleCard = ({ vehicle }) => {
             <span className="price-unit">/heure</span>
           </div>
           <button className="view-btn" onClick={handleViewDetails}>
-            Voir détails →
+            Voir détails
           </button>
         </div>
       </div>
