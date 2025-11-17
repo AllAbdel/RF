@@ -176,29 +176,27 @@ const AuthPage = () => {
 
               {userType === 'client' && (
                 <>
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label>Date de naissance</label>
-                      <input
-                        type="date"
-                        name="birth_date"
-                        value={formData.birth_date}
-                        onChange={handleChange}
-                        max={new Date().toISOString().split('T')[0]}
-                        required
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label>Date d'obtention du permis</label>
-                      <input
-                        type="date"
-                        name="license_date"
-                        value={formData.license_date}
-                        onChange={handleChange}
-                        max={new Date().toISOString().split('T')[0]}
-                        required
-                      />
-                    </div>
+                  <div className="form-group">
+                    <label>Date de naissance</label>
+                    <input
+                      type="date"
+                      name="birth_date"
+                      value={formData.birth_date}
+                      onChange={handleChange}
+                      max={new Date().toISOString().split('T')[0]}
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Date d'obtention du permis</label>
+                    <input
+                      type="date"
+                      name="license_date"
+                      value={formData.license_date}
+                      onChange={handleChange}
+                      max={new Date().toISOString().split('T')[0]}
+                      required
+                    />
                   </div>
                   <div className="age-info">
                     {formData.birth_date && (
@@ -214,10 +212,10 @@ const AuthPage = () => {
                   </div>
                 </>
               )}
-            </>;
+            </>
           )}
 
-          <div className="form-group">;
+          <div className="form-group">
             <label>Email</label>
             <input
               type="email"
