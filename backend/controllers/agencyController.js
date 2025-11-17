@@ -2,6 +2,140 @@ const db = require('../config/database');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 
+// Rechercher des agences (pour les utilisateurs qui veulent rejoindre)
+const searchAgencies = async (req, res) => {
+  try {
+    const { search } = req.query;
+    
+    if (!search || search.length < 2) {
+      return res.json({ agencies: [] });
+    }
+
+    const [agencies] = await db.query(
+      `SELECT id, name, logo, email 
+       FROM agencies 
+       WHERE name LIKE ? 
+       ORDER BY name ASC 
+       LIMIT 10`,
+      [`%${search}%`]
+    );
+
+    res.json({ agencies });
+  } catch (error) {
+    console.error('Erreur recherche agences:', error);
+    res.status(500).json({ error: 'Erreur lors de la recherche d\'agences' });
+  }
+};
+
+// Demander à rejoindre une agence
+const requestToJoinAgency = async (req, res) => {
+  try {
+    const { agency_id } = req.body;
+    const user_id = req.user.id;
+
+    // Vérifier que l'utilisateur n'appartient pas déjà à une agence
+    const [user] = await db.query('SELECT agency_id FROM users WHERE id = ?', [user_id]);
+    if (user[0].agency_id) {
+      return res.status(400).json({ error: 'Vous appartenez déjà à une agence' });
+    }
+
+    // Vérifier qu'une demande n'existe pas déjà
+    const [existing] = await db.query(
+      'SELECT id FROM agency_join_requests WHERE user_id = ? AND agency_id = ? AND status = ?',
+      [user_id, agency_id, 'pending']
+    );
+    if (existing.length > 0) {
+      return res.status(400).json({ error: 'Vous avez déjà une demande en attente pour cette agence' });
+    }
+
+    // Créer la demande
+    await db.query(
+      'INSERT INTO agency_join_requests (user_id, agency_id) VALUES (?, ?)',
+      [user_id, agency_id]
+    );
+
+    res.status(201).json({ message: 'Demande envoyée avec succès' });
+  } catch (error) {
+    console.error('Erreur demande adhésion:', error);
+    res.status(500).json({ error: 'Erreur lors de l\'envoi de la demande' });
+  }
+};
+
+// Obtenir les demandes en attente pour une agence
+const getPendingJoinRequests = async (req, res) => {
+  try {
+    const [requests] = await db.query(
+      `SELECT jr.id, jr.user_id, jr.created_at,
+              u.email, u.first_name, u.last_name, u.phone
+       FROM agency_join_requests jr
+       JOIN users u ON jr.user_id = u.id
+       WHERE jr.agency_id = ? AND jr.status = 'pending'
+       ORDER BY jr.created_at DESC`,
+      [req.user.agency_id]
+    );
+
+    res.json({ requests });
+  } catch (error) {
+    console.error('Erreur récupération demandes:', error);
+    res.status(500).json({ error: 'Erreur lors de la récupération des demandes' });
+  }
+};
+
+// Accepter ou refuser une demande
+const handleJoinRequest = async (req, res) => {
+  try {
+    const { request_id, action } = req.body; // action: 'accept' ou 'reject'
+
+    if (!['accept', 'reject'].includes(action)) {
+      return res.status(400).json({ error: 'Action invalide' });
+    }
+
+    // Récupérer la demande
+    const [requests] = await db.query(
+      `SELECT jr.*, u.user_type 
+       FROM agency_join_requests jr
+       JOIN users u ON jr.user_id = u.id
+       WHERE jr.id = ? AND jr.agency_id = ? AND jr.status = 'pending'`,
+      [request_id, req.user.agency_id]
+    );
+
+    if (requests.length === 0) {
+      return res.status(404).json({ error: 'Demande non trouvée' });
+    }
+
+    const request = requests[0];
+
+    if (action === 'accept') {
+      // Mettre à jour l'utilisateur pour l'ajouter à l'agence
+      await db.query(
+        `UPDATE users 
+         SET agency_id = ?, user_type = 'agency_member', role = 'member' 
+         WHERE id = ?`,
+        [req.user.agency_id, request.user_id]
+      );
+
+      // Mettre à jour le statut de la demande
+      await db.query(
+        'UPDATE agency_join_requests SET status = ? WHERE id = ?',
+        ['accepted', request_id]
+      );
+
+      res.json({ message: 'Demande acceptée avec succès' });
+    } else {
+      // Refuser la demande
+      await db.query(
+        'UPDATE agency_join_requests SET status = ? WHERE id = ?',
+        ['rejected', request_id]
+      );
+
+      res.json({ message: 'Demande refusée' });
+    }
+  } catch (error) {
+    console.error('Erreur traitement demande:', error);
+    res.status(500).json({ error: 'Erreur lors du traitement de la demande' });
+  }
+};
+
 const getAgencyMembers = async (req, res) => {
   try {
     const [members] = await db.query(
@@ -325,6 +459,10 @@ const getPendingInvitations = async (req, res) => {
 };
 
 module.exports = {
+  searchAgencies,
+  requestToJoinAgency,
+  getPendingJoinRequests,
+  handleJoinRequest,
   getAgencyMembers,
   inviteMember,
   updateMemberRole,

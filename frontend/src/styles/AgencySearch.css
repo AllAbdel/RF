@@ -1,0 +1,101 @@
+.agency-search {
+  margin-bottom: 1.5rem;
+}
+
+.search-loading {
+  text-align: center;
+  padding: 0.75rem;
+  color: var(--text-secondary);
+  font-size: 0.925rem;
+}
+
+.search-results {
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-secondary);
+  border-radius: var(--radius-md);
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 0.5rem;
+}
+
+.search-result-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+.search-result-item:hover {
+  background: var(--bg-tertiary);
+}
+
+.agency-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  border: 2px solid var(--border-secondary);
+}
+
+.agency-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.agency-info strong {
+  font-size: 1rem;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.agency-info span {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.selected-agency {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background: var(--accent-primary-light);
+  border: 2px solid var(--accent-primary-border);
+  border-radius: var(--radius-md);
+  margin-top: 0.5rem;
+}
+
+.selected-agency-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.remove-selection-btn {
+  background: var(--danger);
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+}
+
+.remove-selection-btn:hover {
+  background: #dc2626;
+  transform: scale(1.1) rotate(90deg);
+}

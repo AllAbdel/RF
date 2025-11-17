@@ -65,6 +65,10 @@ export const notificationAPI = {
 
 // Agence
 export const agencyAPI = {
+  searchAgencies: (search) => axios.get('/agency/search', { params: { search } }),
+  requestToJoin: (agency_id) => axios.post('/agency/join-request', { agency_id }),
+  getJoinRequests: () => axios.get('/agency/join-requests'),
+  handleJoinRequest: (request_id, action) => axios.post('/agency/join-requests/handle', { request_id, action }),
   getMembers: () => axios.get('/agency/members'),
   inviteMember: (data) => axios.post('/agency/members/invite', data),
   updateMemberRole: (memberId, role) => axios.put(`/agency/members/${memberId}/role`, { role }),

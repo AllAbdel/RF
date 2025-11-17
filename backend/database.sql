@@ -125,29 +125,33 @@ CREATE TABLE notifications (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Table des invitations d'agence
+-- Table des invitations d'agences
 CREATE TABLE agency_invitations (
   id INT PRIMARY KEY AUTO_INCREMENT,
   agency_id INT NOT NULL,
   email VARCHAR(255) NOT NULL,
-  first_name VARCHAR(100) NOT NULL,
-  last_name VARCHAR(100) NOT NULL,
-  phone VARCHAR(20),
-  role ENUM('admin', 'member') NOT NULL DEFAULT 'member',
+  role ENUM('admin', 'member') DEFAULT 'member',
   token VARCHAR(255) UNIQUE NOT NULL,
-  invited_by INT NOT NULL,
   expires_at TIMESTAMP NOT NULL,
-  status ENUM('pending', 'accepted', 'expired') DEFAULT 'pending',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (agency_id) REFERENCES agencies(id) ON DELETE CASCADE,
-  FOREIGN KEY (invited_by) REFERENCES users(id) ON DELETE CASCADE
+  FOREIGN KEY (agency_id) REFERENCES agencies(id) ON DELETE CASCADE
 );
 
--- Index pour améliorer les performances
-CREATE INDEX idx_vehicles_agency ON vehicles(agency_id);
-CREATE INDEX idx_vehicles_status ON vehicles(status);
-CREATE INDEX idx_reservations_client ON reservations(client_id);
-CREATE INDEX idx_reservations_vehicle ON reservations(vehicle_id);
-CREATE INDEX idx_reservations_dates ON reservations(start_date, end_date);
-CREATE INDEX idx_messages_conversation ON messages(conversation_id);
-CREATE INDEX idx_notifications_user ON notifications(user_id, is_read);
+CREATE INDEX idx_token ON agency_invitations(token);
+CREATE INDEX idx_email ON agency_invitations(email);
+
+-- Table pour les demandes d'adhésion aux agences
+CREATE TABLE agency_join_requests (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  user_id INT NOT NULL,
+  agency_id INT NOT NULL,
+  status ENUM('pending', 'accepted', 'rejected') DEFAULT 'pending',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (agency_id) REFERENCES agencies(id) ON DELETE CASCADE,
+  UNIQUE KEY unique_user_agency (user_id, agency_id)
+);
+
+CREATE INDEX idx_status ON agency_join_requests(status);
+CREATE INDEX idx_agency_status ON agency_join_requests(agency_id, status);
