@@ -73,14 +73,16 @@ if ($uniServerPath) {
 
 # Démarrer le backend
 Write-Host "Démarrage du backend..." -ForegroundColor Yellow
-Start-Process powershell -ArgumentList "-NoProfile", "-WindowStyle Hidden", "-Command `"cd '$PSScriptRoot\backend'; npm start`"" -PassThru | Out-File -FilePath "$PSScriptRoot\.backend-pid.txt"
+$backendJob = Start-Process powershell -ArgumentList "-NoProfile", "-WindowStyle Hidden", "-NoExit", "-Command `"cd '$PSScriptRoot\backend'; npm start`"" -PassThru -WindowStyle Hidden
+$backendJob.Id | Out-File -FilePath "$PSScriptRoot\.backend-pid.txt"
 
 # Attendre un peu avant de démarrer le frontend
 Start-Sleep -Seconds 2
 
 # Démarrer le frontend
 Write-Host "Démarrage du frontend..." -ForegroundColor Yellow
-Start-Process powershell -ArgumentList "-NoProfile", "-WindowStyle Hidden", "-Command `"cd '$PSScriptRoot\frontend'; npm start`"" -PassThru | Out-File -FilePath "$PSScriptRoot\.frontend-pid.txt"
+$frontendJob = Start-Process powershell -ArgumentList "-NoProfile", "-WindowStyle Hidden", "-NoExit", "-Command `"cd '$PSScriptRoot\frontend'; npm start`"" -PassThru -WindowStyle Hidden
+$frontendJob.Id | Out-File -FilePath "$PSScriptRoot\.frontend-pid.txt"
 
 Write-Host "`nRentflow est en cours de démarrage!" -ForegroundColor Green
 Write-Host "MySQL: localhost:3306" -ForegroundColor Cyan

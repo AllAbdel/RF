@@ -224,6 +224,10 @@
   box-shadow: var(--shadow-accent);
 }
 
+[data-theme="light"] .submit-btn {
+  color: white;
+}
+
 .submit-btn:hover {
   box-shadow: var(--shadow-lg);
 }
