@@ -95,7 +95,7 @@ const MyReservations = ({ reservations, onCancel, onRefresh, onSubmitReview }) =
                   <span className="date-label">Début:</span>
                   <span className="date-value">{formatDate(reservation.start_date)}</span>
                 </div>
-                <div className="date-separator">→</div>
+                <div className="date-separator">—</div>
                 <div className="date-info">
                   <span className="date-label">Fin:</span>
                   <span className="date-value">{formatDate(reservation.end_date)}</span>

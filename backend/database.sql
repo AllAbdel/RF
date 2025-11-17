@@ -19,6 +19,8 @@ CREATE TABLE users (
   first_name VARCHAR(100) NOT NULL,
   last_name VARCHAR(100) NOT NULL,
   phone VARCHAR(20),
+  birth_date DATE NULL,
+  license_date DATE NULL,
   user_type ENUM('client', 'agency_member') NOT NULL,
   agency_id INT NULL,
   role ENUM('super_admin', 'admin', 'member') DEFAULT 'member',

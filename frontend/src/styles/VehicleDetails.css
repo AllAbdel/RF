@@ -358,20 +358,22 @@
   display: flex;
   gap: 1.25rem;
   padding-top: 1.5rem;
+  flex-direction: column;
 }
 
 .reserve-btn,
 .contact-btn {
   flex: 1;
-  padding: 1.25rem 2rem;
+  padding: 1.5rem 2rem;
   border-radius: var(--radius-md);
   font-weight: 700;
-  font-size: 1.05rem;
+  font-size: 1.125rem;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
   transition: all var(--transition-base);
+  min-height: 60px;
 }
 
 .reserve-btn {

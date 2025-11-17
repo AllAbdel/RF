@@ -87,6 +87,13 @@
   letter-spacing: 0.05em;
 }
 
+.status-badge.reserved {
+  background: rgba(255, 184, 0, 0.95);
+  color: #1a1a1a;
+  text-transform: none;
+  font-size: 0.8rem;
+}
+
 .rating-badge {
   position: absolute;
   bottom: 1rem;
@@ -209,14 +216,22 @@
 .price-amount {
   font-size: 1.75rem;
   font-weight: 800;
-  color: var(--accent-primary);
+  color: var(--text-secondary);
   line-height: 1;
+}
+
+[data-theme="light"] .price-amount {
+  color: var(--text-primary);
 }
 
 .price-unit {
   font-size: 0.875rem;
   color: var(--text-tertiary);
   font-weight: 500;
+}
+
+[data-theme="light"] .price-unit {
+  color: var(--text-secondary);
 }
 
 .view-btn {
@@ -232,19 +247,9 @@
   gap: 0.5rem;
 }
 
-.view-btn::after {
-  content: '→';
-  font-size: 1.25rem;
-  transition: transform var(--transition-base);
-}
-
 .view-btn:hover {
   box-shadow: var(--shadow-accent);
-  transform: translateX(4px);
-}
-
-.view-btn:hover::after {
-  transform: translateX(4px);
+  transform: translateY(-2px);
 }
 
 /* Empty State */

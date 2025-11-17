@@ -4,12 +4,45 @@ const db = require('../config/database');
 
 const register = async (req, res) => {
   try {
-    const { email, password, first_name, last_name, phone, user_type, agency_name } = req.body;
+    const { email, password, first_name, last_name, phone, birth_date, license_date, user_type, agency_name } = req.body;
 
     // Vérifier si l'utilisateur existe déjà
     const [existingUser] = await db.query('SELECT id FROM users WHERE email = ?', [email]);
     if (existingUser.length > 0) {
       return res.status(400).json({ error: 'Cet email est déjà utilisé' });
+    }
+
+    // Validation pour les clients : âge minimum et permis
+    if (user_type === 'client') {
+      if (!birth_date || !license_date) {
+        return res.status(400).json({ error: 'La date de naissance et la date d\'obtention du permis sont obligatoires pour les clients' });
+      }
+
+      const today = new Date();
+      const birthDateObj = new Date(birth_date);
+      const licenseDateObj = new Date(license_date);
+      
+      // Calculer l'âge
+      let age = today.getFullYear() - birthDateObj.getFullYear();
+      const monthDiff = today.getMonth() - birthDateObj.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDateObj.getDate())) {
+        age--;
+      }
+
+      // Vérifier l'âge minimum (18 ans)
+      if (age < 18) {
+        return res.status(400).json({ error: 'Vous devez avoir au moins 18 ans pour vous inscrire' });
+      }
+
+      // Vérifier que la date du permis n'est pas dans le futur
+      if (licenseDateObj > today) {
+        return res.status(400).json({ error: 'La date d\'obtention du permis ne peut pas être dans le futur' });
+      }
+
+      // Vérifier que la date du permis est après la date de naissance
+      if (licenseDateObj <= birthDateObj) {
+        return res.status(400).json({ error: 'La date d\'obtention du permis doit être après votre date de naissance' });
+      }
     }
 
     // Hasher le mot de passe
@@ -29,9 +62,9 @@ const register = async (req, res) => {
 
     // Créer l'utilisateur
     const [result] = await db.query(
-      `INSERT INTO users (email, password, first_name, last_name, phone, user_type, agency_id, role) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [email, hashedPassword, first_name, last_name, phone, user_type, agencyId, 
+      `INSERT INTO users (email, password, first_name, last_name, phone, birth_date, license_date, user_type, agency_id, role) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [email, hashedPassword, first_name, last_name, phone, birth_date || null, license_date || null, user_type, agencyId, 
        user_type === 'agency_member' ? 'super_admin' : 'member']
     );
 

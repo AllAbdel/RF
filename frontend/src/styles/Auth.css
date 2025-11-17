@@ -265,6 +265,31 @@
   background: var(--success);
 }
 
+/* Age Info Display */
+.age-info {
+  display: flex;
+  gap: 1.5rem;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border-secondary);
+  margin-top: -0.5rem;
+}
+
+.age-info span {
+  font-size: 0.925rem;
+  font-weight: 600;
+  color: var(--accent-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.age-info span::before {
+  content: '✓';
+  font-size: 1.25rem;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
   .auth-container {

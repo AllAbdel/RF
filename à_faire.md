@@ -1,4 +1,4 @@
-- ajouter les voitures pour les clients en indiquant que c'est reservé et combien de temps il reste
+- ajouter les voitures déjà réservées pour les clients en indiquant que c'est reservé et combien de temps il reste
 - Ajouter l'age de la personne lors de la création du compte + age du permis de conduire
-- changer le texte blanc sur blanc etc.. taille des boutons, icone calendrier noir sur noir à changer.
-- réflichir sur comment faire le paiement, à quel moment 
+- parfois y a du texte blanc sur blanc (exmple le prix est écrit en blanc, sauf que quand on passe en mode clair, tour devient blanc donc blanc sur blanc) etc.. taille des boutons à aggrandir pour les boutons de réservations quand on est pas connecter, enlever le émojis, et les fleches ->, icone calendrier noir sur noir à changer.
+- réflichir sur comment faire le paiement, à quel moment, dans quel ordre, client paie puis l'agence accepte ? comment faire si l'agence n'accepte pas ? on rends l'argent au client ?
