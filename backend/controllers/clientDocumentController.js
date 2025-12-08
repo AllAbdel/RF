@@ -6,10 +6,11 @@ const fs = require('fs').promises;
 
 // Configuration multer pour l'upload
 const storage = multer.diskStorage({
-  destination: async (req, file, cb) => {
+  destination: (req, file, cb) => {
     const dir = path.join(__dirname, '..', 'uploads', 'documents', req.user.id.toString());
-    await fs.mkdir(dir, { recursive: true });
-    cb(null, dir);
+    fs.mkdir(dir, { recursive: true })
+      .then(() => cb(null, dir))
+      .catch(err => cb(err));
   },
   filename: (req, file, cb) => {
     const uniqueName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}${path.extname(file.originalname)}`;
@@ -53,36 +54,49 @@ const uploadDocuments = async (req, res) => {
       
       console.log(`📄 Analyse de ${docType}...`);
       
-      // 1. Analyse technique
-      const technicalAnalysis = await documentValidationService.analyzeTechnicalQuality(filePath);
-      console.log(`✅ Score technique: ${technicalAnalysis.score}/100`);
-      
-      // 2. Détection d'édition
-      const isEdited = await documentValidationService.detectEditing(filePath);
-      
-      // 3. Hash pour duplicatas
-      const imageHash = await documentValidationService.getImageHash(filePath);
-      
-      // 4. Vérifier duplicata
-      const [existingDocs] = await db.query(
-        'SELECT id FROM client_documents WHERE image_metadata->>"$.hash" = ?',
-        [imageHash]
-      );
-      const isDuplicate = existingDocs.length > 0;
-      
-      // 5. OCR - Extraction de texte
-      console.log(`🔍 Extraction OCR de ${docType}...`);
-      const ocrResult = await documentValidationService.extractText(filePath);
-      
-      // 6. Validation du format selon le type
-      let formatValidation;
-      if (docType === 'driving_license') {
-        formatValidation = documentValidationService.validateDrivingLicense(ocrResult.text);
-      } else if (docType === 'id_card') {
-        formatValidation = documentValidationService.validateIdCard(ocrResult.text);
-      }
-      
-      console.log(`✅ Score format: ${formatValidation.total}/100`);
+      try {
+        // 1. Analyse technique
+        const technicalAnalysis = await documentValidationService.analyzeTechnicalQuality(filePath);
+        console.log(`✅ Score technique: ${technicalAnalysis.score}/100`);
+        
+        // 2. Détection d'édition
+        const isEdited = await documentValidationService.detectEditing(filePath);
+        
+        // 3. Hash pour duplicatas
+        const imageHash = await documentValidationService.getImageHash(filePath);
+        
+        // 4. Vérifier duplicata
+        const [existingDocs] = await db.query(
+          'SELECT id FROM client_documents WHERE image_metadata->>"$.hash" = ?',
+          [imageHash]
+        );
+        const isDuplicate = existingDocs.length > 0;
+        
+        // 5. OCR - Extraction de texte (avec timeout)
+        console.log(`🔍 Extraction OCR de ${docType}...`);
+        let ocrResult;
+        try {
+          const ocrPromise = documentValidationService.extractText(filePath);
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('OCR timeout')), 30000)
+          );
+          ocrResult = await Promise.race([ocrPromise, timeoutPromise]);
+        } catch (ocrError) {
+          console.warn(`⚠️ OCR échoué pour ${docType}:`, ocrError.message);
+          ocrResult = { text: '', confidence: 0, words: [] };
+        }
+        
+        // 6. Validation du format selon le type
+        let formatValidation;
+        if (docType === 'driving_license') {
+          formatValidation = documentValidationService.validateDrivingLicense(ocrResult.text);
+        } else if (docType === 'id_card') {
+          formatValidation = documentValidationService.validateIdCard(ocrResult.text);
+        } else {
+          formatValidation = { total: 0, data: {} };
+        }
+        
+        console.log(`✅ Score format: ${formatValidation.total}/100`);
       
       // Préparer les métadonnées
       const metadata = {
