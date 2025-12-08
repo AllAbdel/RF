@@ -75,6 +75,7 @@ const AuthPage = () => {
           submitData.append('last_name', formData.last_name);
           submitData.append('phone', formData.phone);
           submitData.append('user_type', 'client'); // Temporairement client
+          submitData.append('pending_agency_join', 'true'); // Flag pour bypasser validation dates
 
           const registerResult = await register(submitData);
           if (registerResult.success) {
@@ -269,7 +270,7 @@ const AuthPage = () => {
                 />
               </div>
 
-              {userType === 'client' && (
+              {(userType === 'client' || (userType === 'agency_member' && agencyMode === 'create')) && (
                 <>
                   <div className="form-group">
                     <label>Date de naissance</label>

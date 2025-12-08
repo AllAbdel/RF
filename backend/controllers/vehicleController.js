@@ -67,7 +67,7 @@ const getVehicleById = async (req, res) => {
     const { id } = req.params;
 
     const [vehicles] = await db.query(
-      `SELECT v.*, a.name as agency_name, a.phone as agency_phone, a.email as agency_email,
+      `SELECT v.*, a.name as agency_name, a.phone as agency_phone, a.email as agency_email, a.rental_conditions,
               (SELECT AVG(rating) FROM reviews WHERE vehicle_id = v.id) as avg_rating,
               (SELECT COUNT(*) FROM reviews WHERE vehicle_id = v.id) as review_count
        FROM vehicles v
@@ -109,15 +109,15 @@ const createVehicle = async (req, res) => {
   try {
     const {
       brand, model, seats, engine, tank_capacity, price_per_hour,
-      fuel_type, description, release_date, location
+      fuel_type, description, release_date, location, pickup_address, return_address
     } = req.body;
 
     const [result] = await db.query(
       `INSERT INTO vehicles (agency_id, brand, model, seats, engine, tank_capacity, 
-       price_per_hour, fuel_type, description, release_date, location)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       price_per_hour, fuel_type, description, release_date, location, pickup_address, return_address)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [req.user.agency_id, brand, model, seats, engine, tank_capacity, 
-       price_per_hour, fuel_type, description, release_date, location]
+       price_per_hour, fuel_type, description, release_date, location, pickup_address, return_address]
     );
 
     // Gérer les images si elles sont uploadées
@@ -145,7 +145,7 @@ const updateVehicle = async (req, res) => {
     const { id } = req.params;
     const {
       brand, model, seats, engine, tank_capacity, price_per_hour,
-      fuel_type, description, release_date, location, status
+      fuel_type, description, release_date, location, pickup_address, return_address, status
     } = req.body;
 
     // Vérifier que le véhicule appartient à l'agence
@@ -161,10 +161,10 @@ const updateVehicle = async (req, res) => {
     await db.query(
       `UPDATE vehicles SET brand = ?, model = ?, seats = ?, engine = ?, 
        tank_capacity = ?, price_per_hour = ?, fuel_type = ?, description = ?, 
-       release_date = ?, location = ?, status = ?
+       release_date = ?, location = ?, pickup_address = ?, return_address = ?, status = ?
        WHERE id = ?`,
       [brand, model, seats, engine, tank_capacity, price_per_hour, 
-       fuel_type, description, release_date, location, status, id]
+       fuel_type, description, release_date, location, pickup_address, return_address, status, id]
     );
 
     res.json({ message: 'Véhicule mis à jour avec succès' });

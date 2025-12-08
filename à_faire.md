@@ -1,4 +1,7 @@
-- ajouter les voitures déjà réservées pour les clients en indiquant que c'est reservé et combien de temps il reste
-- Ajouter l'age de la personne lors de la création du compte + age du permis de conduire
-- parfois y a du texte blanc sur blanc (exmple le prix est écrit en blanc, sauf que quand on passe en mode clair, tour devient blanc donc blanc sur blanc) etc.. taille des boutons à aggrandir pour les boutons de réservations quand on est pas connecter, enlever le émojis, et les fleches ->, icone calendrier noir sur noir à changer.
-- réflichir sur comment faire le paiement, à quel moment, dans quel ordre, client paie puis l'agence accepte ? comment faire si l'agence n'accepte pas ? on rends l'argent au client ?
+- Ajouter les voitures déjà réservées pour les clients en indiquant que c'est reservé et combien de temps il reste
+- Réflichir sur comment faire le paiement, à quel moment, dans quel ordre, client paie puis l'agence accepte ? comment faire si l'agence n'accepte pas ? on rends l'argent au client ?
+x Ajout de l'adresse de dépot de la voiture et de récupération
+x En bas de chaque véhicule on va mettre les conditions des agences (remettre la voiture avec le pleins, les nettoyer etc...)
+- Génération des factures éléctroniques, reçu et de contracts (charger un fichier pdf et le client doit signer) système de signature pour le contract
+- Amélioerer le dashboard avec pleins de statistiques (historique ,revenus, factures etc..)
+- Pouvoir vérifier les documents rentrés par les clients (permis de conduire pour voir s'il est valide)

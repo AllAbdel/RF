@@ -209,10 +209,40 @@ const VehicleDetails = () => {
             </div>
           </div>
 
+          <div className="vehicle-addresses">
+            <h3>📍 Adresses de prise en charge</h3>
+            <div className="address-info">
+              <div className="address-item">
+                <strong>🚗 Récupération :</strong>
+                <p>{vehicle.pickup_address || vehicle.location}</p>
+              </div>
+              <div className="address-item">
+                <strong>🏁 Dépôt/Retour :</strong>
+                <p>{vehicle.return_address || vehicle.location}</p>
+              </div>
+            </div>
+          </div>
+
           {vehicle.description && (
             <div className="vehicle-description">
               <h3>Description</h3>
               <p>{vehicle.description}</p>
+            </div>
+          )}
+
+          {vehicle.rental_conditions && (
+            <div className="rental-conditions">
+              <h3>📋 Conditions de location de l'agence</h3>
+              <div className="conditions-content">
+                {vehicle.rental_conditions.split('\n').map((condition, index) => (
+                  condition.trim() && (
+                    <div key={index} className="condition-item">
+                      <span className="condition-bullet">✓</span>
+                      <span className="condition-text">{condition.trim()}</span>
+                    </div>
+                  )
+                ))}
+              </div>
             </div>
           )}
 

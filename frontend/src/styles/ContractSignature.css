@@ -1,0 +1,213 @@
+.contract-signature-page {
+  min-height: 100vh;
+  background: var(--background);
+  padding: 40px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.contract-signature-container {
+  max-width: 800px;
+  width: 100%;
+  background: var(--card-background);
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-color);
+}
+
+.signature-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.signature-header h2 {
+  color: var(--text-primary);
+  font-size: 2rem;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.signature-info {
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.signature-error {
+  background: rgba(211, 47, 47, 0.1);
+  color: #d32f2f;
+  padding: 14px 20px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  border-left: 4px solid #d32f2f;
+  font-weight: 500;
+}
+
+.signature-section {
+  margin-bottom: 32px;
+}
+
+.signature-label {
+  display: block;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.signature-canvas-container {
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  background: white;
+  overflow: hidden;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.3s ease;
+}
+
+.signature-canvas-container:hover {
+  border-color: var(--primary-color);
+}
+
+.signature-canvas {
+  display: block;
+  width: 100%;
+  height: 200px;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.signature-hint {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-top: 8px;
+  font-style: italic;
+  text-align: center;
+}
+
+.signature-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.signature-actions .btn {
+  padding: 12px 28px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-clear {
+  background: #9e9e9e;
+  color: white;
+}
+
+.btn-clear:hover:not(:disabled) {
+  background: #757575;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-cancel {
+  background: #f44336;
+  color: white;
+}
+
+.btn-cancel:hover:not(:disabled) {
+  background: #d32f2f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
+}
+
+.btn-submit {
+  background: #4caf50;
+  color: white;
+}
+
+.btn-submit:hover:not(:disabled) {
+  background: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.signature-actions .btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+}
+
+.signature-legal {
+  background: var(--hover-bg);
+  padding: 20px;
+  border-radius: 8px;
+  border-left: 4px solid var(--primary-color);
+}
+
+.signature-legal p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .contract-signature-page {
+    padding: 20px 12px;
+  }
+
+  .contract-signature-container {
+    padding: 24px 16px;
+  }
+
+  .signature-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .signature-info {
+    font-size: 0.95rem;
+  }
+
+  .signature-canvas {
+    height: 180px;
+  }
+
+  .signature-actions {
+    flex-direction: column;
+  }
+
+  .signature-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .signature-legal p {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .signature-canvas {
+    height: 150px;
+  }
+
+  .signature-header h2 {
+    font-size: 1.3rem;
+    flex-direction: column;
+    gap: 8px;
+  }
+}

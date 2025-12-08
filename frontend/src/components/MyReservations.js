@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import DocumentViewer from './DocumentViewer';
 import '../styles/MyReservations.css';
 
 const MyReservations = ({ reservations, onCancel, onRefresh, onSubmitReview }) => {
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [selectedReservation, setSelectedReservation] = useState(null);
+  const [showDocuments, setShowDocuments] = useState({});
   const [reviewData, setReviewData] = useState({
     rating: 5,
     comment: ''
@@ -50,6 +52,13 @@ const MyReservations = ({ reservations, onCancel, onRefresh, onSubmitReview }) =
       await onSubmitReview(selectedReservation.id, reviewData);
       handleCloseReviewModal();
     }
+  };
+
+  const toggleDocuments = (reservationId) => {
+    setShowDocuments(prev => ({
+      ...prev,
+      [reservationId]: !prev[reservationId]
+    }));
   };
 
   if (reservations.length === 0) {
@@ -109,6 +118,12 @@ const MyReservations = ({ reservations, onCancel, onRefresh, onSubmitReview }) =
                 </div>
 
                 <div className="reservation-actions">
+                  <button
+                    className="documents-btn"
+                    onClick={() => toggleDocuments(reservation.id)}
+                  >
+                    {showDocuments[reservation.id] ? '📁 Masquer documents' : '📄 Voir documents'}
+                  </button>
                   {canCancel(reservation) && (
                     <button
                       className="cancel-btn"
@@ -130,6 +145,13 @@ const MyReservations = ({ reservations, onCancel, onRefresh, onSubmitReview }) =
                   )}
                 </div>
               </div>
+
+              {showDocuments[reservation.id] && (
+                <DocumentViewer 
+                  reservationId={reservation.id} 
+                  userType="client"
+                />
+              )}
             </div>
           </div>
         );

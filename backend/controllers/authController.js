@@ -4,7 +4,7 @@ const db = require('../config/database');
 
 const register = async (req, res) => {
   try {
-    const { email, password, first_name, last_name, phone, birth_date, license_date, user_type, agency_name } = req.body;
+    const { email, password, first_name, last_name, phone, birth_date, license_date, user_type, agency_name, pending_agency_join } = req.body;
 
     // Vérifier si l'utilisateur existe déjà
     const [existingUser] = await db.query('SELECT id FROM users WHERE email = ?', [email]);
@@ -12,8 +12,8 @@ const register = async (req, res) => {
       return res.status(400).json({ error: 'Cet email est déjà utilisé' });
     }
 
-    // Validation pour les clients : âge minimum et permis
-    if (user_type === 'client') {
+    // Validation pour les clients : âge minimum et permis (sauf si c'est une demande d'adhésion à une agence)
+    if (user_type === 'client' && pending_agency_join !== 'true') {
       if (!birth_date || !license_date) {
         return res.status(400).json({ error: 'La date de naissance et la date d\'obtention du permis sont obligatoires pour les clients' });
       }

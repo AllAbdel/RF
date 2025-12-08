@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import DocumentViewer from './DocumentViewer';
 import '../styles/ReservationList.css';
 
 const ReservationList = ({ reservations, onStatusUpdate, isAgency }) => {
+  const [showDocuments, setShowDocuments] = useState({});
   const getStatusInfo = (status) => {
     const statusMap = {
       pending: { text: 'En attente', class: 'status-pending', color: '#f59e0b' },
@@ -21,6 +23,13 @@ const ReservationList = ({ reservations, onStatusUpdate, isAgency }) => {
     } catch {
       return dateString;
     }
+  };
+
+  const toggleDocuments = (reservationId) => {
+    setShowDocuments(prev => ({
+      ...prev,
+      [reservationId]: !prev[reservationId]
+    }));
   };
 
   if (reservations.length === 0) {
@@ -90,32 +99,46 @@ const ReservationList = ({ reservations, onStatusUpdate, isAgency }) => {
               )}
             </div>
 
-            {isAgency && reservation.status === 'pending' && (
-              <div className="reservation-actions">
-                <button
-                  className="accept-btn"
-                  onClick={() => onStatusUpdate(reservation.id, 'accepted')}
-                >
-                  Accepter
-                </button>
-                <button
-                  className="reject-btn"
-                  onClick={() => onStatusUpdate(reservation.id, 'rejected')}
-                >
-                  Refuser
-                </button>
-              </div>
-            )}
+            <div className="reservation-actions">
+              <button
+                className="documents-btn"
+                onClick={() => toggleDocuments(reservation.id)}
+              >
+                {showDocuments[reservation.id] ? '📁 Masquer documents' : '📄 Voir documents'}
+              </button>
 
-            {isAgency && reservation.status === 'accepted' && (
-              <div className="reservation-actions">
+              {isAgency && reservation.status === 'pending' && (
+                <>
+                  <button
+                    className="accept-btn"
+                    onClick={() => onStatusUpdate(reservation.id, 'accepted')}
+                  >
+                    Accepter
+                  </button>
+                  <button
+                    className="reject-btn"
+                    onClick={() => onStatusUpdate(reservation.id, 'rejected')}
+                  >
+                    Refuser
+                  </button>
+                </>
+              )}
+
+              {isAgency && reservation.status === 'accepted' && (
                 <button
                   className="complete-btn"
                   onClick={() => onStatusUpdate(reservation.id, 'completed')}
                 >
                   Marquer comme terminée
                 </button>
-              </div>
+              )}
+            </div>
+
+            {showDocuments[reservation.id] && (
+              <DocumentViewer 
+                reservationId={reservation.id} 
+                userType={isAgency ? 'agency' : 'client'}
+              />
             )}
           </div>
         );

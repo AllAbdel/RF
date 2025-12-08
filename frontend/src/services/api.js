@@ -77,13 +77,24 @@ export const agencyAPI = {
   updateInfo: (data) => axios.put('/agency/info', data)
 };
 
+// Documents
+export const documentAPI = {
+  generateInvoice: (reservationId) => axios.post(`/documents/generate-invoice/${reservationId}`),
+  generateReceipt: (reservationId) => axios.post(`/documents/generate-receipt/${reservationId}`),
+  generateContract: (reservationId) => axios.post(`/documents/generate-contract/${reservationId}`),
+  getDocuments: (reservationId) => axios.get(`/documents/reservation/${reservationId}`),
+  signContract: (documentId, signatureData) => axios.post(`/documents/sign-contract/${documentId}`, { signature_data: signatureData }),
+  download: (documentId) => axios.get(`/documents/download/${documentId}`, { responseType: 'blob' })
+};
+
 const api = {
   vehicleAPI,
   reservationAPI,
   messageAPI,
   reviewAPI,
   notificationAPI,
-  agencyAPI
+  agencyAPI,
+  documentAPI
 };
 
 export default api;

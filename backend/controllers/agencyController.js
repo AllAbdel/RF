@@ -270,6 +270,21 @@ const removeMember = async (req, res) => {
 
 const getAgencyStats = async (req, res) => {
   try {
+    // Vérifier que l'utilisateur a une agence
+    if (!req.user.agency_id) {
+      return res.status(400).json({ error: 'Utilisateur non associé à une agence' });
+    }
+
+    // Informations de l'agence
+    const [agency] = await db.query(
+      'SELECT id, name, email, phone, address, rental_conditions FROM agencies WHERE id = ?',
+      [req.user.agency_id]
+    );
+
+    if (agency.length === 0) {
+      return res.status(404).json({ error: 'Agence non trouvée' });
+    }
+
     // Nombre total de véhicules
     const [vehicleCount] = await db.query(
       'SELECT COUNT(*) as count FROM vehicles WHERE agency_id = ?',
@@ -317,6 +332,7 @@ const getAgencyStats = async (req, res) => {
     );
 
     res.json({
+      agency: agency[0],
       vehicle_count: vehicleCount[0].count,
       reservation_stats: reservationStats,
       total_revenue: revenue[0].total || 0,
@@ -331,11 +347,43 @@ const getAgencyStats = async (req, res) => {
 
 const updateAgencyInfo = async (req, res) => {
   try {
-    const { name, phone, address } = req.body;
+    const { name, phone, address, rental_conditions } = req.body;
+
+    // Vérifier que l'utilisateur a une agence
+    if (!req.user.agency_id) {
+      return res.status(400).json({ error: 'Utilisateur non associé à une agence' });
+    }
+
+    // Construire la requête dynamiquement selon les champs fournis
+    const updates = [];
+    const values = [];
+
+    if (name !== undefined) {
+      updates.push('name = ?');
+      values.push(name);
+    }
+    if (phone !== undefined) {
+      updates.push('phone = ?');
+      values.push(phone);
+    }
+    if (address !== undefined) {
+      updates.push('address = ?');
+      values.push(address);
+    }
+    if (rental_conditions !== undefined) {
+      updates.push('rental_conditions = ?');
+      values.push(rental_conditions);
+    }
+
+    if (updates.length === 0) {
+      return res.status(400).json({ error: 'Aucune donnée à mettre à jour' });
+    }
+
+    values.push(req.user.agency_id);
 
     await db.query(
-      'UPDATE agencies SET name = ?, phone = ?, address = ? WHERE id = ?',
-      [name, phone, address, req.user.agency_id]
+      `UPDATE agencies SET ${updates.join(', ')} WHERE id = ?`,
+      values
     );
 
     res.json({ message: 'Informations de l\'agence mises à jour avec succès' });

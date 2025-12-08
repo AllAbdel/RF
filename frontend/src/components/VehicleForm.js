@@ -13,6 +13,8 @@ const VehicleForm = ({ vehicle, onSubmit, onCancel }) => {
     description: '',
     release_date: '',
     location: '',
+    pickup_address: '',
+    return_address: '',
     status: 'available'
   });
   const [images, setImages] = useState([]);
@@ -31,6 +33,8 @@ const VehicleForm = ({ vehicle, onSubmit, onCancel }) => {
         description: vehicle.description || '',
         release_date: vehicle.release_date || '',
         location: vehicle.location || '',
+        pickup_address: vehicle.pickup_address || '',
+        return_address: vehicle.return_address || '',
         status: vehicle.status || 'available'
       });
     }
@@ -222,6 +226,32 @@ const VehicleForm = ({ vehicle, onSubmit, onCancel }) => {
                 onChange={handleChange}
                 min="0"
                 step="0.01"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label>Adresse de récupération *</label>
+              <input
+                type="text"
+                name="pickup_address"
+                value={formData.pickup_address}
+                onChange={handleChange}
+                placeholder="Adresse complète de récupération"
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Adresse de dépôt/retour *</label>
+              <input
+                type="text"
+                name="return_address"
+                value={formData.return_address}
+                onChange={handleChange}
+                placeholder="Adresse complète de retour"
                 required
               />
             </div>

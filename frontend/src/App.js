@@ -15,6 +15,7 @@ import PrivacyPage from './pages/PrivacyPage';
 import TermsPage from './pages/TermsPage';
 import CookiesPage from './pages/CookiesPage';
 import JoinAgencyPage from './pages/JoinAgencyPage';
+import ContractSignature from './components/ContractSignature';
 
 import './styles/App.css';
 
@@ -92,6 +93,16 @@ function App() {
             
             {/* Route d'invitation agence - publique */}
             <Route path="/join-agency/:token" element={<JoinAgencyPage />} />
+
+            {/* Route de signature de contrat */}
+            <Route
+              path="/sign-contract/:documentId"
+              element={
+                <ProtectedRoute requireClient>
+                  <ContractSignature />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Routes protégées - Messages */}
             <Route

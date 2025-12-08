@@ -7,6 +7,7 @@ import ReservationList from '../components/ReservationList';
 import AgencyMembers from '../components/AgencyMembers';
 import AgencyStats from '../components/AgencyStats';
 import AgencyJoinRequests from '../components/AgencyJoinRequests';
+import AgencySettings from '../components/AgencySettings';
 import '../styles/Agency.css';
 import { useNavigate } from 'react-router-dom';
 
@@ -131,22 +132,27 @@ const AgencyDashboard = () => {
         >
           Messages
         </button>
-        {user?.isAdmin && (
+        {(user?.role === 'admin' || user?.role === 'super_admin') && (
+          <>
             <button
-            className={`nav-btn ${activeTab === 'members' ? 'active' : ''}`}
-            onClick={() => setActiveTab('members')}
-          >
-            Membres
-          </button>
-          
-        )}
-        {user?.isAdmin && (
-          <button
-            className={`nav-btn ${activeTab === 'join-requests' ? 'active' : ''}`}
-            onClick={() => setActiveTab('join-requests')}
-          >
-            Demandes d'adhésion
-          </button>
+              className={`nav-btn ${activeTab === 'members' ? 'active' : ''}`}
+              onClick={() => setActiveTab('members')}
+            >
+              Membres
+            </button>
+            <button
+              className={`nav-btn ${activeTab === 'join-requests' ? 'active' : ''}`}
+              onClick={() => setActiveTab('join-requests')}
+            >
+              Demandes d'adhésion
+            </button>
+            <button
+              className={`nav-btn ${activeTab === 'settings' ? 'active' : ''}`}
+              onClick={() => setActiveTab('settings')}
+            >
+              Paramètres
+            </button>
+          </>
         )}
       </nav>
 
@@ -204,12 +210,16 @@ const AgencyDashboard = () => {
               <AgencyStats stats={stats} />
             )}
 
-            {activeTab === 'members' && user?.isAdmin && (
+            {activeTab === 'members' && (user?.role === 'admin' || user?.role === 'super_admin') && (
               <AgencyMembers />
             )}
 
-            {activeTab === 'join-requests' && user?.isAdmin && (
+            {activeTab === 'join-requests' && (user?.role === 'admin' || user?.role === 'super_admin') && (
               <AgencyJoinRequests onRequestHandled={loadData} />
+            )}
+
+            {activeTab === 'settings' && (user?.role === 'admin' || user?.role === 'super_admin') && (
+              <AgencySettings />
             )}
           </>
         )}
