@@ -1,0 +1,86 @@
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Testing
+/coverage
+
+# Production
+/build
+/dist
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Uploads et fichiers sensibles
+backend/uploads/**/*
+!backend/uploads/.gitkeep
+uploads/
+*.pdf
+*.PDF
+
+# Documents sensibles
+**/documents/**/*.pdf
+**/documents/**/*.jpg
+**/documents/**/*.jpeg
+**/documents/**/*.png
+backend/uploads/documents/
+backend/uploads/agencies/
+backend/uploads/vehicles/
+
+# Base de données
+*.sql.backup
+*.sql.gz
+*.db
+*.sqlite
+*.sqlite3
+
+# Fichiers temporaires
+*.tmp
+*.temp
+*.cache
+.cache/
+
+# Certificats et clés
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+*.pfx
+
+# Sauvegardes
+*.bak
+*.backup
+*~
+
+# Fichiers de configuration sensibles
+config.local.js
+secrets.json
+credentials.json
+
+# Autres
+*.old
