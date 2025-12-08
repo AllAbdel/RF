@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import '../styles/AgencyMembers.css';
 
 const AgencyMembers = () => {
-  const { user } = useAuth();
+  const { user, isSuperAdmin, isAdmin } = useAuth();
   const [members, setMembers] = useState([]);
   const [showInviteForm, setShowInviteForm] = useState(false);
   const [formData, setFormData] = useState({
@@ -17,8 +17,10 @@ const AgencyMembers = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    console.log('AgencyMembers - user:', user);
+    console.log('AgencyMembers - isSuperAdmin:', isSuperAdmin);
     loadMembers();
-  }, []);
+  }, [user]);
 
   const loadMembers = async () => {
     try {
@@ -95,6 +97,18 @@ const AgencyMembers = () => {
     }
   };
 
+  const handlePromoteMember = async (userId) => {
+    if (window.confirm('Êtes-vous sûr de vouloir promouvoir ce membre en administrateur ?')) {
+      try {
+        await agencyAPI.promoteMember(userId);
+        alert('Membre promu avec succès !');
+        loadMembers();
+      } catch (error) {
+        alert('Erreur lors de la promotion: ' + (error.response?.data?.error || 'Erreur inconnue'));
+      }
+    }
+  };
+
   const getRoleBadge = (role) => {
     const badges = {
       super_admin: { text: 'Super Admin', class: 'role-super-admin' },
@@ -108,83 +122,13 @@ const AgencyMembers = () => {
     <div className="agency-members">
       <div className="members-header">
         <h2>Gestion des membres</h2>
-        {user.isAdmin && (
-          <button className="invite-btn" onClick={() => setShowInviteForm(!showInviteForm)}>
-            {showInviteForm ? 'Annuler' : '+ Inviter un membre'}
-          </button>
-        )}
       </div>
-
-      {showInviteForm && (
-        <div className="invite-form-container">
-          <form onSubmit={handleInvite} className="invite-form">
-            <h3>Inviter un nouveau membre</h3>
-            
-            <div className="form-row">
-              <div className="form-group">
-                <label>Prénom *</label>
-                <input
-                  type="text"
-                  name="first_name"
-                  value={formData.first_name}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>Nom *</label>
-                <input
-                  type="text"
-                  name="last_name"
-                  value={formData.last_name}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label>Email *</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>Téléphone *</label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label>Rôle</label>
-              <select name="role" value={formData.role} onChange={handleChange}>
-                <option value="member">Membre</option>
-                {user.isSuperAdmin && <option value="admin">Admin</option>}
-              </select>
-            </div>
-
-            <button type="submit" className="submit-btn" disabled={loading}>
-              {loading ? 'Invitation en cours...' : 'Inviter'}
-            </button>
-          </form>
-        </div>
-      )}
 
       <div className="members-list">
         {members.map((member) => {
           const roleBadge = getRoleBadge(member.role);
           const isCurrentUser = member.id === user.id;
+          console.log('Member:', member.first_name, 'role:', member.role, 'isCurrentUser:', isCurrentUser, 'isSuperAdmin:', isSuperAdmin);
 
           return (
             <div key={member.id} className="member-card">
@@ -207,8 +151,16 @@ const AgencyMembers = () => {
                   {roleBadge.text}
                 </span>
 
-                {user.isSuperAdmin && !isCurrentUser && (
+                {isSuperAdmin && !isCurrentUser && (
                   <div className="action-buttons">
+                    {member.role === 'member' && (
+                      <button
+                        className="promote-btn"
+                        onClick={() => handlePromoteMember(member.id)}
+                      >
+                        ⬆️ Promouvoir en Admin
+                      </button>
+                    )}
                     <select
                       value={member.role}
                       onChange={(e) => handleRoleUpdate(member.id, e.target.value)}
@@ -221,7 +173,7 @@ const AgencyMembers = () => {
                   </div>
                 )}
 
-                {user.isAdmin && !isCurrentUser && (
+                {isAdmin && !isCurrentUser && (
                   <button
                     className="remove-btn"
                     onClick={() => handleRemoveMember(member.id)}

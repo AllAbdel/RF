@@ -1,0 +1,311 @@
+.vehicle-performance {
+  background: var(--card-background);
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid var(--border-color);
+  margin-top: 24px;
+}
+
+.performance-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.performance-header h3 {
+  color: var(--text-primary);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vehicle-count {
+  background: var(--hover-bg);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* Table */
+.performance-table {
+  overflow-x: auto;
+}
+
+.table-header,
+.table-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  gap: 16px;
+  align-items: center;
+  padding: 16px;
+}
+
+.table-header {
+  background: var(--hover-bg);
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.table-row {
+  border-bottom: 1px solid var(--border-color);
+  transition: background 0.2s ease;
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.table-row:hover {
+  background: var(--hover-bg);
+  border-radius: 8px;
+}
+
+/* Vehicle column */
+.vehicle-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rank-badge {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.vehicle-image {
+  width: 60px;
+  height: 45px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--hover-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vehicle-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.no-image {
+  font-size: 1.5rem;
+}
+
+.vehicle-name {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.brand {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.model {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* Bookings column */
+.col-bookings {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bookings-value {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+}
+
+.bookings-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+/* Revenue column */
+.revenue-value {
+  font-weight: 700;
+  color: #4caf50;
+  font-size: 1.1rem;
+}
+
+/* Average column */
+.avg-value {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+/* Rating column */
+.rating-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rating-value {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.rating-count {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.no-rating {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* Empty state */
+.vehicle-performance.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+
+.empty-state {
+  text-align: center;
+  color: var(--text-secondary);
+  margin-top: 40px;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  display: block;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.empty-state p {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Loading state */
+.vehicle-performance.loading h3 {
+  margin-bottom: 24px;
+}
+
+.performance-skeleton {
+  height: 400px;
+  background: linear-gradient(90deg, 
+    var(--hover-bg) 0%, 
+    rgba(255, 255, 255, 0.1) 50%, 
+    var(--hover-bg) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .table-header,
+  .table-row {
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+  }
+
+  .col-avg {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .vehicle-performance {
+    padding: 16px;
+  }
+
+  .performance-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .table-header {
+    display: none;
+  }
+
+  .table-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    margin-bottom: 12px;
+  }
+
+  .col-vehicle {
+    grid-column: 1 / -1;
+  }
+
+  .col-bookings,
+  .col-revenue,
+  .col-avg,
+  .col-rating {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .col-bookings::before {
+    content: 'Réservations:';
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .col-revenue::before {
+    content: 'Revenus:';
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .col-avg::before {
+    content: 'Moyenne:';
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .col-rating::before {
+    content: 'Note:';
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+  }
+
+  .col-bookings {
+    flex-direction: row !important;
+    gap: 8px;
+  }
+}

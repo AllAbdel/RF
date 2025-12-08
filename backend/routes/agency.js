@@ -13,7 +13,9 @@ const {
   updateAgencyInfo,
   verifyInvitation,
   acceptInvitation,
-  getPendingInvitations
+  getPendingInvitations,
+  getDetailedStats,
+  promoteMember
 } = require('../controllers/agencyController');
 const { authMiddleware, isAgencyMember, isAgencyAdmin, isSuperAdmin } = require('../middleware/auth');
 
@@ -28,8 +30,10 @@ router.post('/join-requests/handle', authMiddleware, isAgencyAdmin, handleJoinRe
 router.get('/members', authMiddleware, isAgencyMember, getAgencyMembers);
 router.post('/members/invite', authMiddleware, isAgencyAdmin, inviteMember);
 router.put('/members/:member_id/role', authMiddleware, isSuperAdmin, updateMemberRole);
+router.post('/members/:userId/promote', authMiddleware, isSuperAdmin, promoteMember);
 router.delete('/members/:member_id', authMiddleware, isAgencyAdmin, removeMember);
 router.get('/stats', authMiddleware, isAgencyMember, getAgencyStats);
+router.get('/stats/detailed', authMiddleware, isAgencyMember, getDetailedStats);
 router.put('/info', authMiddleware, isAgencyAdmin, updateAgencyInfo);
 
 // Routes d'invitation (publiques)

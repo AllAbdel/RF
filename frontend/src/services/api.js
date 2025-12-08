@@ -72,8 +72,10 @@ export const agencyAPI = {
   getMembers: () => axios.get('/agency/members'),
   inviteMember: (data) => axios.post('/agency/members/invite', data),
   updateMemberRole: (memberId, role) => axios.put(`/agency/members/${memberId}/role`, { role }),
+  promoteMember: (userId) => axios.post(`/agency/members/${userId}/promote`),
   removeMember: (memberId) => axios.delete(`/agency/members/${memberId}`),
   getStats: () => axios.get('/agency/stats'),
+  getDetailedStats: () => axios.get('/agency/stats/detailed'),
   updateInfo: (data) => axios.put('/agency/info', data)
 };
 

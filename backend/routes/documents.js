@@ -1,26 +1,26 @@
 const express = require('express');
 const router = express.Router();
 const documentController = require('../controllers/documentController');
-const { authenticate } = require('../middleware/auth');
+const { authMiddleware } = require('../middleware/auth');
 const path = require('path');
 
 // Générer une facture (agence uniquement)
-router.post('/generate-invoice/:reservation_id', authenticate, documentController.createInvoice);
+router.post('/generate-invoice/:reservation_id', authMiddleware, documentController.createInvoice);
 
 // Générer un reçu (agence uniquement)
-router.post('/generate-receipt/:reservation_id', authenticate, documentController.createReceipt);
+router.post('/generate-receipt/:reservation_id', authMiddleware, documentController.createReceipt);
 
 // Générer un contrat (agence uniquement)
-router.post('/generate-contract/:reservation_id', authenticate, documentController.createContract);
+router.post('/generate-contract/:reservation_id', authMiddleware, documentController.createContract);
 
 // Signer un contrat (client uniquement)
-router.post('/sign-contract/:document_id', authenticate, documentController.signContract);
+router.post('/sign-contract/:document_id', authMiddleware, documentController.signContract);
 
 // Obtenir les documents d'une réservation
-router.get('/reservation/:reservation_id', authenticate, documentController.getDocuments);
+router.get('/reservation/:reservation_id', authMiddleware, documentController.getDocuments);
 
 // Télécharger un document
-router.get('/download/:document_id', authenticate, async (req, res) => {
+router.get('/download/:document_id', authMiddleware, async (req, res) => {
   try {
     const db = require('../config/database');
     const { document_id } = req.params;

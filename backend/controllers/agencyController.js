@@ -505,6 +505,228 @@ const getPendingInvitations = async (req, res) => {
   }
 };
 
+// Obtenir des statistiques détaillées pour le dashboard
+const getDetailedStats = async (req, res) => {
+  try {
+    if (!req.user.agency_id) {
+      return res.status(400).json({ error: 'Utilisateur non associé à une agence' });
+    }
+
+    const agency_id = req.user.agency_id;
+
+    // 1. Revenus par mois (12 derniers mois)
+    const [monthlyRevenue] = await db.query(
+      `SELECT 
+        DATE_FORMAT(r.start_date, '%Y-%m') as month,
+        SUM(r.total_price) as revenue,
+        COUNT(*) as bookings
+       FROM reservations r
+       JOIN vehicles v ON r.vehicle_id = v.id
+       WHERE v.agency_id = ? 
+         AND r.status IN ('completed', 'accepted')
+       GROUP BY DATE_FORMAT(r.start_date, '%Y-%m')
+       ORDER BY month DESC
+       LIMIT 12`,
+      [agency_id]
+    );
+
+    // 2. Performance par véhicule (toutes les réservations)
+    const [vehiclePerformance] = await db.query(
+      `SELECT 
+        v.id,
+        v.brand,
+        v.model,
+        v.image,
+        COUNT(DISTINCT r.id) as total_bookings,
+        SUM(CASE WHEN r.status IN ('completed', 'accepted') THEN r.total_price ELSE 0 END) as total_revenue,
+        AVG(CASE WHEN r.status IN ('completed', 'accepted') THEN r.total_price ELSE NULL END) as avg_booking_value,
+        AVG(rev.rating) as avg_rating,
+        COUNT(DISTINCT rev.id) as review_count
+       FROM vehicles v
+       LEFT JOIN reservations r ON v.id = r.vehicle_id
+       LEFT JOIN reviews rev ON v.id = rev.vehicle_id
+       WHERE v.agency_id = ?
+       GROUP BY v.id, v.brand, v.model, v.image
+       ORDER BY total_revenue DESC`,
+      [agency_id]
+    );
+
+    // 3. Statistiques des réservations par statut (détaillé)
+    const [reservationBreakdown] = await db.query(
+      `SELECT 
+        status,
+        COUNT(*) as count,
+        SUM(total_price) as total_value
+       FROM reservations r
+       JOIN vehicles v ON r.vehicle_id = v.id
+       WHERE v.agency_id = ?
+       GROUP BY status`,
+      [agency_id]
+    );
+
+    // 4. Nombre de véhicules et note moyenne
+    const [vehicleCount] = await db.query(
+      `SELECT COUNT(*) as count FROM vehicles WHERE agency_id = ?`,
+      [agency_id]
+    );
+
+    const [avgRating] = await db.query(
+      `SELECT AVG(rating) as avg_rating
+       FROM reviews rev
+       JOIN vehicles v ON rev.vehicle_id = v.id
+       WHERE v.agency_id = ?`,
+      [agency_id]
+    );
+
+    // 5. Documents générés
+    const [documentsStats] = await db.query(
+      `SELECT 
+        d.document_type,
+        COUNT(*) as count
+       FROM documents d
+       JOIN reservations r ON d.reservation_id = r.id
+       JOIN vehicles v ON r.vehicle_id = v.id
+       WHERE v.agency_id = ?
+       GROUP BY d.document_type`,
+      [agency_id]
+    );
+
+    // 6. Taux d'occupation (pourcentage de jours réservés - 3 derniers mois)
+    const [occupancyRate] = await db.query(
+      `SELECT 
+        COUNT(DISTINCT DATE(r.start_date)) as days_booked,
+        DATEDIFF(MAX(r.end_date), MIN(r.start_date)) as total_days
+       FROM reservations r
+       JOIN vehicles v ON r.vehicle_id = v.id
+       WHERE v.agency_id = ? 
+         AND r.status IN ('accepted', 'completed')
+         AND r.start_date >= DATE_SUB(NOW(), INTERVAL 3 MONTH)`,
+      [agency_id]
+    );
+
+    // 7. Revenus ce mois vs mois dernier
+    const [currentMonthRevenue] = await db.query(
+      `SELECT COALESCE(SUM(r.total_price), 0) as revenue
+       FROM reservations r
+       JOIN vehicles v ON r.vehicle_id = v.id
+       WHERE v.agency_id = ? 
+         AND r.status IN ('completed', 'accepted')
+         AND MONTH(r.start_date) = MONTH(CURRENT_DATE())
+         AND YEAR(r.start_date) = YEAR(CURRENT_DATE())`,
+      [agency_id]
+    );
+
+    const [lastMonthRevenue] = await db.query(
+      `SELECT COALESCE(SUM(r.total_price), 0) as revenue
+       FROM reservations r
+       JOIN vehicles v ON r.vehicle_id = v.id
+       WHERE v.agency_id = ? 
+         AND r.status IN ('completed', 'accepted')
+         AND MONTH(r.start_date) = MONTH(DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH))
+         AND YEAR(r.start_date) = YEAR(DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH))`,
+      [agency_id]
+    );
+
+    // 8. Top 5 clients (toutes les réservations)
+    const [topClients] = await db.query(
+      `SELECT 
+        u.id,
+        u.first_name,
+        u.last_name,
+        u.email,
+        COUNT(DISTINCT r.id) as booking_count,
+        SUM(r.total_price) as total_spent
+       FROM users u
+       JOIN reservations r ON u.id = r.client_id
+       JOIN vehicles v ON r.vehicle_id = v.id
+       WHERE v.agency_id = ? AND r.status IN ('completed', 'accepted')
+       GROUP BY u.id, u.first_name, u.last_name, u.email
+       ORDER BY total_spent DESC
+       LIMIT 5`,
+      [agency_id]
+    );
+
+    // Calculer les variations
+    const currentRevenue = currentMonthRevenue[0]?.revenue || 0;
+    const lastRevenue = lastMonthRevenue[0]?.revenue || 0;
+    const revenueChange = lastRevenue > 0 ? ((currentRevenue - lastRevenue) / lastRevenue * 100).toFixed(1) : 0;
+
+    const occupancy = occupancyRate[0]?.total_days > 0 
+      ? ((occupancyRate[0].days_booked / occupancyRate[0].total_days) * 100).toFixed(1)
+      : 0;
+
+    res.json({
+      monthlyRevenue,
+      vehiclePerformance,
+      reservationBreakdown,
+      documentsStats,
+      vehicleCount: vehicleCount[0]?.count || 0,
+      avgRating: avgRating[0]?.avg_rating || 0,
+      occupancyRate: parseFloat(occupancy),
+      currentMonthRevenue: currentRevenue,
+      lastMonthRevenue: lastRevenue,
+      revenueChange: parseFloat(revenueChange),
+      topClients
+    });
+
+  } catch (error) {
+    console.error('Erreur statistiques détaillées:', error);
+    res.status(500).json({ error: 'Erreur lors de la récupération des statistiques' });
+  }
+};
+
+// Promouvoir un membre (membre -> admin) - réservé aux super_admin
+const promoteMember = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const requestingUser = req.user;
+
+    // Vérifier que l'utilisateur est super_admin
+    if (requestingUser.role !== 'super_admin') {
+      return res.status(403).json({ error: 'Seuls les super administrateurs peuvent promouvoir des membres' });
+    }
+
+    // Vérifier que l'utilisateur cible existe et appartient à la même agence
+    const [targetUser] = await db.query(
+      'SELECT id, role, agency_id, first_name, last_name FROM users WHERE id = ?',
+      [userId]
+    );
+
+    if (targetUser.length === 0) {
+      return res.status(404).json({ error: 'Utilisateur non trouvé' });
+    }
+
+    if (targetUser[0].agency_id !== requestingUser.agency_id) {
+      return res.status(403).json({ error: 'Cet utilisateur n\'appartient pas à votre agence' });
+    }
+
+    // Vérifier que l'utilisateur n'est pas déjà admin ou super_admin
+    if (targetUser[0].role === 'admin' || targetUser[0].role === 'super_admin') {
+      return res.status(400).json({ error: 'Cet utilisateur est déjà administrateur' });
+    }
+
+    // Promouvoir le membre en admin
+    await db.query(
+      'UPDATE users SET role = ? WHERE id = ?',
+      ['admin', userId]
+    );
+
+    res.json({ 
+      message: 'Membre promu avec succès',
+      user: {
+        id: targetUser[0].id,
+        first_name: targetUser[0].first_name,
+        last_name: targetUser[0].last_name,
+        role: 'admin'
+      }
+    });
+
+  } catch (error) {
+    console.error('Erreur promotion membre:', error);
+    res.status(500).json({ error: 'Erreur lors de la promotion du membre' });
+  }
+};
+
 module.exports = {
   searchAgencies,
   requestToJoinAgency,
@@ -518,5 +740,7 @@ module.exports = {
   updateAgencyInfo,
   verifyInvitation,
   acceptInvitation,
-  getPendingInvitations
+  getPendingInvitations,
+  getDetailedStats,
+  promoteMember
 };

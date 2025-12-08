@@ -29,6 +29,7 @@ export const AuthProvider = ({ children }) => {
   const loadUser = async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/auth/profile');
+      console.log('AuthContext - User loaded:', response.data.user);
       setUser(response.data.user);
     } catch (error) {
       console.error('Erreur chargement utilisateur:', error);

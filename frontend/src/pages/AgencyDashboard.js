@@ -126,12 +126,6 @@ const AgencyDashboard = () => {
         >
           Statistiques
         </button>
-        <button
-          className={`nav-btn ${activeTab === 'messages' ? 'active' : ''}`}
-          onClick={() => navigate('/messages')}
-        >
-          Messages
-        </button>
         {(user?.role === 'admin' || user?.role === 'super_admin') && (
           <>
             <button
@@ -154,6 +148,13 @@ const AgencyDashboard = () => {
             </button>
           </>
         )}
+        <button
+          className={`nav-btn ${activeTab === 'messages' ? 'active' : ''}`}
+          onClick={() => navigate('/messages')}
+          style={{ marginLeft: 'auto' }}
+        >
+          💬 Messages
+        </button>
       </nav>
 
       <main className="dashboard-content">
@@ -206,8 +207,8 @@ const AgencyDashboard = () => {
               </div>
             )}
 
-            {activeTab === 'stats' && stats && (
-              <AgencyStats stats={stats} />
+            {activeTab === 'stats' && (
+              <AgencyStats />
             )}
 
             {activeTab === 'members' && (user?.role === 'admin' || user?.role === 'super_admin') && (
