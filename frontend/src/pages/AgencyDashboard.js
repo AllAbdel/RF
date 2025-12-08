@@ -8,6 +8,7 @@ import AgencyMembers from '../components/AgencyMembers';
 import AgencyStats from '../components/AgencyStats';
 import AgencyJoinRequests from '../components/AgencyJoinRequests';
 import AgencySettings from '../components/AgencySettings';
+import DocumentValidation from '../components/DocumentValidation';
 import '../styles/Agency.css';
 import { useNavigate } from 'react-router-dom';
 
@@ -126,6 +127,12 @@ const AgencyDashboard = () => {
         >
           Statistiques
         </button>
+        <button
+          className={`nav-btn ${activeTab === 'documents' ? 'active' : ''}`}
+          onClick={() => setActiveTab('documents')}
+        >
+          Documents
+        </button>
         {(user?.role === 'admin' || user?.role === 'super_admin') && (
           <>
             <button
@@ -209,6 +216,10 @@ const AgencyDashboard = () => {
 
             {activeTab === 'stats' && (
               <AgencyStats />
+            )}
+
+            {activeTab === 'documents' && (
+              <DocumentValidation />
             )}
 
             {activeTab === 'members' && (user?.role === 'admin' || user?.role === 'super_admin') && (

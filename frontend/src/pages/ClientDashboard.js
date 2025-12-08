@@ -5,6 +5,7 @@ import axios from 'axios';
 import VehicleCard from '../components/VehicleCard';
 import SearchBar from '../components/SearchBar';
 import MyReservations from '../components/MyReservations';
+import DocumentUpload from '../components/DocumentUpload';
 import '../styles/Client.css';
 import { useNavigate } from 'react-router-dom';
 
@@ -125,6 +126,12 @@ const ClientDashboard = () => {
           Mes réservations
         </button>
         <button
+          className={`nav-btn ${activeTab === 'documents' ? 'active' : ''}`}
+          onClick={() => setActiveTab('documents')}
+        >
+          Mes documents
+        </button>
+        <button
           className={`nav-btn ${activeTab === 'messages' ? 'active' : ''}`}
           onClick={() => navigate('/messages')}
         >
@@ -179,6 +186,10 @@ const ClientDashboard = () => {
               />
             )}
           </div>
+        )}
+
+        {activeTab === 'documents' && (
+          <DocumentUpload />
         )}
       </main>
     </div>

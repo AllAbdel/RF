@@ -38,9 +38,13 @@ const VehicleList = ({ vehicles, onEdit, onDelete }) => {
           <div key={vehicle.id} className="vehicle-item">
             <div className="vehicle-item-image">
               {vehicle.primary_image ? (
-                <img src={`http://localhost:5000${vehicle.primary_image}`} alt={vehicle.model} />
+                <img 
+                  src={`http://localhost:5000${vehicle.primary_image}`} 
+                  alt={vehicle.model}
+                  onError={(e) => { e.target.src = '/no-image.svg'; }}
+                />
               ) : (
-                <div className="no-image">Pas d'image</div>
+                <img src="/no-image.svg" alt="Pas d'image" />
               )}
             </div>
 

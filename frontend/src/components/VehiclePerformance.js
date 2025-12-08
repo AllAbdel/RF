@@ -58,9 +58,10 @@ const VehiclePerformance = ({ data, loading = false }) => {
                         <img 
                           src={`http://localhost:5000${vehicle.image}`} 
                           alt={`${vehicle.brand} ${vehicle.model}`}
+                          onError={(e) => { e.target.src = '/no-image.svg'; }}
                         />
                       ) : (
-                        <div className="no-image">🚗</div>
+                        <img src="/no-image.svg" alt="Pas d'image" />
                       )}
                     </div>
                     <div className="vehicle-name">

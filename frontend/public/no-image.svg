@@ -1,0 +1,17 @@
+<svg width="300" height="200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a1a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2a2a2a;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="300" height="200" fill="url(#bg)"/>
+  <circle cx="150" cy="85" r="30" fill="#ff6600" opacity="0.3"/>
+  <path d="M 130 85 L 150 70 L 170 85 L 150 100 Z" fill="#ff6600"/>
+  <text x="150" y="130" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#ff6600" text-anchor="middle">
+    Image non disponible
+  </text>
+  <text x="150" y="150" font-family="Arial, sans-serif" font-size="12" fill="#999" text-anchor="middle">
+    Aucune photo du véhicule
+  </text>
+</svg>

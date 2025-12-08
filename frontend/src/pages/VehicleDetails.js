@@ -145,9 +145,10 @@ const VehicleDetails = () => {
               <img 
                 src={`http://localhost:5000${images[selectedImage]?.image_url}`} 
                 alt={vehicle.brand}
+                onError={(e) => { e.target.src = '/no-image.svg'; }}
               />
             ) : (
-              <div className="no-image">Pas d'image</div>
+              <img src="/no-image.svg" alt="Pas d'image" />
             )}
           </div>
           
@@ -160,6 +161,7 @@ const VehicleDetails = () => {
                   alt={`${vehicle.brand} ${index + 1}`}
                   className={selectedImage === index ? 'active' : ''}
                   onClick={() => setSelectedImage(index)}
+                  onError={(e) => { e.target.src = '/no-image.svg'; }}
                 />
               ))}
             </div>

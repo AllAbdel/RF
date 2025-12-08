@@ -27,6 +27,7 @@ app.use('/api/messages', require('./routes/messages'));
 app.use('/api', require('./routes/reviews'));
 app.use('/api/agency', require('./routes/agency'));
 app.use('/api/documents', require('./routes/documents'));
+app.use('/api/client-documents', require('./routes/clientDocuments'));
 
 // Socket.io pour la messagerie en temps réel
 const userSockets = new Map();

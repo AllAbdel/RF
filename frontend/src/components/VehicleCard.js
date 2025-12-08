@@ -6,7 +6,7 @@ const VehicleCard = ({ vehicle }) => {
   const navigate = useNavigate();
   const [imageError, setImageError] = useState(false);
 
-  const defaultImage = 'https://via.placeholder.com/300x200?text=Pas+d\'image';
+  const defaultImage = '/no-image.svg';
 
   const handleViewDetails = () => {
     navigate(`/vehicle/${vehicle.id}`);
@@ -48,7 +48,7 @@ const VehicleCard = ({ vehicle }) => {
     <div className="vehicle-card" onClick={handleViewDetails}>
       <div className="vehicle-image">
         <img
-          src={imageError ? defaultImage : `http://localhost:5000${vehicle.primary_image}` || defaultImage}
+          src={imageError || !vehicle.primary_image ? defaultImage : `http://localhost:5000${vehicle.primary_image}`}
           alt={`${vehicle.brand} ${vehicle.model}`}
           onError={() => setImageError(true)}
         />

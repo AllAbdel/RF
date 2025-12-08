@@ -89,6 +89,17 @@ export const documentAPI = {
   download: (documentId) => axios.get(`/documents/download/${documentId}`, { responseType: 'blob' })
 };
 
+// Documents clients (validation)
+export const clientDocumentAPI = {
+  upload: (formData) => axios.post('/client-documents/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  getMyDocuments: () => axios.get('/client-documents/my-documents'),
+  getPending: () => axios.get('/client-documents/pending'),
+  validate: (documentId, action, notes) => axios.put(`/client-documents/${documentId}/validate`, { action, notes }),
+  download: (documentId) => axios.get(`/client-documents/${documentId}/download`, { responseType: 'blob' })
+};
+
 const api = {
   vehicleAPI,
   reservationAPI,
@@ -96,7 +107,8 @@ const api = {
   reviewAPI,
   notificationAPI,
   agencyAPI,
-  documentAPI
+  documentAPI,
+  clientDocumentAPI
 };
 
 export default api;
