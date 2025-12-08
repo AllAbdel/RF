@@ -73,7 +73,8 @@
 .status-badge {
   position: absolute;
   top: 1rem;
-  right: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
   background: rgba(239, 68, 68, 0.95);
   backdrop-filter: var(--blur-sm);
   color: white;

@@ -293,11 +293,11 @@ const getAgencyStats = async (req, res) => {
 
     // Nombre de réservations par statut
     const [reservationStats] = await db.query(
-      `SELECT status, COUNT(*) as count
+      `SELECT r.status, COUNT(*) as count
        FROM reservations r
        JOIN vehicles v ON r.vehicle_id = v.id
        WHERE v.agency_id = ?
-       GROUP BY status`,
+       GROUP BY r.status`,
       [req.user.agency_id]
     );
 
@@ -513,20 +513,46 @@ const getDetailedStats = async (req, res) => {
     }
 
     const agency_id = req.user.agency_id;
+    const { period = 'all' } = req.query; // all, 12m, 6m, 3m, 1m
 
-    // 1. Revenus par mois (12 derniers mois)
+    // Calculer la date de début selon la période
+    let dateFilter = '';
+    let dateFilterWithAnd = '';
+    switch(period) {
+      case '12m':
+        dateFilter = 'AND r.start_date >= DATE_SUB(NOW(), INTERVAL 12 MONTH)';
+        dateFilterWithAnd = 'AND r.start_date >= DATE_SUB(NOW(), INTERVAL 12 MONTH)';
+        break;
+      case '6m':
+        dateFilter = 'AND r.start_date >= DATE_SUB(NOW(), INTERVAL 6 MONTH)';
+        dateFilterWithAnd = 'AND r.start_date >= DATE_SUB(NOW(), INTERVAL 6 MONTH)';
+        break;
+      case '3m':
+        dateFilter = 'AND r.start_date >= DATE_SUB(NOW(), INTERVAL 3 MONTH)';
+        dateFilterWithAnd = 'AND r.start_date >= DATE_SUB(NOW(), INTERVAL 3 MONTH)';
+        break;
+      case '1m':
+        dateFilter = 'AND r.start_date >= DATE_SUB(NOW(), INTERVAL 1 MONTH)';
+        dateFilterWithAnd = 'AND r.start_date >= DATE_SUB(NOW(), INTERVAL 1 MONTH)';
+        break;
+      default:
+        dateFilter = '';
+        dateFilterWithAnd = '';
+    }
+
+    // 1. Revenus par mois (toutes les données ou filtrées)
     const [monthlyRevenue] = await db.query(
       `SELECT 
         DATE_FORMAT(r.start_date, '%Y-%m') as month,
         SUM(r.total_price) as revenue,
-        COUNT(*) as bookings
+        COUNT(DISTINCT r.id) as bookings
        FROM reservations r
        JOIN vehicles v ON r.vehicle_id = v.id
        WHERE v.agency_id = ? 
          AND r.status IN ('completed', 'accepted')
+         ${dateFilter}
        GROUP BY DATE_FORMAT(r.start_date, '%Y-%m')
-       ORDER BY month DESC
-       LIMIT 12`,
+       ORDER BY month DESC`,
       [agency_id]
     );
 
@@ -536,7 +562,6 @@ const getDetailedStats = async (req, res) => {
         v.id,
         v.brand,
         v.model,
-        v.image,
         COUNT(DISTINCT r.id) as total_bookings,
         SUM(CASE WHEN r.status IN ('completed', 'accepted') THEN r.total_price ELSE 0 END) as total_revenue,
         AVG(CASE WHEN r.status IN ('completed', 'accepted') THEN r.total_price ELSE NULL END) as avg_booking_value,
@@ -546,7 +571,7 @@ const getDetailedStats = async (req, res) => {
        LEFT JOIN reservations r ON v.id = r.vehicle_id
        LEFT JOIN reviews rev ON v.id = rev.vehicle_id
        WHERE v.agency_id = ?
-       GROUP BY v.id, v.brand, v.model, v.image
+       GROUP BY v.id, v.brand, v.model
        ORDER BY total_revenue DESC`,
       [agency_id]
     );
@@ -554,13 +579,13 @@ const getDetailedStats = async (req, res) => {
     // 3. Statistiques des réservations par statut (détaillé)
     const [reservationBreakdown] = await db.query(
       `SELECT 
-        status,
+        r.status,
         COUNT(*) as count,
-        SUM(total_price) as total_value
+        SUM(r.total_price) as total_value
        FROM reservations r
        JOIN vehicles v ON r.vehicle_id = v.id
        WHERE v.agency_id = ?
-       GROUP BY status`,
+       GROUP BY r.status`,
       [agency_id]
     );
 
@@ -627,7 +652,7 @@ const getDetailedStats = async (req, res) => {
       [agency_id]
     );
 
-    // 8. Top 5 clients (toutes les réservations)
+    // 8. Top 5 clients (selon période)
     const [topClients] = await db.query(
       `SELECT 
         u.id,
@@ -640,9 +665,79 @@ const getDetailedStats = async (req, res) => {
        JOIN reservations r ON u.id = r.client_id
        JOIN vehicles v ON r.vehicle_id = v.id
        WHERE v.agency_id = ? AND r.status IN ('completed', 'accepted')
+         ${dateFilterWithAnd}
        GROUP BY u.id, u.first_name, u.last_name, u.email
        ORDER BY total_spent DESC
        LIMIT 5`,
+      [agency_id]
+    );
+
+    // 9. Durée moyenne de location et valeur moyenne
+    const [avgMetrics] = await db.query(
+      `SELECT 
+        AVG(DATEDIFF(r.end_date, r.start_date)) as avg_rental_days,
+        AVG(r.total_price) as avg_booking_value,
+        AVG(r.total_price / NULLIF(DATEDIFF(r.end_date, r.start_date), 0)) as avg_daily_rate
+       FROM reservations r
+       JOIN vehicles v ON r.vehicle_id = v.id
+       WHERE v.agency_id = ? 
+         AND r.status IN ('completed', 'accepted')
+         ${dateFilterWithAnd}`,
+      [agency_id]
+    );
+
+    // 10. Taux de conversion (acceptées vs refusées)
+    const [conversionRate] = await db.query(
+      `SELECT 
+        SUM(CASE WHEN r.status = 'accepted' THEN 1 ELSE 0 END) as accepted_count,
+        SUM(CASE WHEN r.status = 'rejected' THEN 1 ELSE 0 END) as rejected_count,
+        SUM(CASE WHEN r.status = 'pending' THEN 1 ELSE 0 END) as pending_count,
+        COUNT(*) as total_requests
+       FROM reservations r
+       JOIN vehicles v ON r.vehicle_id = v.id
+       WHERE v.agency_id = ?
+         ${dateFilterWithAnd}`,
+      [agency_id]
+    );
+
+    // 11. Répartition par jour de semaine
+    const [weekdayDistribution] = await db.query(
+      `SELECT 
+        DAYNAME(r.start_date) as day_name,
+        DAYOFWEEK(r.start_date) as day_num,
+        COUNT(*) as booking_count,
+        SUM(r.total_price) as revenue
+       FROM reservations r
+       JOIN vehicles v ON r.vehicle_id = v.id
+       WHERE v.agency_id = ? 
+         AND r.status IN ('completed', 'accepted')
+         ${dateFilterWithAnd}
+       GROUP BY day_name, day_num
+       ORDER BY day_num`,
+      [agency_id]
+    );
+
+    // 12. Réservations à venir (futures)
+    const [upcomingReservations] = await db.query(
+      `SELECT 
+        r.id,
+        r.start_date,
+        r.end_date,
+        r.total_price,
+        r.status,
+        v.brand,
+        v.model,
+        u.first_name,
+        u.last_name,
+        DATEDIFF(r.start_date, NOW()) as days_until_start
+       FROM reservations r
+       JOIN vehicles v ON r.vehicle_id = v.id
+       JOIN users u ON r.client_id = u.id
+       WHERE v.agency_id = ? 
+         AND r.start_date > NOW()
+         AND r.status IN ('accepted', 'pending')
+       ORDER BY r.start_date ASC
+       LIMIT 10`,
       [agency_id]
     );
 
@@ -653,6 +748,12 @@ const getDetailedStats = async (req, res) => {
 
     const occupancy = occupancyRate[0]?.total_days > 0 
       ? ((occupancyRate[0].days_booked / occupancyRate[0].total_days) * 100).toFixed(1)
+      : 0;
+
+    // Calculer taux de conversion
+    const conversionData = conversionRate[0] || {};
+    const acceptanceRate = conversionData.total_requests > 0
+      ? ((conversionData.accepted_count / conversionData.total_requests) * 100).toFixed(1)
       : 0;
 
     res.json({
@@ -666,11 +767,22 @@ const getDetailedStats = async (req, res) => {
       currentMonthRevenue: currentRevenue,
       lastMonthRevenue: lastRevenue,
       revenueChange: parseFloat(revenueChange),
-      topClients
+      topClients,
+      avgRentalDays: avgMetrics[0]?.avg_rental_days || 0,
+      avgBookingValue: avgMetrics[0]?.avg_booking_value || 0,
+      avgDailyRate: avgMetrics[0]?.avg_daily_rate || 0,
+      acceptanceRate: parseFloat(acceptanceRate),
+      conversionStats: conversionData,
+      weekdayDistribution,
+      upcomingReservations,
+      appliedPeriod: period
     });
 
   } catch (error) {
     console.error('Erreur statistiques détaillées:', error);
+    console.error('Message:', error.message);
+    console.error('SQL:', error.sql);
+    console.error('Stack:', error.stack);
     res.status(500).json({ error: 'Erreur lors de la récupération des statistiques' });
   }
 };

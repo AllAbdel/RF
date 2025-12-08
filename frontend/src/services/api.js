@@ -75,7 +75,7 @@ export const agencyAPI = {
   promoteMember: (userId) => axios.post(`/agency/members/${userId}/promote`),
   removeMember: (memberId) => axios.delete(`/agency/members/${memberId}`),
   getStats: () => axios.get('/agency/stats'),
-  getDetailedStats: () => axios.get('/agency/stats/detailed'),
+  getDetailedStats: (period = 'all') => axios.get('/agency/stats/detailed', { params: { period } }),
   updateInfo: (data) => axios.put('/agency/info', data)
 };
 
