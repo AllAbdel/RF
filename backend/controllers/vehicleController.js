@@ -157,8 +157,13 @@ const updateVehicle = async (req, res) => {
     const { id } = req.params;
     const {
       brand, model, seats, engine, tank_capacity, price_per_hour,
-      fuel_type, description, release_date, location, pickup_address, return_address, status
+      fuel_type, description, release_date, location, pickup_address, return_address, status,
+      imagesToDelete
     } = req.body;
+
+    console.log('🔄 Update vehicle:', id);
+    console.log('📝 Body:', req.body);
+    console.log('📁 Files:', req.files);
 
     // Vérifier que le véhicule appartient à l'agence
     const [vehicles] = await db.query(
@@ -168,6 +173,47 @@ const updateVehicle = async (req, res) => {
 
     if (vehicles.length === 0) {
       return res.status(404).json({ error: 'Véhicule non trouvé ou accès refusé' });
+    }
+
+    // Supprimer les images demandées
+    if (imagesToDelete) {
+      const imageIds = JSON.parse(imagesToDelete);
+      console.log('🗑️ Images à supprimer:', imageIds);
+      
+      if (imageIds.length > 0) {
+        // Récupérer les chemins des images avant suppression (pour supprimer les fichiers physiques)
+        const [imagesToRemove] = await db.query(
+          'SELECT image_url FROM vehicle_images WHERE id IN (?)',
+          [imageIds]
+        );
+        
+        // Supprimer de la base de données
+        await db.query('DELETE FROM vehicle_images WHERE id IN (?)', [imageIds]);
+        
+        // TODO: Supprimer les fichiers physiques
+        const fs = require('fs');
+        const path = require('path');
+        imagesToRemove.forEach(img => {
+          const filePath = path.join(__dirname, '..', img.image_url);
+          if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+            console.log('✅ Fichier supprimé:', filePath);
+          }
+        });
+      }
+    }
+
+    // Ajouter les nouvelles images
+    if (req.files && req.files.length > 0) {
+      const imageFiles = req.files.filter(f => f.fieldname === 'images');
+      console.log('➕ Nouvelles images:', imageFiles.length);
+      
+      for (const file of imageFiles) {
+        await db.query(
+          'INSERT INTO vehicle_images (vehicle_id, image_url) VALUES (?, ?)',
+          [id, `/uploads/vehicles/${file.filename}`]
+        );
+      }
     }
 
     // Récupérer le nouveau fichier PDF s'il existe
@@ -189,9 +235,10 @@ const updateVehicle = async (req, res) => {
        fuel_type, description, termsPdfPath, release_date, location, pickup_address, return_address, status, id]
     );
 
+    console.log('✅ Véhicule mis à jour avec succès');
     res.json({ message: 'Véhicule mis à jour avec succès' });
   } catch (error) {
-    console.error('Erreur mise à jour véhicule:', error);
+    console.error('❌ Erreur mise à jour véhicule:', error);
     res.status(500).json({ error: 'Erreur lors de la mise à jour du véhicule' });
   }
 };
@@ -230,6 +277,15 @@ const getAgencyVehicles = async (req, res) => {
        ORDER BY v.created_at DESC`,
       [req.user.agency_id]
     );
+
+    // Récupérer toutes les images pour chaque véhicule
+    for (let vehicle of vehicles) {
+      const [images] = await db.query(
+        'SELECT id, image_url, is_primary FROM vehicle_images WHERE vehicle_id = ? ORDER BY is_primary DESC, id ASC',
+        [vehicle.id]
+      );
+      vehicle.images = images;
+    }
 
     res.json({ vehicles });
   } catch (error) {

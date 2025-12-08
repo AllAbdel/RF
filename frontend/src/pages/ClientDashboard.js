@@ -114,6 +114,12 @@ const ClientDashboard = () => {
 
       <nav className="dashboard-nav">
         <button
+          className="nav-btn"
+          onClick={() => navigate('/')}
+        >
+          🏠 Accueil
+        </button>
+        <button
           className={`nav-btn ${activeTab === 'search' ? 'active' : ''}`}
           onClick={() => setActiveTab('search')}
         >

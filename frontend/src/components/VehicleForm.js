@@ -18,6 +18,8 @@ const VehicleForm = ({ vehicle, onSubmit, onCancel }) => {
     status: 'available'
   });
   const [images, setImages] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
+  const [imagesToDelete, setImagesToDelete] = useState([]);
   const [termsPdf, setTermsPdf] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -38,6 +40,11 @@ const VehicleForm = ({ vehicle, onSubmit, onCancel }) => {
         return_address: vehicle.return_address || '',
         status: vehicle.status || 'available'
       });
+      
+      // Charger les images existantes
+      if (vehicle.images && vehicle.images.length > 0) {
+        setExistingImages(vehicle.images);
+      }
     }
   }, [vehicle]);
 
@@ -50,8 +57,9 @@ const VehicleForm = ({ vehicle, onSubmit, onCancel }) => {
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
-    if (files.length + images.length > 10) {
-      alert('Vous ne pouvez télécharger que 10 images maximum');
+    const totalImages = existingImages.length + images.length + files.length;
+    if (totalImages > 10) {
+      alert('Vous ne pouvez avoir que 10 images maximum au total');
       return;
     }
     setImages([...images, ...files]);
@@ -59,6 +67,11 @@ const VehicleForm = ({ vehicle, onSubmit, onCancel }) => {
 
   const removeImage = (index) => {
     setImages(images.filter((_, i) => i !== index));
+  };
+
+  const removeExistingImage = (imageId) => {
+    setExistingImages(existingImages.filter(img => img.id !== imageId));
+    setImagesToDelete([...imagesToDelete, imageId]);
   };
 
   const handlePdfChange = (e) => {
@@ -92,6 +105,11 @@ const VehicleForm = ({ vehicle, onSubmit, onCancel }) => {
     images.forEach(image => {
       submitData.append('images', image);
     });
+
+    // Ajouter les IDs des images à supprimer en mode édition
+    if (vehicle && imagesToDelete.length > 0) {
+      submitData.append('imagesToDelete', JSON.stringify(imagesToDelete));
+    }
 
     // Ajouter le PDF des conditions si présent
     if (termsPdf) {
@@ -325,24 +343,51 @@ const VehicleForm = ({ vehicle, onSubmit, onCancel }) => {
           </div>
         </div>
 
-        {!vehicle && (
-          <div className="form-section">
-            <h3>Images (max 10)</h3>
-            <div className="image-upload">
-              <input
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleImageChange}
-                id="image-input"
-              />
-              <label htmlFor="image-input" className="upload-label">
-                Choisir des images
-              </label>
-              <span className="image-count">{images.length}/10 images sélectionnées</span>
+        <div className="form-section">
+          <h3>Images (max 10)</h3>
+          
+          {/* Images existantes */}
+          {vehicle && existingImages.length > 0 && (
+            <div className="existing-images">
+              <h4>Images actuelles</h4>
+              <div className="image-preview">
+                {existingImages.map((image) => (
+                  <div key={image.id} className="preview-item">
+                    <img src={`http://localhost:5000${image.image_url}`} alt="Existing" />
+                    <button
+                      type="button"
+                      className="remove-img-btn"
+                      onClick={() => removeExistingImage(image.id)}
+                    >
+                      Supprimer
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
+          )}
 
-            {images.length > 0 && (
+          {/* Upload de nouvelles images */}
+          <div className="image-upload">
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleImageChange}
+              id="image-input"
+            />
+            <label htmlFor="image-input" className="upload-label">
+              {vehicle ? 'Ajouter des images' : 'Choisir des images'}
+            </label>
+            <span className="image-count">
+              {existingImages.length + images.length}/10 images
+            </span>
+          </div>
+
+          {/* Prévisualisation des nouvelles images */}
+          {images.length > 0 && (
+            <div className="new-images">
+              <h4>Nouvelles images</h4>
               <div className="image-preview">
                 {images.map((image, index) => (
                   <div key={index} className="preview-item">
@@ -357,9 +402,9 @@ const VehicleForm = ({ vehicle, onSubmit, onCancel }) => {
                   </div>
                 ))}
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
 
         <div className="form-actions">
           <button type="button" className="cancel-btn" onClick={onCancel}>

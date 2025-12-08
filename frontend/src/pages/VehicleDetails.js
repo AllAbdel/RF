@@ -232,19 +232,23 @@ const VehicleDetails = () => {
             </div>
           )}
 
-          {vehicle.rental_conditions && (
+          {(vehicle.rental_conditions || vehicle.terms_pdf) && (
             <div className="rental-conditions">
               <h3>📋 Conditions de location de l'agence</h3>
-              <div className="conditions-content">
-                {vehicle.rental_conditions.split('\n').map((condition, index) => (
-                  condition.trim() && (
-                    <div key={index} className="condition-item">
-                      <span className="condition-bullet">✓</span>
-                      <span className="condition-text">{condition.trim()}</span>
-                    </div>
-                  )
-                ))}
-              </div>
+              
+              {vehicle.rental_conditions && (
+                <div className="conditions-content">
+                  {vehicle.rental_conditions.split('\n').map((condition, index) => (
+                    condition.trim() && (
+                      <div key={index} className="condition-item">
+                        <span className="condition-bullet">✓</span>
+                        <span className="condition-text">{condition.trim()}</span>
+                      </div>
+                    )
+                  ))}
+                </div>
+              )}
+              
               {vehicle.terms_pdf && (
                 <div className="pdf-download">
                   <a 

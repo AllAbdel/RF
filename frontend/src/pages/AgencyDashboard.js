@@ -111,6 +111,12 @@ const AgencyDashboard = () => {
 
       <nav className="dashboard-nav">
         <button
+          className="nav-btn"
+          onClick={() => navigate('/')}
+        >
+          🏠 Accueil
+        </button>
+        <button
           className={`nav-btn ${activeTab === 'vehicles' ? 'active' : ''}`}
           onClick={() => setActiveTab('vehicles')}
         >

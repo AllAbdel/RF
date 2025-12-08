@@ -113,6 +113,20 @@
   border: 1px solid var(--border-secondary);
 }
 
+.existing-images,
+.new-images {
+  margin-bottom: 1.5rem;
+}
+
+.existing-images h4,
+.new-images h4 {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-secondary);
+}
+
 .image-preview {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));

@@ -26,7 +26,9 @@ export const vehicleAPI = {
   create: (formData) => axios.post('/vehicles', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),
-  update: (id, data) => axios.put(`/vehicles/${id}`, data),
+  update: (id, data) => axios.put(`/vehicles/${id}`, data, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
   delete: (id) => axios.delete(`/vehicles/${id}`),
   checkAvailability: (id, params) => axios.get(`/vehicles/${id}/availability`, { params })
 };
