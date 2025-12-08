@@ -14,10 +14,28 @@ const ContractSignature = () => {
   const [loading, setLoading] = useState(true);
   const [signing, setSigning] = useState(false);
   const [error, setError] = useState(null);
+  const [hasDrawn, setHasDrawn] = useState(false);
 
   useEffect(() => {
-    initializeSignaturePad();
+    // Attendre que le DOM soit complètement rendu
+    const timer = setTimeout(() => {
+      initializeSignaturePad();
+    }, 100);
+
+    // Gérer le redimensionnement
+    const handleResize = () => {
+      if (canvasRef.current && signaturePadRef.current) {
+        const data = signaturePadRef.current.toData();
+        initializeSignaturePad();
+        signaturePadRef.current.fromData(data);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+
     return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', handleResize);
       if (signaturePadRef.current) {
         signaturePadRef.current.off();
       }
@@ -25,19 +43,39 @@ const ContractSignature = () => {
   }, []);
 
   const initializeSignaturePad = () => {
-    if (canvasRef.current && !signaturePadRef.current) {
+    if (canvasRef.current) {
       const canvas = canvasRef.current;
       const container = canvas.parentElement;
       
-      // Ajuster la taille du canvas
-      canvas.width = container.offsetWidth;
-      canvas.height = 200;
+      // Calculer les dimensions en tenant compte du ratio de pixels
+      const ratio = Math.max(window.devicePixelRatio || 1, 1);
+      const rect = container.getBoundingClientRect();
+      
+      canvas.width = rect.width * ratio;
+      canvas.height = 200 * ratio;
+      canvas.style.width = `${rect.width}px`;
+      canvas.style.height = '200px';
+      
+      const ctx = canvas.getContext('2d');
+      ctx.scale(ratio, ratio);
+      
+      // Créer ou recréer le SignaturePad
+      if (signaturePadRef.current) {
+        signaturePadRef.current.off();
+      }
       
       signaturePadRef.current = new SignaturePad(canvas, {
         backgroundColor: 'rgb(255, 255, 255)',
         penColor: 'rgb(0, 0, 0)',
         minWidth: 1,
         maxWidth: 2.5,
+        throttle: 16,
+      });
+
+      // Écouter les événements de dessin
+      signaturePadRef.current.addEventListener('beginStroke', () => {
+        setHasDrawn(true);
+        setError(null);
       });
     }
   };
@@ -45,6 +83,7 @@ const ContractSignature = () => {
   const clearSignature = () => {
     if (signaturePadRef.current) {
       signaturePadRef.current.clear();
+      setHasDrawn(false);
     }
   };
 
@@ -88,11 +127,13 @@ const ContractSignature = () => {
 
         <div className="signature-section">
           <label className="signature-label">Votre signature :</label>
-          <div className="signature-canvas-container">
+          <div className={`signature-canvas-container ${hasDrawn ? 'has-signature' : ''}`}>
             <canvas ref={canvasRef} className="signature-canvas"></canvas>
           </div>
           <div className="signature-hint">
-            Signez avec votre souris, trackpad ou doigt (sur mobile)
+            {hasDrawn 
+              ? '✓ Signature détectée - Vous pouvez valider ou effacer' 
+              : 'Signez avec votre souris, trackpad ou doigt (sur mobile)'}
           </div>
         </div>
 

@@ -10,4 +10,4 @@ x Génération des factures éléctroniques, reçu et de contracts (charger un f
 
 x Amélioerer le dashboard avec pleins de statistiques (historique ,revenus, factures etc..)
 
-- Pouvoir vérifier les documents rentrés par les clients (permis de conduire pour voir s'il est valide, et carte d'identité, pour voir si elle est fausse)
+? Pouvoir vérifier les documents rentrés par les clients (permis de conduire pour voir s'il est valide, et carte d'identité, pour voir si elle est fausse)

@@ -42,8 +42,8 @@ const HomePage = () => {
 
   const getTopRatedVehicles = () => {
     return [...filteredVehicles]
-      .filter(v => v.avg_rating > 0)
-      .sort((a, b) => (b.avg_rating || 0) - (a.avg_rating || 0))
+      .filter(v => v.avg_rating && parseFloat(v.avg_rating) > 0)
+      .sort((a, b) => (parseFloat(b.avg_rating) || 0) - (parseFloat(a.avg_rating) || 0))
       .slice(0, 8);
   };
 
@@ -97,7 +97,7 @@ const HomePage = () => {
           filtered.sort((a, b) => b.price_per_hour - a.price_per_hour);
           break;
         case 'rating':
-          filtered.sort((a, b) => (b.avg_rating || 0) - (a.avg_rating || 0));
+          filtered.sort((a, b) => (parseFloat(b.avg_rating) || 0) - (parseFloat(a.avg_rating) || 0));
           break;
         case 'recent':
         default:
@@ -217,7 +217,7 @@ const HomePage = () => {
                       key={vehicle.id}
                       vehicle={vehicle}
                       onClick={() => handleVehicleClick(vehicle.id)}
-                      badge={vehicle.avg_rating ? `⭐ ${vehicle.avg_rating.toFixed(1)}` : null}
+                      badge={vehicle.avg_rating ? `⭐ ${parseFloat(vehicle.avg_rating).toFixed(1)}` : null}
                     />
                   ))}
                 </div>

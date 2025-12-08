@@ -11,6 +11,14 @@ class DocumentValidationService {
     const score = { total: 0, details: {} };
     
     try {
+      // Vérifier que le fichier existe
+      try {
+        await fs.access(filePath);
+      } catch (err) {
+        console.error(`❌ Fichier non trouvé: ${filePath}`);
+        throw new Error(`Fichier non accessible: ${filePath}`);
+      }
+
       const metadata = await sharp(filePath).metadata();
       const stats = await sharp(filePath).stats();
       

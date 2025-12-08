@@ -53,11 +53,15 @@ const uploadDocuments = async (req, res) => {
       const filePath = file.path;
       
       console.log(`📄 Analyse de ${docType}...`);
+      console.log(`   Fichier: ${file.originalname}`);
+      console.log(`   Taille: ${(file.size / 1024).toFixed(2)} KB`);
+      console.log(`   Chemin: ${filePath}`);
       
       try {
         // 1. Analyse technique
+        console.log(`   ⏳ Analyse technique en cours...`);
         const technicalAnalysis = await documentValidationService.analyzeTechnicalQuality(filePath);
-        console.log(`✅ Score technique: ${technicalAnalysis.score}/100`);
+        console.log(`   ✅ Score technique: ${technicalAnalysis.score}/100`);
         
         // 2. Détection d'édition
         const isEdited = await documentValidationService.detectEditing(filePath);
@@ -98,52 +102,56 @@ const uploadDocuments = async (req, res) => {
         
         console.log(`✅ Score format: ${formatValidation.total}/100`);
       
-      // Préparer les métadonnées
-      const metadata = {
-        hash: imageHash,
-        ...technicalAnalysis.details,
-        ocrConfidence: ocrResult.confidence
-      };
+        // Préparer les métadonnées
+        const metadata = {
+          hash: imageHash,
+          ...technicalAnalysis.details,
+          ocrConfidence: ocrResult.confidence
+        };
       
-      // Insérer dans la BDD
-      const [result] = await db.query(
-        `INSERT INTO client_documents 
-        (user_id, reservation_id, document_type, file_path, original_filename, 
-         file_size, mime_type, extracted_data, image_metadata, technical_score, 
-         format_score, is_screenshot, is_edited, is_duplicate, validation_status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
-          userId,
-          reservation_id || null,
-          docType,
-          filePath,
-          file.originalname,
-          file.size,
-          file.mimetype,
-          JSON.stringify(formatValidation.data),
-          JSON.stringify(metadata),
-          technicalAnalysis.score,
-          formatValidation.total,
-          technicalAnalysis.details.isScreenshot || false,
-          isEdited,
-          isDuplicate,
-          'pending'
-        ]
-      );
+        // Insérer dans la BDD
+        const [result] = await db.query(
+          `INSERT INTO client_documents 
+          (user_id, reservation_id, document_type, file_path, original_filename, 
+           file_size, mime_type, extracted_data, image_metadata, technical_score, 
+           format_score, is_screenshot, is_edited, is_duplicate, validation_status)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            userId,
+            reservation_id || null,
+            docType,
+            filePath,
+            file.originalname,
+            file.size,
+            file.mimetype,
+            JSON.stringify(formatValidation.data),
+            JSON.stringify(metadata),
+            technicalAnalysis.score,
+            formatValidation.total,
+            technicalAnalysis.details.isScreenshot || false,
+            isEdited,
+            isDuplicate,
+            'pending'
+          ]
+        );
       
-      documents.push({
-        id: result.insertId,
-        type: docType,
-        technicalScore: technicalAnalysis.score,
-        formatScore: formatValidation.total,
-        flags: {
-          isScreenshot: technicalAnalysis.details.isScreenshot,
-          isEdited,
-          isDuplicate
-        }
-      });
+        documents.push({
+          id: result.insertId,
+          type: docType,
+          technicalScore: technicalAnalysis.score,
+          formatScore: formatValidation.total,
+          flags: {
+            isScreenshot: technicalAnalysis.details.isScreenshot,
+            isEdited,
+            isDuplicate
+          }
+        });
       
-      analysisResults[docType] = formatValidation.data;
+        analysisResults[docType] = formatValidation.data;
+      } catch (docError) {
+        console.error(`❌ Erreur analyse ${docType}:`, docError);
+        // Continuer avec le document suivant
+      }
     }
     
     // 7. Vérifier la cohérence si on a les deux documents
