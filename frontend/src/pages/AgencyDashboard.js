@@ -9,6 +9,7 @@ import AgencyStats from '../components/AgencyStats';
 import AgencyJoinRequests from '../components/AgencyJoinRequests';
 import AgencySettings from '../components/AgencySettings';
 import DocumentValidation from '../components/DocumentValidation';
+import AgencyProfile from '../components/AgencyProfile';
 import '../styles/Agency.css';
 import { useNavigate } from 'react-router-dom';
 
@@ -153,6 +154,12 @@ const AgencyDashboard = () => {
             >
               Paramètres
             </button>
+            <button
+              className={`nav-btn ${activeTab === 'profile' ? 'active' : ''}`}
+              onClick={() => setActiveTab('profile')}
+            >
+              ⚙️ Profil
+            </button>
           </>
         )}
         <button
@@ -232,6 +239,10 @@ const AgencyDashboard = () => {
 
             {activeTab === 'settings' && (user?.role === 'admin' || user?.role === 'super_admin') && (
               <AgencySettings />
+            )}
+
+            {activeTab === 'profile' && (user?.role === 'admin' || user?.role === 'super_admin') && (
+              <AgencyProfile />
             )}
           </>
         )}

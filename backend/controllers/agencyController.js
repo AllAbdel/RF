@@ -277,7 +277,10 @@ const getAgencyStats = async (req, res) => {
 
     // Informations de l'agence
     const [agency] = await db.query(
-      'SELECT id, name, email, phone, address, rental_conditions FROM agencies WHERE id = ?',
+      `SELECT id, name, email, phone, address, logo, description, 
+              rental_conditions, rental_conditions_pdf,
+              payment_link_paypal, payment_link_stripe, payment_link_other, website
+       FROM agencies WHERE id = ?`,
       [req.user.agency_id]
     );
 
@@ -347,10 +350,16 @@ const getAgencyStats = async (req, res) => {
 
 const updateAgencyInfo = async (req, res) => {
   try {
-    const { name, phone, address, rental_conditions } = req.body;
+    console.log('🔍 Update agency info - User:', req.user?.email, 'Agency ID:', req.user?.agency_id);
+    console.log('📝 Body:', req.body);
+    console.log('📁 Files:', req.files);
+
+    const { name, phone, address, email, rental_conditions, description, 
+            payment_link_paypal, payment_link_stripe, payment_link_other, website } = req.body;
 
     // Vérifier que l'utilisateur a une agence
     if (!req.user.agency_id) {
+      console.error('❌ Utilisateur sans agence');
       return res.status(400).json({ error: 'Utilisateur non associé à une agence' });
     }
 
@@ -362,6 +371,10 @@ const updateAgencyInfo = async (req, res) => {
       updates.push('name = ?');
       values.push(name);
     }
+    if (email !== undefined) {
+      updates.push('email = ?');
+      values.push(email);
+    }
     if (phone !== undefined) {
       updates.push('phone = ?');
       values.push(phone);
@@ -370,16 +383,54 @@ const updateAgencyInfo = async (req, res) => {
       updates.push('address = ?');
       values.push(address);
     }
+    if (description !== undefined) {
+      updates.push('description = ?');
+      values.push(description);
+    }
     if (rental_conditions !== undefined) {
       updates.push('rental_conditions = ?');
       values.push(rental_conditions);
     }
+    if (payment_link_paypal !== undefined) {
+      updates.push('payment_link_paypal = ?');
+      values.push(payment_link_paypal);
+    }
+    if (payment_link_stripe !== undefined) {
+      updates.push('payment_link_stripe = ?');
+      values.push(payment_link_stripe);
+    }
+    if (payment_link_other !== undefined) {
+      updates.push('payment_link_other = ?');
+      values.push(payment_link_other);
+    }
+    if (website !== undefined) {
+      updates.push('website = ?');
+      values.push(website);
+    }
+
+    // Gérer les fichiers uploadés (logo et PDF)
+    if (req.files) {
+      // Avec multer.fields(), req.files est un objet avec les noms de champs comme clés
+      if (req.files.logo && req.files.logo[0]) {
+        updates.push('logo = ?');
+        values.push(`/uploads/agencies/logos/${req.files.logo[0].filename}`);
+      }
+
+      if (req.files.rental_conditions_pdf && req.files.rental_conditions_pdf[0]) {
+        updates.push('rental_conditions_pdf = ?');
+        values.push(`/uploads/agencies/terms/${req.files.rental_conditions_pdf[0].filename}`);
+      }
+    }
 
     if (updates.length === 0) {
+      console.error('❌ Aucune donnée à mettre à jour');
       return res.status(400).json({ error: 'Aucune donnée à mettre à jour' });
     }
 
     values.push(req.user.agency_id);
+    
+    console.log('✅ SQL:', `UPDATE agencies SET ${updates.join(', ')} WHERE id = ?`);
+    console.log('✅ Values:', values);
 
     await db.query(
       `UPDATE agencies SET ${updates.join(', ')} WHERE id = ?`,

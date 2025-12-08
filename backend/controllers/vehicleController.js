@@ -112,21 +112,33 @@ const createVehicle = async (req, res) => {
       fuel_type, description, release_date, location, pickup_address, return_address
     } = req.body;
 
+    // Récupérer le fichier PDF s'il existe
+    let termsPdfPath = null;
+    if (req.files) {
+      const termsPdfFile = req.files.find(f => f.fieldname === 'terms_pdf');
+      if (termsPdfFile) {
+        termsPdfPath = `/uploads/vehicles/terms/${termsPdfFile.filename}`;
+      }
+    }
+
     const [result] = await db.query(
       `INSERT INTO vehicles (agency_id, brand, model, seats, engine, tank_capacity, 
-       price_per_hour, fuel_type, description, release_date, location, pickup_address, return_address)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       price_per_hour, fuel_type, description, terms_pdf, release_date, location, pickup_address, return_address)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [req.user.agency_id, brand, model, seats, engine, tank_capacity, 
-       price_per_hour, fuel_type, description, release_date, location, pickup_address, return_address]
+       price_per_hour, fuel_type, description, termsPdfPath, release_date, location, pickup_address, return_address]
     );
 
     // Gérer les images si elles sont uploadées
     if (req.files && req.files.length > 0) {
       for (let i = 0; i < req.files.length; i++) {
-        await db.query(
-          'INSERT INTO vehicle_images (vehicle_id, image_url, is_primary) VALUES (?, ?, ?)',
-          [result.insertId, `/uploads/vehicles/${req.files[i].filename}`, i === 0]
-        );
+        // Ignorer le fichier PDF dans le traitement des images
+        if (req.files[i].fieldname === 'images') {
+          await db.query(
+            'INSERT INTO vehicle_images (vehicle_id, image_url, is_primary) VALUES (?, ?, ?)',
+            [result.insertId, `/uploads/vehicles/${req.files[i].filename}`, i === 0]
+          );
+        }
       }
     }
 
@@ -158,13 +170,23 @@ const updateVehicle = async (req, res) => {
       return res.status(404).json({ error: 'Véhicule non trouvé ou accès refusé' });
     }
 
+    // Récupérer le nouveau fichier PDF s'il existe
+    let termsPdfPath = vehicles[0].terms_pdf; // Conserver l'ancien si pas de nouveau
+    if (req.files) {
+      const termsPdfFile = req.files.find(f => f.fieldname === 'terms_pdf');
+      if (termsPdfFile) {
+        termsPdfPath = `/uploads/vehicles/terms/${termsPdfFile.filename}`;
+        // TODO: Supprimer l'ancien PDF si nécessaire
+      }
+    }
+
     await db.query(
       `UPDATE vehicles SET brand = ?, model = ?, seats = ?, engine = ?, 
-       tank_capacity = ?, price_per_hour = ?, fuel_type = ?, description = ?, 
+       tank_capacity = ?, price_per_hour = ?, fuel_type = ?, description = ?, terms_pdf = ?,
        release_date = ?, location = ?, pickup_address = ?, return_address = ?, status = ?
        WHERE id = ?`,
       [brand, model, seats, engine, tank_capacity, price_per_hour, 
-       fuel_type, description, release_date, location, pickup_address, return_address, status, id]
+       fuel_type, description, termsPdfPath, release_date, location, pickup_address, return_address, status, id]
     );
 
     res.json({ message: 'Véhicule mis à jour avec succès' });

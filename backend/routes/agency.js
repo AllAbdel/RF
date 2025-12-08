@@ -18,6 +18,7 @@ const {
   promoteMember
 } = require('../controllers/agencyController');
 const { authMiddleware, isAgencyMember, isAgencyAdmin, isSuperAdmin } = require('../middleware/auth');
+const { uploadAgencyFiles } = require('../middleware/upload');
 
 // Routes publiques pour rejoindre une agence
 router.get('/search', searchAgencies);
@@ -34,7 +35,10 @@ router.post('/members/:userId/promote', authMiddleware, isSuperAdmin, promoteMem
 router.delete('/members/:member_id', authMiddleware, isAgencyAdmin, removeMember);
 router.get('/stats', authMiddleware, isAgencyMember, getAgencyStats);
 router.get('/stats/detailed', authMiddleware, isAgencyMember, getDetailedStats);
-router.put('/info', authMiddleware, isAgencyAdmin, updateAgencyInfo);
+router.put('/info', authMiddleware, isAgencyAdmin, uploadAgencyFiles.fields([
+  { name: 'logo', maxCount: 1 },
+  { name: 'rental_conditions_pdf', maxCount: 1 }
+]), updateAgencyInfo);
 
 // Routes d'invitation (publiques)
 router.get('/invitation/:token/verify', verifyInvitation);

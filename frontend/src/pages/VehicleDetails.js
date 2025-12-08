@@ -245,6 +245,18 @@ const VehicleDetails = () => {
                   )
                 ))}
               </div>
+              {vehicle.terms_pdf && (
+                <div className="pdf-download">
+                  <a 
+                    href={`http://localhost:5000${vehicle.terms_pdf}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="download-pdf-btn"
+                  >
+                    📄 Télécharger les conditions (PDF)
+                  </a>
+                </div>
+              )}
             </div>
           )}
 

@@ -460,6 +460,29 @@
   flex: 1;
 }
 
+.pdf-download {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 2px dashed var(--border-secondary);
+}
+
+.download-pdf-btn {
+  display: inline-block;
+  background: var(--accent-gradient);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  text-decoration: none;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-accent);
+}
+
+.download-pdf-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
 .vehicle-actions {
   content: '';
 }

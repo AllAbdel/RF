@@ -18,6 +18,7 @@ const VehicleForm = ({ vehicle, onSubmit, onCancel }) => {
     status: 'available'
   });
   const [images, setImages] = useState([]);
+  const [termsPdf, setTermsPdf] = useState(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -60,6 +61,25 @@ const VehicleForm = ({ vehicle, onSubmit, onCancel }) => {
     setImages(images.filter((_, i) => i !== index));
   };
 
+  const handlePdfChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.type !== 'application/pdf') {
+        alert('Seuls les fichiers PDF sont autorisés');
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        alert('Le fichier PDF ne doit pas dépasser 10 MB');
+        return;
+      }
+      setTermsPdf(file);
+    }
+  };
+
+  const removePdf = () => {
+    setTermsPdf(null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -72,6 +92,11 @@ const VehicleForm = ({ vehicle, onSubmit, onCancel }) => {
     images.forEach(image => {
       submitData.append('images', image);
     });
+
+    // Ajouter le PDF des conditions si présent
+    if (termsPdf) {
+      submitData.append('terms_pdf', termsPdf);
+    }
 
     try {
       await onSubmit(submitData);
@@ -266,6 +291,37 @@ const VehicleForm = ({ vehicle, onSubmit, onCancel }) => {
               rows="4"
               placeholder="Décrivez le véhicule..."
             />
+          </div>
+
+          <div className="form-group">
+            <label>Conditions d'utilisation (PDF optionnel)</label>
+            <p className="form-hint">
+              Vous pouvez uploader un PDF personnalisé avec vos conditions d'utilisation
+            </p>
+            <div className="pdf-upload">
+              <input
+                type="file"
+                accept="application/pdf"
+                onChange={handlePdfChange}
+                id="pdf-input"
+                style={{ display: 'none' }}
+              />
+              <label htmlFor="pdf-input" className="upload-label">
+                {termsPdf ? '✓ PDF sélectionné' : 'Choisir un PDF'}
+              </label>
+              {termsPdf && (
+                <div className="pdf-preview">
+                  <span className="pdf-name">{termsPdf.name}</span>
+                  <button
+                    type="button"
+                    className="remove-pdf-btn"
+                    onClick={removePdf}
+                  >
+                    Supprimer
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
