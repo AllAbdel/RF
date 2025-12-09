@@ -14,6 +14,7 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token'));
+  const [refreshToken, setRefreshToken] = useState(localStorage.getItem('refreshToken'));
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -38,19 +39,51 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = async (email, password, userType) => {
+  const login = async (email, password, userType, twoFactorToken = null) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
+      const payload = {
         email,
         password,
         user_type: userType
-      });
+      };
       
-      const { token, user } = response.data;
-      localStorage.setItem('token', token);
-      setToken(token);
+      // Ajouter le code 2FA si fourni
+      if (twoFactorToken) {
+        payload.twoFactorToken = twoFactorToken;
+      }
+      
+      const response = await axios.post('http://localhost:5000/api/auth/login', payload);
+      
+      // Cas 1: 2FA requis
+      if (response.data.requires2FA) {
+        return { 
+          success: false, 
+          requires2FA: true,
+          message: 'Code 2FA requis'
+        };
+      }
+      
+      // Cas 2: Email non vérifié
+      if (response.data.emailVerificationRequired) {
+        return {
+          success: false,
+          emailVerificationRequired: true,
+          message: 'Veuillez vérifier votre email avant de vous connecter'
+        };
+      }
+      
+      // Cas 3: Connexion réussie
+      const { accessToken, refreshToken: newRefreshToken, user } = response.data;
+      
+      // Sauvegarder les tokens
+      localStorage.setItem('token', accessToken);
+      localStorage.setItem('refreshToken', newRefreshToken);
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      setToken(accessToken);
+      setRefreshToken(newRefreshToken);
       setUser(user);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
       
       return { success: true };
     } catch (error) {
@@ -67,11 +100,25 @@ export const AuthProvider = ({ children }) => {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
-      const { token, user } = response.data;
-      localStorage.setItem('token', token);
-      setToken(token);
+      // Si vérification email requise
+      if (response.data.emailVerificationRequired) {
+        return {
+          success: true,
+          emailVerificationRequired: true,
+          message: 'Veuillez vérifier votre email'
+        };
+      }
+      
+      const { accessToken, refreshToken: newRefreshToken, user } = response.data;
+      
+      localStorage.setItem('token', accessToken);
+      localStorage.setItem('refreshToken', newRefreshToken);
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      setToken(accessToken);
+      setRefreshToken(newRefreshToken);
       setUser(user);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
       
       return { success: true };
     } catch (error) {
@@ -82,11 +129,25 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    setToken(null);
-    setUser(null);
-    delete axios.defaults.headers.common['Authorization'];
+  const logout = async () => {
+    try {
+      // Appeler le logout serveur pour blacklister le token
+      if (token) {
+        await axios.post('http://localhost:5000/api/auth/logout');
+      }
+    } catch (error) {
+      console.error('Erreur logout serveur:', error);
+    } finally {
+      // Nettoyer le localStorage
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      
+      setToken(null);
+      setRefreshToken(null);
+      setUser(null);
+      delete axios.defaults.headers.common['Authorization'];
+    }
   };
 
   const value = {

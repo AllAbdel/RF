@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Tests API Sécurité - RentFlow</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 { font-size: 2em; margin-bottom: 10px; }
+        .content { padding: 30px; }
+        .test-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #667eea;
+        }
+        .test-section h3 { color: #667eea; margin-bottom: 15px; }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: transform 0.2s;
+            margin: 5px;
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
+        button:active { transform: translateY(0); }
+        .result {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { background: #d4edda; color: #155724; border-left: 5px solid #28a745; }
+        .error { background: #f8d7da; color: #721c24; border-left: 5px solid #dc3545; }
+        .info { background: #d1ecf1; color: #0c5460; border-left: 5px solid #17a2b8; }
+        pre { white-space: pre-wrap; word-wrap: break-word; }
+        .token-display { 
+            background: #fff3cd; 
+            padding: 10px; 
+            border-radius: 5px; 
+            margin: 10px 0;
+            word-break: break-all;
+        }
+        .loading { display: none; color: #667eea; margin-left: 10px; }
+        .loading.active { display: inline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Tests API Sécurité</h1>
+            <p>RentFlow V2 - Système d'authentification renforcé</p>
+        </div>
+        
+        <div class="content">
+            <!-- Test 1: Inscription valide -->
+            <div class="test-section">
+                <h3>✅ Test 1: Inscription (Mot de passe VALIDE)</h3>
+                <p><strong>Mot de passe:</strong> Test1234!@# (8+ chars, maj, min, chiffre, spécial)</p>
+                <button onclick="testRegister()">Tester Inscription</button>
+                <span class="loading" id="loading1">⏳ En cours...</span>
+                <div id="result1"></div>
+            </div>
+
+            <!-- Test 2: Inscription invalide -->
+            <div class="test-section">
+                <h3>❌ Test 2: Inscription (Mot de passe FAIBLE)</h3>
+                <p><strong>Mot de passe:</strong> weak (trop simple)</p>
+                <button onclick="testWeakPassword()">Tester Mot de Passe Faible</button>
+                <span class="loading" id="loading2">⏳ En cours...</span>
+                <div id="result2"></div>
+            </div>
+
+            <!-- Test 3: Connexion -->
+            <div class="test-section">
+                <h3>🔑 Test 3: Connexion</h3>
+                <p>Se connecter avec le compte créé au Test 1</p>
+                <button onclick="testLogin()">Tester Connexion</button>
+                <span class="loading" id="loading3">⏳ En cours...</span>
+                <div id="result3"></div>
+            </div>
+
+            <!-- Test 4: Profil -->
+            <div class="test-section">
+                <h3>👤 Test 4: Profil Utilisateur (Authentifié)</h3>
+                <p>Récupérer les infos utilisateur avec le token</p>
+                <button onclick="testProfile()">Voir Profil</button>
+                <span class="loading" id="loading4">⏳ En cours...</span>
+                <div id="result4"></div>
+            </div>
+
+            <!-- Test 5: Refresh Token -->
+            <div class="test-section">
+                <h3>🔄 Test 5: Refresh Token</h3>
+                <p>Générer un nouveau access token avec le refresh token</p>
+                <button onclick="testRefreshToken()">Rafraîchir Token</button>
+                <span class="loading" id="loading5">⏳ En cours...</span>
+                <div id="result5"></div>
+            </div>
+
+            <!-- Test 6: Logout -->
+            <div class="test-section">
+                <h3>🚪 Test 6: Logout Serveur (Blacklist)</h3>
+                <p>Révoquer le token côté serveur</p>
+                <button onclick="testLogout()">Se Déconnecter</button>
+                <span class="loading" id="loading6">⏳ En cours...</span>
+                <div id="result6"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000/api/auth';
+        let accessToken = '';
+        let refreshToken = '';
+        let testEmail = `test${Date.now()}@example.com`;
+
+        async function apiCall(endpoint, method, body, token = null) {
+            const headers = { 'Content-Type': 'application/json' };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+            
+            const response = await fetch(`${API_URL}${endpoint}`, {
+                method,
+                headers,
+                body: body ? JSON.stringify(body) : undefined
+            });
+            
+            const data = await response.json();
+            return { status: response.status, data };
+        }
+
+        function showResult(id, content, type = 'info') {
+            const result = document.getElementById(id);
+            result.className = `result ${type}`;
+            result.innerHTML = content;
+        }
+
+        function showLoading(id, show) {
+            document.getElementById(id).classList.toggle('active', show);
+        }
+
+        async function testRegister() {
+            showLoading('loading1', true);
+            try {
+                const { status, data } = await apiCall('/register', 'POST', {
+                    email: testEmail,
+                    password: 'Test1234!@#',
+                    first_name: 'John',
+                    last_name: 'Doe',
+                    user_type: 'client'
+                });
+
+                if (status === 201 || status === 200) {
+                    accessToken = data.accessToken;
+                    refreshToken = data.refreshToken;
+                    
+                    showResult('result1', `
+                        <div class="success">
+                            <h4>✅ Inscription réussie!</h4>
+                            <p><strong>Email:</strong> ${testEmail}</p>
+                            <p><strong>User ID:</strong> ${data.user.id}</p>
+                            <p><strong>Email vérifié:</strong> ${data.user.email_verified ? '✅ Oui' : '❌ Non'}</p>
+                            <p><strong>2FA activé:</strong> ${data.user.twofa_enabled ? '✅ Oui' : '❌ Non'}</p>
+                            <div class="token-display">
+                                <strong>Access Token:</strong> ${accessToken.substring(0, 60)}...<br>
+                                <strong>Refresh Token:</strong> ${refreshToken.substring(0, 60)}...
+                            </div>
+                            <p><em>Les tokens sont sauvegardés pour les tests suivants</em></p>
+                        </div>
+                    `, 'success');
+                } else {
+                    showResult('result1', `<h4>❌ Erreur ${status}</h4><pre>${JSON.stringify(data, null, 2)}</pre>`, 'error');
+                }
+            } catch (error) {
+                showResult('result1', `<h4>❌ Erreur</h4><p>${error.message}</p>`, 'error');
+            }
+            showLoading('loading1', false);
+        }
+
+        async function testWeakPassword() {
+            showLoading('loading2', true);
+            try {
+                const { status, data } = await apiCall('/register', 'POST', {
+                    email: `weak${Date.now()}@example.com`,
+                    password: 'weak',
+                    first_name: 'Test',
+                    last_name: 'User',
+                    user_type: 'client'
+                });
+
+                if (status === 400) {
+                    const errors = data.errors || [data.message];
+                    showResult('result2', `
+                        <div class="error">
+                            <h4>✅ Validation fonctionne! (Attendu: erreur 400)</h4>
+                            <p><strong>Problèmes détectés:</strong></p>
+                            <ul>
+                                ${errors.map(err => `<li>${err}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `, 'success');
+                } else {
+                    showResult('result2', `<h4>⚠️ Inattendu (statut ${status})</h4><pre>${JSON.stringify(data, null, 2)}</pre>`, 'info');
+                }
+            } catch (error) {
+                showResult('result2', `<h4>❌ Erreur</h4><p>${error.message}</p>`, 'error');
+            }
+            showLoading('loading2', false);
+        }
+
+        async function testLogin() {
+            showLoading('loading3', true);
+            try {
+                const { status, data } = await apiCall('/login', 'POST', {
+                    email: testEmail,
+                    password: 'Test1234!@#'
+                });
+
+                if (status === 200) {
+                    accessToken = data.accessToken;
+                    refreshToken = data.refreshToken;
+                    
+                    showResult('result3', `
+                        <div class="success">
+                            <h4>✅ Connexion réussie!</h4>
+                            <p><strong>Nom:</strong> ${data.user.first_name} ${data.user.last_name}</p>
+                            <p><strong>Type:</strong> ${data.user.user_type}</p>
+                            ${data.requires2FA ? '<p><strong>⚠️ 2FA requis</strong></p>' : ''}
+                            <div class="token-display">
+                                <strong>Nouveaux tokens générés:</strong><br>
+                                Access: ${accessToken.substring(0, 50)}...<br>
+                                Refresh: ${refreshToken.substring(0, 50)}...
+                            </div>
+                        </div>
+                    `, 'success');
+                } else {
+                    showResult('result3', `<h4>❌ Erreur ${status}</h4><pre>${JSON.stringify(data, null, 2)}</pre>`, 'error');
+                }
+            } catch (error) {
+                showResult('result3', `<h4>❌ Erreur</h4><p>${error.message}</p>`, 'error');
+            }
+            showLoading('loading3', false);
+        }
+
+        async function testProfile() {
+            if (!accessToken) {
+                showResult('result4', '<p class="error">⚠️ Exécutez d\'abord le Test 1 ou Test 3</p>', 'error');
+                return;
+            }
+            
+            showLoading('loading4', true);
+            try {
+                const { status, data } = await apiCall('/profile', 'GET', null, accessToken);
+
+                if (status === 200) {
+                    showResult('result4', `
+                        <div class="success">
+                            <h4>✅ Profil récupéré!</h4>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `, 'success');
+                } else {
+                    showResult('result4', `<h4>❌ Erreur ${status}</h4><pre>${JSON.stringify(data, null, 2)}</pre>`, 'error');
+                }
+            } catch (error) {
+                showResult('result4', `<h4>❌ Erreur</h4><p>${error.message}</p>`, 'error');
+            }
+            showLoading('loading4', false);
+        }
+
+        async function testRefreshToken() {
+            if (!refreshToken) {
+                showResult('result5', '<p class="error">⚠️ Exécutez d\'abord le Test 1 ou Test 3</p>', 'error');
+                return;
+            }
+            
+            showLoading('loading5', true);
+            try {
+                const { status, data } = await apiCall('/refresh-token', 'POST', { refreshToken });
+
+                if (status === 200) {
+                    const oldToken = accessToken;
+                    accessToken = data.accessToken;
+                    
+                    showResult('result5', `
+                        <div class="success">
+                            <h4>✅ Token rafraîchi!</h4>
+                            <p><strong>Ancien token:</strong> ${oldToken.substring(0, 40)}...</p>
+                            <p><strong>Nouveau token:</strong> ${accessToken.substring(0, 40)}...</p>
+                            <p><em>Le nouveau token est maintenant utilisé pour les prochains tests</em></p>
+                        </div>
+                    `, 'success');
+                } else {
+                    showResult('result5', `<h4>❌ Erreur ${status}</h4><pre>${JSON.stringify(data, null, 2)}</pre>`, 'error');
+                }
+            } catch (error) {
+                showResult('result5', `<h4>❌ Erreur</h4><p>${error.message}</p>`, 'error');
+            }
+            showLoading('loading5', false);
+        }
+
+        async function testLogout() {
+            if (!accessToken) {
+                showResult('result6', '<p class="error">⚠️ Exécutez d\'abord le Test 1 ou Test 3</p>', 'error');
+                return;
+            }
+            
+            showLoading('loading6', true);
+            try {
+                const { status, data } = await apiCall('/logout', 'POST', null, accessToken);
+
+                if (status === 200) {
+                    // Tester que le token est bien révoqué
+                    const { status: profileStatus } = await apiCall('/profile', 'GET', null, accessToken);
+                    
+                    showResult('result6', `
+                        <div class="success">
+                            <h4>✅ Logout réussi!</h4>
+                            <p>${data.message}</p>
+                            <p><strong>Vérification:</strong> ${profileStatus === 401 ? '✅ Token bien révoqué (erreur 401)' : '⚠️ Token toujours valide'}</p>
+                            <p><em>Le token ne peut plus être utilisé</em></p>
+                        </div>
+                    `, 'success');
+                    
+                    accessToken = '';
+                    refreshToken = '';
+                } else {
+                    showResult('result6', `<h4>❌ Erreur ${status}</h4><pre>${JSON.stringify(data, null, 2)}</pre>`, 'error');
+                }
+            } catch (error) {
+                showResult('result6', `<h4>❌ Erreur</h4><p>${error.message}</p>`, 'error');
+            }
+            showLoading('loading6', false);
+        }
+
+        // Message initial
+        window.addEventListener('load', () => {
+            console.log('🎯 Interface de test prête!');
+            console.log('📝 Email de test:', testEmail);
+        });
+    </script>
+</body>
+</html>

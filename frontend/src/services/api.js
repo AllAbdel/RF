@@ -4,6 +4,22 @@ const API_URL = 'http://localhost:5000/api';
 
 axios.defaults.baseURL = API_URL;
 
+// Variable pour éviter les boucles infinies de refresh
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  
+  failedQueue = [];
+};
+
 // Intercepteur pour ajouter le token à chaque requête
 axios.interceptors.request.use(
   (config) => {
@@ -14,6 +30,83 @@ axios.interceptors.request.use(
     return config;
   },
   (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Intercepteur pour gérer le refresh automatique des tokens
+axios.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    // Si erreur 401 et pas déjà en train de refresh
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      
+      // Si déjà en train de refresh, mettre en queue
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then(token => {
+            originalRequest.headers.Authorization = 'Bearer ' + token;
+            return axios(originalRequest);
+          })
+          .catch(err => {
+            return Promise.reject(err);
+          });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      const refreshToken = localStorage.getItem('refreshToken');
+      
+      if (!refreshToken) {
+        // Pas de refresh token, déconnecter
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        window.location.href = '/auth';
+        return Promise.reject(error);
+      }
+
+      try {
+        // Tenter de refresh le token
+        const response = await axios.post('/auth/refresh-token', {
+          refreshToken: refreshToken
+        });
+
+        const { accessToken } = response.data;
+        
+        // Sauvegarder le nouveau token
+        localStorage.setItem('token', accessToken);
+        
+        // Mettre à jour l'header de la requête originale
+        originalRequest.headers.Authorization = 'Bearer ' + accessToken;
+        
+        // Traiter la queue
+        processQueue(null, accessToken);
+        
+        isRefreshing = false;
+        
+        // Réessayer la requête originale
+        return axios(originalRequest);
+        
+      } catch (refreshError) {
+        // Refresh a échoué, déconnecter
+        processQueue(refreshError, null);
+        isRefreshing = false;
+        
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+        window.location.href = '/auth';
+        
+        return Promise.reject(refreshError);
+      }
+    }
+
     return Promise.reject(error);
   }
 );

@@ -29,6 +29,8 @@ const VehicleDetails = () => {
   const loadVehicleDetails = async () => {
     try {
       const response = await vehicleAPI.getById(id);
+      console.log('🚗 Vehicle data:', response.data.vehicle);
+      console.log('📄 terms_pdf:', response.data.vehicle.terms_pdf);
       setVehicle(response.data.vehicle);
       setImages(response.data.images);
       setReviews(response.data.reviews);
@@ -251,6 +253,11 @@ const VehicleDetails = () => {
               
               {vehicle.terms_pdf && (
                 <div className="pdf-download">
+                  {!vehicle.rental_conditions && (
+                    <p style={{ marginBottom: '1rem', color: 'var(--text-secondary)' }}>
+                      Les conditions de location sont disponibles en PDF ci-dessous
+                    </p>
+                  )}
                   <a 
                     href={`http://localhost:5000${vehicle.terms_pdf}`}
                     target="_blank"

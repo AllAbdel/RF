@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import AgencySearch from '../components/AgencySearch';
+import PasswordStrengthMeter from '../components/PasswordStrengthMeter';
 import { agencyAPI } from '../services/api';
 import '../styles/Auth.css';
 
@@ -24,6 +25,10 @@ const AuthPage = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState(null);
+  const [showEmailVerification, setShowEmailVerification] = useState(false);
+  const [show2FAInput, setShow2FAInput] = useState(false);
+  const [twoFactorCode, setTwoFactorCode] = useState('');
 
   const { login, register } = useAuth();
   const navigate = useNavigate();
@@ -46,7 +51,16 @@ const AuthPage = () => {
 
     try {
       if (isLogin) {
-        const result = await login(formData.email, formData.password, userType);
+        const result = await login(formData.email, formData.password, userType, twoFactorCode);
+        
+        // Gérer le cas où 2FA est requis
+        if (result.requires2FA) {
+          setShow2FAInput(true);
+          setError('');
+          setLoading(false);
+          return;
+        }
+        
         if (result.success) {
           // Rediriger vers la page de retour ou le dashboard approprié
           if (returnTo) {
@@ -58,6 +72,13 @@ const AuthPage = () => {
           setError(result.error);
         }
       } else {
+        // Valider la force du mot de passe avant inscription
+        if (!passwordStrength || !passwordStrength.valid) {
+          setError('Le mot de passe ne respecte pas les critères de sécurité');
+          setLoading(false);
+          return;
+        }
+
         // Mode inscription
         if (userType === 'agency_member' && agencyMode === 'join') {
           // Rejoindre une agence existante
@@ -102,6 +123,14 @@ const AuthPage = () => {
 
           const result = await register(submitData);
           if (result.success) {
+            // Afficher message de vérification email
+            if (result.emailVerificationRequired) {
+              setShowEmailVerification(true);
+              setError('');
+              setLoading(false);
+              return;
+            }
+            
             // Rediriger vers la page de retour ou le dashboard approprié
             if (returnTo) {
               navigate(returnTo);
@@ -153,7 +182,54 @@ const AuthPage = () => {
 
         {error && <div className="error-message">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="auth-form">
+        {showEmailVerification && (
+          <div className="success-message">
+            <h3>✅ Inscription réussie !</h3>
+            <p>Un email de vérification a été envoyé à <strong>{formData.email}</strong></p>
+            <p>Veuillez vérifier votre boîte mail et cliquer sur le lien pour activer votre compte.</p>
+            <button 
+              className="primary-btn"
+              onClick={() => navigate('/')}
+              style={{marginTop: '15px'}}
+            >
+              Retour à l'accueil
+            </button>
+          </div>
+        )}
+
+        {show2FAInput && !showEmailVerification && (
+          <div className="twofa-prompt">
+            <h3>🔒 Authentification à deux facteurs</h3>
+            <p>Entrez le code à 6 chiffres depuis votre application d'authentification</p>
+            <input
+              type="text"
+              className="twofa-input"
+              value={twoFactorCode}
+              onChange={(e) => setTwoFactorCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              placeholder="123456"
+              maxLength="6"
+              autoFocus
+            />
+            <button 
+              className="submit-btn"
+              onClick={handleSubmit}
+              disabled={twoFactorCode.length !== 6 || loading}
+            >
+              {loading ? 'Vérification...' : 'Vérifier'}
+            </button>
+            <button 
+              className="secondary-btn"
+              onClick={() => {
+                setShow2FAInput(false);
+                setTwoFactorCode('');
+              }}
+            >
+              Annuler
+            </button>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="auth-form" style={{display: (showEmailVerification || show2FAInput) ? 'none' : 'block'}}>
           {!isLogin && (
             <>
               <div className="form-row">
@@ -330,9 +406,39 @@ const AuthPage = () => {
               value={formData.password}
               onChange={handleChange}
               required
-              minLength="6"
+              minLength="8"
             />
+            {!isLogin && (
+              <PasswordStrengthMeter 
+                password={formData.password}
+                onStrengthChange={setPasswordStrength}
+              />
+            )}
           </div>
+
+          {!isLogin && (
+            <div className="password-requirements">
+              <small>Le mot de passe doit contenir :</small>
+              <ul>
+                <li>Au moins 8 caractères</li>
+                <li>Une majuscule et une minuscule</li>
+                <li>Un chiffre</li>
+                <li>Un caractère spécial (!@#$%...)</li>
+              </ul>
+            </div>
+          )}
+
+          {isLogin && (
+            <div className="forgot-password-link">
+              <button 
+                type="button"
+                onClick={() => navigate('/reset-password')}
+                className="link-btn"
+              >
+                Mot de passe oublié ?
+              </button>
+            </div>
+          )}
 
           <button type="submit" className="submit-btn" disabled={loading}>
             {loading ? 'Chargement...' : (isLogin ? 'Se connecter' : 'S\'inscrire')}

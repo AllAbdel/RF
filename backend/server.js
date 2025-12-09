@@ -4,6 +4,9 @@ const http = require('http');
 const socketIo = require('socket.io');
 require('dotenv').config();
 
+// 🆕 IMPORT NETTOYAGE TOKENS
+const { cleanupExpiredTokens } = require('./utils/tokenManager');
+
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
@@ -12,6 +15,16 @@ const io = socketIo(server, {
     methods: ['GET', 'POST']
   }
 });
+
+// 🆕 NETTOYAGE AUTOMATIQUE DES TOKENS EXPIRÉS
+// Exécuter toutes les 6 heures
+setInterval(async () => {
+  console.log('🧹 Nettoyage des tokens expirés...');
+  await cleanupExpiredTokens(require('./config/database'));
+}, 6 * 60 * 60 * 1000);
+
+// Nettoyage au démarrage
+cleanupExpiredTokens(require('./config/database'));
 
 // Middlewares
 app.use(cors());

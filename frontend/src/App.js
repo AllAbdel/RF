@@ -16,6 +16,9 @@ import TermsPage from './pages/TermsPage';
 import CookiesPage from './pages/CookiesPage';
 import JoinAgencyPage from './pages/JoinAgencyPage';
 import ContractSignature from './components/ContractSignature';
+import VerifyEmail from './pages/VerifyEmail';
+import ResetPassword from './pages/ResetPassword';
+import TwoFactorSetup from './pages/TwoFactorSetup';
 
 import './styles/App.css';
 
@@ -79,6 +82,18 @@ function App() {
 
             {/* Route de connexion/inscription */}
             <Route path="/auth" element={<AuthPage />} />
+            
+            {/* Nouvelles routes sécurité */}
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route 
+              path="/2fa-setup" 
+              element={
+                <ProtectedRoute>
+                  <TwoFactorSetup />
+                </ProtectedRoute>
+              } 
+            />
 
             {/* Route des détails de véhicule - accessible à tous */}
             <Route path="/vehicle/:id" element={<VehicleDetails />} />

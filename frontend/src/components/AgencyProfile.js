@@ -34,6 +34,9 @@ const AgencyProfile = () => {
       const response = await agencyAPI.getStats();
       const agencyData = response.data.agency;
       
+      console.log('📊 Agency data loaded:', agencyData);
+      console.log('📄 rental_conditions_pdf:', agencyData.rental_conditions_pdf);
+      
       setAgency(agencyData);
       setFormData({
         name: agencyData.name || '',
@@ -333,7 +336,7 @@ const AgencyProfile = () => {
               <label htmlFor="terms-input" className="upload-btn">
                 {termsFile ? `✓ ${termsFile.name}` : 'Choisir un PDF'}
               </label>
-              {agency?.rental_conditions_pdf && !termsFile && (
+              {!termsFile && agency && agency.rental_conditions_pdf && (
                 <a 
                   href={`http://localhost:5000${agency.rental_conditions_pdf}`}
                   target="_blank"
