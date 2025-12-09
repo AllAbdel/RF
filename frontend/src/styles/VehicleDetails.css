@@ -99,6 +99,7 @@
   position: relative;
   z-index: 1;
   backdrop-filter: var(--blur-md);
+  -webkit-backdrop-filter: var(--blur-md);
   animation: slideUp var(--transition-slow);
 }
 

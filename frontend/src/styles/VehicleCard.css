@@ -77,6 +77,7 @@
   transform: translateX(-50%);
   background: rgba(239, 68, 68, 0.95);
   backdrop-filter: var(--blur-sm);
+  -webkit-backdrop-filter: var(--blur-sm);
   color: white;
   padding: 0.5rem 1rem;
   border-radius: var(--radius-full);
@@ -101,6 +102,7 @@
   left: 1rem;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: var(--blur-sm);
+  -webkit-backdrop-filter: var(--blur-sm);
   color: var(--accent-primary);
   padding: 0.5rem 0.875rem;
   border-radius: var(--radius-full);

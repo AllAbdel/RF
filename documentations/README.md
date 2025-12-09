@@ -1,227 +1,187 @@
-# 🚗 Plateforme de Location de Voitures
+# 📚 Documentation RentFlow
 
-Une application web complète pour la gestion de location de voitures, permettant aux agences de gérer leurs véhicules et aux clients de réserver des voitures.
+Bienvenue dans la documentation complète de RentFlow !
 
-## 📋 Fonctionnalités
+## 📖 Organisation
 
-### Pour les Clients
-- ✅ Recherche et filtrage de véhicules (par prix, carburant, localisation)
-- ✅ Réservation de véhicules avec sélection de dates
-- ✅ Gestion des réservations (modification, annulation)
-- ✅ Historique des réservations
-- ✅ Système d'avis et de notation
-- ✅ Messagerie avec les agences
+La documentation est organisée par thématiques pour faciliter la navigation :
 
-### Pour les Agences
-- ✅ Dashboard de gestion complet
-- ✅ CRUD complet des véhicules (ajout, modification, suppression)
-- ✅ Gestion des réservations (acceptation, refus)
-- ✅ Statistiques et analytics
-- ✅ Gestion des membres de l'agence avec système de rôles
-- ✅ Système de notifications en temps réel
-
-## 🛠️ Technologies Utilisées
-
-### Backend
-- Node.js + Express.js
-- MySQL (base de données)
-- JWT (authentification)
-- Socket.io (messagerie temps réel)
-- Multer (upload de fichiers)
-- Bcrypt (hashage de mots de passe)
-
-### Frontend
-- React 18
-- React Router (navigation)
-- Axios (API calls)
-- Socket.io-client (temps réel)
-- CSS moderne et responsive
-
-## 📦 Installation
-
-### Prérequis
-- Node.js (v14 ou supérieur)
-- MySQL (v5.7 ou supérieur)
-- npm ou yarn
-
-### 1. Configuration de la base de données
-
-1. Créez une base de données MySQL :
-```bash
-mysql -u root -p
-```
-
-2. Importez le schéma :
-```bash
-mysql -u root -p car_rental < backend/database.sql
-```
-
-### 2. Installation du Backend
-
-```bash
-cd backend
-npm install
-```
-
-Créez un fichier `.env` :
-```env
-PORT=5000
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=votre_mot_de_passe
-DB_NAME=car_rental
-
-JWT_SECRET=votre_secret_jwt_super_securise
-JWT_EXPIRE=7d
-
-UPLOAD_PATH=./uploads
-```
-
-Lancez le serveur :
-```bash
-npm run dev
-```
-
-Le serveur démarre sur http://localhost:5000
-
-### 3. Installation du Frontend
-
-```bash
-cd frontend
-npm install
-```
-
-Lancez l'application :
-```bash
-npm start
-```
-
-L'application démarre sur http://localhost:3000
-
-## 🎯 Utilisation
-
-### Première connexion
-
-#### En tant que Client
-1. Cliquez sur "Client"
-2. Inscrivez-vous avec vos informations
-3. Recherchez des véhicules et effectuez des réservations
-
-#### En tant qu'Agence
-1. Cliquez sur "Agence"
-2. Inscrivez-vous en créant votre agence
-3. Ajoutez vos véhicules
-4. Gérez les réservations et votre équipe
-
-### Structure des Rôles d'Agence
-
-- **Super Admin** : Accès complet, peut gérer les membres et leurs rôles
-- **Admin** : Peut inviter des membres, gérer les véhicules et réservations
-- **Membre** : Peut gérer les véhicules et réservations
-
-## 📂 Structure du Projet
+### 📁 Structure
 
 ```
-car-rental-platform/
-├── backend/
-│   ├── config/          # Configuration DB
-│   ├── controllers/     # Logique métier
-│   ├── middleware/      # Authentification, upload
-│   ├── models/          # (futurs modèles)
-│   ├── routes/          # Routes API
-│   ├── uploads/         # Fichiers uploadés
-│   ├── database.sql     # Schéma SQL
-│   └── server.js        # Point d'entrée
-│
-├── frontend/
-│   ├── public/          # Fichiers statiques
-│   └── src/
-│       ├── components/  # Composants React
-│       ├── contexts/    # Context API (Auth)
-│       ├── pages/       # Pages principales
-│       ├── services/    # API & Socket.io
-│       ├── styles/      # CSS modules
-│       ├── App.js       # App principale
-│       └── index.js     # Point d'entrée
-│
-└── README.md
+documentations/
+├── 01-Installation/     # Installation et démarrage rapide
+├── 02-Configuration/    # Configuration base de données, SMTP, etc.
+├── 03-Securite/        # Sécurité, authentification, migrations
+├── 04-Tests/           # Guides de test et scripts
+├── 05-Deploiement/     # Déploiement et commandes
+├── 06-Fonctionnalites/ # Nouvelles fonctionnalités et instructions
+└── README.md           # Ce fichier
 ```
-
-## 🔌 API Endpoints
-
-### Authentification
-- POST `/api/auth/register` - Inscription
-- POST `/api/auth/login` - Connexion
-- GET `/api/auth/profile` - Profil utilisateur
-
-### Véhicules
-- GET `/api/vehicles` - Liste des véhicules (avec filtres)
-- GET `/api/vehicles/:id` - Détails d'un véhicule
-- POST `/api/vehicles` - Ajouter un véhicule (Agence)
-- PUT `/api/vehicles/:id` - Modifier un véhicule (Agence)
-- DELETE `/api/vehicles/:id` - Supprimer un véhicule (Agence)
-
-### Réservations
-- POST `/api/reservations` - Créer une réservation (Client)
-- GET `/api/reservations/client` - Mes réservations (Client)
-- GET `/api/reservations/agency` - Réservations de l'agence
-- PUT `/api/reservations/:id/status` - Changer le statut (Agence)
-- PUT `/api/reservations/:id/cancel` - Annuler une réservation (Client)
-
-### Messagerie
-- POST `/api/messages/conversation` - Créer/récupérer conversation
-- GET `/api/messages/conversations` - Liste des conversations
-- GET `/api/messages/conversation/:id` - Messages d'une conversation
-- POST `/api/messages/send` - Envoyer un message
-
-### Agence
-- GET `/api/agency/members` - Liste des membres
-- POST `/api/agency/members/invite` - Inviter un membre
-- PUT `/api/agency/members/:id/role` - Changer le rôle
-- DELETE `/api/agency/members/:id` - Retirer un membre
-- GET `/api/agency/stats` - Statistiques
-
-## 🔒 Sécurité
-
-- Authentification JWT sécurisée
-- Mots de passe hashés avec bcrypt
-- Validation des entrées
-- Protection CORS
-- Gestion des rôles et permissions
-- Upload de fichiers sécurisé
-
-## 🚀 Améliorations Futures
-
-- [ ] Intégration de paiement (Stripe)
-- [ ] Carte interactive avec localisation
-- [ ] Notifications push
-- [ ] Export PDF des réservations
-- [ ] Système de favoris
-- [ ] Chat en temps réel amélioré
-- [ ] Application mobile (React Native)
-- [ ] Système de parrainage
-- [ ] Multi-langue
-
-## 🐛 Problèmes Connus
-
-- Les images des véhicules doivent être au format JPG, PNG ou WEBP
-- Le chat nécessite une connexion Socket.io stable
-- La pagination n'est pas encore implémentée
-
-## 📝 Notes
-
-- Les réservations sont en mode "premier arrivé, premier servi"
-- Un véhicule ne peut pas avoir plusieurs réservations actives en même temps
-- Les avis ne peuvent être laissés qu'après la fin d'une réservation
-
-## 👥 Contribution
-
-Ce projet a été créé comme une démo complète d'une plateforme de location de voitures.
-
-## 📄 Licence
-
-Ce projet est sous licence MIT.
 
 ---
 
-**Développé avec ❤️ pour démontrer une architecture full-stack moderne**
+## 🚀 01. Installation
+
+**📄 Documents disponibles :**
+- [QUICKSTART.md](01-Installation/QUICKSTART.md) - Guide de démarrage rapide
+- [LISEZ-MOI-EN-PREMIER.md](01-Installation/LISEZ-MOI-EN-PREMIER.md) - Instructions initiales
+- [00-LIRE-EN-PREMIER.txt](01-Installation/00-LIRE-EN-PREMIER.txt) - Prérequis
+
+**Pour commencer :**
+1. Installer XAMPP (MySQL + Apache)
+2. Installer Node.js
+3. Cloner le projet
+4. Lancer `.\start-all.ps1`
+
+---
+
+## ⚙️ 02. Configuration
+
+**📄 Documents disponibles :**
+- [CONFIGURATION_SMTP.md](02-Configuration/CONFIGURATION_SMTP.md) - Configuration des emails
+- [SETUP_DATABASE.md](02-Configuration/SETUP_DATABASE.md) - Configuration base de données
+- [PROBLEME-BDD.md](02-Configuration/PROBLEME-BDD.md) - Résolution problèmes BDD
+
+**Points clés :**
+- Configuration du fichier `.env`
+- Paramétrage SMTP pour Gmail
+- Création et migration de la base de données
+
+---
+
+## 🔒 03. Sécurité
+
+**📄 Documents disponibles :**
+- [SECURITY_INSTALLATION.md](03-Securite/SECURITY_INSTALLATION.md) - Installation des fonctionnalités de sécurité
+- [MIGRATION_GUIDE.md](03-Securite/MIGRATION_GUIDE.md) - Guide de migration base de données
+- [IMPLEMENTATION_COMPLETE.md](03-Securite/IMPLEMENTATION_COMPLETE.md) - Détails de l'implémentation backend
+- [FRONTEND_IMPLEMENTATION.md](03-Securite/FRONTEND_IMPLEMENTATION.md) - Détails de l'implémentation frontend
+
+**Fonctionnalités de sécurité :**
+- ✅ Vérification email avec tokens
+- ✅ Authentification 2FA (TOTP)
+- ✅ Politique de mots de passe forts
+- ✅ Historique des 5 derniers mots de passe
+- ✅ Réinitialisation mot de passe (expiration 1h)
+- ✅ Rate limiting (5 tentatives/15min)
+- ✅ JWT avec refresh tokens (24h/7j)
+- ✅ Sécurité uploads (MIME validation, antivirus)
+
+---
+
+## 🧪 04. Tests
+
+**📄 Documents disponibles :**
+- [GUIDE_TEST.md](04-Tests/GUIDE_TEST.md) - Guide complet de test
+- [TEST_SCRIPTS.md](04-Tests/TEST_SCRIPTS.md) - Scripts de test disponibles
+- [TESTING_GUIDE.md](04-Tests/TESTING_GUIDE.md) - Méthodologie de test
+
+**Scripts utiles :**
+```powershell
+# Vérifier la base de données
+node backend/check-db.js
+
+# Importer les données de test
+node backend/import-test-data.js
+
+# Tester l'envoi d'emails
+node backend/test-email.js
+
+# Vérifier tous les utilisateurs
+node backend/verify-users.js
+```
+
+**Comptes de test :**
+- Client : `client1@email.fr` / `password123`
+- Agence : `admin@premium-paris.fr` / `password123`
+
+---
+
+## 🚢 05. Déploiement
+
+**📄 Documents disponibles :**
+- [DEPLOYMENT_COMPLETE.md](05-Deploiement/DEPLOYMENT_COMPLETE.md) - Guide de déploiement
+- [DEPLOYMENT.md](05-Deploiement/DEPLOYMENT.md) - Instructions détaillées
+- [COMMANDS.md](05-Deploiement/COMMANDS.md) - Commandes disponibles
+- [SCRIPTS_README.md](05-Deploiement/SCRIPTS_README.md) - Documentation des scripts
+- [SCRIPTS_POWERSHELL.md](05-Deploiement/SCRIPTS_POWERSHELL.md) - Guide d'utilisation des scripts
+
+**Commandes principales :**
+```powershell
+# Démarrer tout (silencieux)
+.\start-all.ps1
+
+# Arrêter les serveurs
+Get-Process -Name node | Stop-Process -Force
+
+# Mode debug
+.\start-debug.ps1
+```
+
+---
+
+## ✨ 06. Fonctionnalités
+
+**📄 Documents disponibles :**
+- [NOUVELLES_FONCTIONNALITES.md](06-Fonctionnalites/NOUVELLES_FONCTIONNALITES.md) - Nouvelles fonctionnalités
+- [FEATURES.md](06-Fonctionnalites/FEATURES.md) - Liste complète des fonctionnalités
+- [VEHICLE_ADDRESSES_INSTRUCTIONS.md](06-Fonctionnalites/VEHICLE_ADDRESSES_INSTRUCTIONS.md) - Gestion des adresses
+
+**Fonctionnalités principales :**
+- 🚗 Gestion de véhicules avec images multiples
+- 📅 Système de réservations
+- 💬 Messagerie en temps réel (Socket.io)
+- ⭐ Système d'avis et notes
+- 🏢 Gestion multi-agences
+- 👥 Gestion membres d'agence
+- 🔍 Recherche et filtres avancés
+- 📊 Dashboard statistiques
+
+---
+
+## 🛠️ Technologies utilisées
+
+### Backend
+- **Node.js** + Express.js
+- **MySQL** (avec mysql2)
+- **JWT** pour l'authentification
+- **Socket.io** pour le temps réel
+- **Nodemailer** pour les emails
+- **Speakeasy** pour 2FA
+- **bcrypt** pour le hashing
+
+### Frontend
+- **React** 18
+- **React Router** pour la navigation
+- **Axios** pour les requêtes HTTP
+- **Socket.io-client** pour le temps réel
+- **CSS** personnalisé avec variables
+
+---
+
+## 📞 Support
+
+Pour toute question ou problème :
+
+1. **Consulter la documentation appropriée** dans les dossiers ci-dessus
+2. **Vérifier les logs** : Backend affiche les erreurs dans le terminal
+3. **Tester la configuration** : Utiliser les scripts de test
+
+---
+
+## 🔄 Mises à jour
+
+**Dernière mise à jour :** 9 décembre 2025
+
+**Changements récents :**
+- ✅ Ajout authentification 2FA
+- ✅ Vérification email obligatoire
+- ✅ Configuration SMTP fonctionnelle
+- ✅ Rate limiting adaptatif (dev/prod)
+- ✅ Mode développement simplifié
+- ✅ Documentation réorganisée
+
+---
+
+**Bon développement ! 🚀**

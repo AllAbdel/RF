@@ -1,46 +1,62 @@
-# Dependencies
+# ================================
+# FICHIERS SENSIBLES - NE JAMAIS COMMITTER
+# ================================
+
+# Variables d'environnement (contient mots de passe, secrets JWT, SMTP)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.*.local
+backend/.env
+frontend/.env
+
+# Mots de passe et secrets
+secrets.json
+credentials.json
+config.local.js
+*.secret
+*.credentials
+
+# Certificats et clés privées
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+*.pfx
+ssl/
+certificates/
+
+# ================================
+# DEPENDENCIES
+# ================================
 node_modules/
 /.pnp
 .pnp.js
 **/node_modules/
 **/.cache/
 .cache/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
 
-# Testing
-/coverage
-
-# Production
+# ================================
+# BUILD & PRODUCTION
+# ================================
 /build
 /dist
+/coverage
+*.tsbuildinfo
 
-# Environment variables
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-*.log
-
-# OS files
-.DS_Store
-Thumbs.db
-desktop.ini
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# Uploads et fichiers sensibles
+# ================================
+# UPLOADS & USER FILES
+# ================================
 backend/uploads/**/*
 !backend/uploads/.gitkeep
+!backend/uploads/agencies/.gitkeep
+!backend/uploads/vehicles/.gitkeep
 uploads/
 *.pdf
 *.PDF
@@ -51,39 +67,89 @@ uploads/
 **/documents/**/*.jpeg
 **/documents/**/*.png
 backend/uploads/documents/
-backend/uploads/agencies/
-backend/uploads/vehicles/
+backend/uploads/agencies/*
+!backend/uploads/agencies/.gitkeep
+backend/uploads/vehicles/*
+!backend/uploads/vehicles/.gitkeep
 
-# Base de données
+# ================================
+# BASE DE DONNÉES
+# ================================
 *.sql.backup
 *.sql.gz
 *.db
 *.sqlite
 *.sqlite3
+*.dump
+database-backup/
+backups/
 
-# Fichiers temporaires
+# ================================
+# LOGS
+# ================================
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+logs/
+*.log.*
+combined.log
+error.log
+access.log
+
+# ================================
+# OS FILES
+# ================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# ================================
+# IDE & EDITORS
+# ================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+.project
+.settings/
+.classpath
+
+# ================================
+# TEMPORARY FILES
+# ================================
 *.tmp
 *.temp
 *.cache
 .cache/
-
-# Certificats et clés
-*.pem
-*.key
-*.cert
-*.crt
-*.p12
-*.pfx
-
-# Sauvegardes
 *.bak
 *.backup
 *~
-
-# Fichiers de configuration sensibles
-config.local.js
-secrets.json
-credentials.json
-
-# Autres
 *.old
+.pid
+*.pid
+.backend-pid.txt
+.frontend-pid.txt
+
+# ================================
+# TESTING
+# ================================
+coverage/
+.nyc_output/
+*.test.js.snap
+
+# ================================
+# AUTRES
+# ================================
+.history/
+.git-credentials

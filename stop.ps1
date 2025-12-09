@@ -1,30 +1,36 @@
-# Script pour arreter le frontend, le backend et MySQL
-Write-Host "Arret de Rentflow..." -ForegroundColor Red
+# ========================================
+# 🛑 RentFlow - Script d'arret
+# ========================================
+# Arrete tous les serveurs Node.js
 
-# Arreter tous les processus Node.js lies au projet
-Write-Host "Arret du backend et du frontend..." -ForegroundColor Yellow
+$ErrorActionPreference = "SilentlyContinue"
 
-# Tuer tous les processus node qui correspondent à notre projet
-Get-Process node -ErrorAction SilentlyContinue | Where-Object {
-    $_.Path -like "*$PSScriptRoot*"
-} | Stop-Process -Force
+Write-Host "`n========================================" -ForegroundColor Cyan
+Write-Host "   🛑 RentFlow - Arret des serveurs" -ForegroundColor Cyan
+Write-Host "========================================`n" -ForegroundColor Cyan
 
-# Arreter MySQL (UniServerZ)
-Write-Host "Arret de MySQL..." -ForegroundColor Yellow
-$mysqlProcess = Get-Process mysqld_z -ErrorAction SilentlyContinue
-if ($mysqlProcess) {
-    Stop-Process -Name mysqld_z -Force -ErrorAction SilentlyContinue
-    Write-Host "MySQL arrete." -ForegroundColor Green
+# Arreter tous les processus Node
+Write-Host "Arret des serveurs Node.js..." -ForegroundColor Yellow
+
+$nodeProcesses = Get-Process -Name node -ErrorAction SilentlyContinue
+if ($nodeProcesses) {
+    $count = $nodeProcesses.Count
+    $nodeProcesses | Stop-Process -Force
+    Write-Host "✅ $count processus Node arretes" -ForegroundColor Green
 } else {
-    Write-Host "MySQL n'etait pas en cours d'execution." -ForegroundColor Yellow
+    Write-Host "ℹ️  Aucun processus Node en cours d'execution" -ForegroundColor Gray
 }
 
-# Nettoyer les fichiers PID
-if (Test-Path "$PSScriptRoot\.backend-pid.txt") {
-    Remove-Item "$PSScriptRoot\.backend-pid.txt" -Force
-}
-if (Test-Path "$PSScriptRoot\.frontend-pid.txt") {
-    Remove-Item "$PSScriptRoot\.frontend-pid.txt" -Force
+# Arreter tous les jobs PowerShell
+$jobs = Get-Job -ErrorAction SilentlyContinue
+if ($jobs) {
+    $jobs | Stop-Job
+    $jobs | Remove-Job
+    Write-Host "✅ Jobs PowerShell nettoyes" -ForegroundColor Green
 }
 
-Write-Host "`nRentflow a ete arrete avec succes!" -ForegroundColor Green
+Write-Host "`n========================================" -ForegroundColor Cyan
+Write-Host "   ✅ Tous les serveurs sont arretes" -ForegroundColor Green
+Write-Host "========================================`n" -ForegroundColor Cyan
+
+Start-Sleep -Seconds 2
