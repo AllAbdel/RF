@@ -42,7 +42,6 @@ const HomePage = () => {
 
   const getTopRatedVehicles = () => {
     return [...filteredVehicles]
-      .filter(v => v.avg_rating && parseFloat(v.avg_rating) > 0)
       .sort((a, b) => (parseFloat(b.avg_rating) || 0) - (parseFloat(a.avg_rating) || 0))
       .slice(0, 8);
   };

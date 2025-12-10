@@ -1,12 +1,12 @@
 # ========================================
-# 🛑 RentFlow - Script d'arret
+# RentFlow - Script d'arret
 # ========================================
 # Arrete tous les serveurs Node.js
 
 $ErrorActionPreference = "SilentlyContinue"
 
 Write-Host "`n========================================" -ForegroundColor Cyan
-Write-Host "   🛑 RentFlow - Arret des serveurs" -ForegroundColor Cyan
+Write-Host "   RentFlow - Arret des serveurs" -ForegroundColor Cyan
 Write-Host "========================================`n" -ForegroundColor Cyan
 
 # Arreter tous les processus Node
@@ -18,7 +18,7 @@ if ($nodeProcesses) {
     $nodeProcesses | Stop-Process -Force
     Write-Host "✅ $count processus Node arretes" -ForegroundColor Green
 } else {
-    Write-Host "ℹ️  Aucun processus Node en cours d'execution" -ForegroundColor Gray
+    Write-Host "Aucun processus Node en cours d'execution" -ForegroundColor Gray
 }
 
 # Arreter tous les jobs PowerShell

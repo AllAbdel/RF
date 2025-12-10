@@ -53,20 +53,21 @@
 }
 
 .back-btn {
-  background: var(--bg-elevated);
-  color: var(--text-primary);
+  background: var(--accent-gradient) !important;
+  color: white !important;
   padding: 0.875rem 1.75rem;
   border-radius: var(--radius-md);
   font-weight: 600;
-  margin-bottom: 2.5rem;
-  box-shadow: var(--shadow-md);
-  border: 2px solid var(--border-secondary);
+  box-shadow: var(--shadow-accent);
+  border: none !important;
   transition: all var(--transition-base);
   display: inline-flex;
   align-items: center;
   gap: 0.75rem;
-  position: relative;
-  z-index: 1;
+  position: absolute;
+  top: 4rem;
+  right: 2rem;
+  z-index: 999;
   min-width: 120px;
   justify-content: center;
 }
@@ -76,9 +77,8 @@
 }
 
 .back-btn:hover {
-  background: var(--bg-secondary);
-  border-color: var(--accent-primary);
-  transform: translateX(-4px);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
 }
 
 .back-btn:hover::before {
@@ -94,6 +94,7 @@
   background: var(--bg-elevated);
   border-radius: var(--radius-xl);
   padding: 3rem;
+  padding-top: 5rem;
   box-shadow: var(--shadow-xl);
   border: 1px solid var(--border-primary);
   position: relative;
@@ -101,6 +102,12 @@
   backdrop-filter: var(--blur-md);
   -webkit-backdrop-filter: var(--blur-md);
   animation: slideUp var(--transition-slow);
+}
+
+.vehicle-left-column {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
 .vehicle-images {
@@ -377,11 +384,9 @@
 
 .vehicle-description {
   padding: 2rem;
-  border-top: 2px solid var(--border-primary);
   background: var(--bg-secondary);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-secondary);
-  margin-bottom: 1.5rem;
 }
 
 .vehicle-description h3 {
@@ -409,7 +414,6 @@
   background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
   border-radius: var(--radius-lg);
   border: 2px solid var(--accent-primary);
-  margin-bottom: 1.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
@@ -759,13 +763,21 @@
 }
 
 @media (max-width: 768px) {
-  .vehicle-details {
+  .vehicle-details-wrapper {
     padding: 1.5rem;
   }
 
   .vehicle-details-container,
   .reviews-section {
     padding: 1.5rem;
+    padding-top: 4rem;
+  }
+
+  .back-btn {
+    top: 3rem;
+    right: 1rem;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
   }
 
   .vehicle-header-details h1 {
@@ -782,6 +794,10 @@
 
   .reservation-form {
     padding: 1.5rem;
+  }
+
+  .vehicle-left-column {
+    gap: 1.5rem;
   }
 }
 

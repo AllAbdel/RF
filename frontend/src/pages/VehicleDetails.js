@@ -141,31 +141,77 @@ const VehicleDetails = () => {
         </button>
 
       <div className="vehicle-details-container">
-        <div className="vehicle-images">
-          <div className="main-image">
-            {images.length > 0 ? (
-              <img 
-                src={`http://localhost:5000${images[selectedImage]?.image_url}`} 
-                alt={vehicle.brand}
-                onError={(e) => { e.target.src = '/no-image.svg'; }}
-              />
-            ) : (
-              <img src="/no-image.svg" alt="Pas d'image" />
-            )}
-          </div>
-          
-          {images.length > 1 && (
-            <div className="image-thumbnails">
-              {images.map((img, index) => (
-                <img
-                  key={img.id}
-                  src={`http://localhost:5000${img.image_url}`}
-                  alt={`${vehicle.brand} ${index + 1}`}
-                  className={selectedImage === index ? 'active' : ''}
-                  onClick={() => setSelectedImage(index)}
+        <div className="vehicle-left-column">
+          <div className="vehicle-images">
+            <div className="main-image">
+              {images.length > 0 ? (
+                <img 
+                  src={`http://localhost:5000${images[selectedImage]?.image_url}`} 
+                  alt={vehicle.brand}
                   onError={(e) => { e.target.src = '/no-image.svg'; }}
                 />
-              ))}
+              ) : (
+                <img src="/no-image.svg" alt="Pas d'image" />
+              )}
+            </div>
+            
+            {images.length > 1 && (
+              <div className="image-thumbnails">
+                {images.map((img, index) => (
+                  <img
+                    key={img.id}
+                    src={`http://localhost:5000${img.image_url}`}
+                    alt={`${vehicle.brand} ${index + 1}`}
+                    className={selectedImage === index ? 'active' : ''}
+                    onClick={() => setSelectedImage(index)}
+                    onError={(e) => { e.target.src = '/no-image.svg'; }}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {vehicle.description && (
+            <div className="vehicle-description">
+              <h3>Description</h3>
+              <p>{vehicle.description}</p>
+            </div>
+          )}
+
+          {(vehicle.rental_conditions || vehicle.terms_pdf) && (
+            <div className="rental-conditions">
+              <h3>📋 Conditions de location de l'agence</h3>
+              
+              {vehicle.rental_conditions && (
+                <div className="conditions-content">
+                  {vehicle.rental_conditions.split('\n').map((condition, index) => (
+                    condition.trim() && (
+                      <div key={index} className="condition-item">
+                        <span className="condition-bullet">✓</span>
+                        <span className="condition-text">{condition.trim()}</span>
+                      </div>
+                    )
+                  ))}
+                </div>
+              )}
+              
+              {vehicle.terms_pdf && (
+                <div className="pdf-download">
+                  {!vehicle.rental_conditions && (
+                    <p style={{ marginBottom: '1rem', color: 'var(--text-secondary)' }}>
+                      Les conditions de location sont disponibles en PDF ci-dessous
+                    </p>
+                  )}
+                  <a 
+                    href={`http://localhost:5000${vehicle.terms_pdf}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="download-pdf-btn"
+                  >
+                    📄 Télécharger les conditions (PDF)
+                  </a>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -226,50 +272,6 @@ const VehicleDetails = () => {
               </div>
             </div>
           </div>
-
-          {vehicle.description && (
-            <div className="vehicle-description">
-              <h3>Description</h3>
-              <p>{vehicle.description}</p>
-            </div>
-          )}
-
-          {(vehicle.rental_conditions || vehicle.terms_pdf) && (
-            <div className="rental-conditions">
-              <h3>📋 Conditions de location de l'agence</h3>
-              
-              {vehicle.rental_conditions && (
-                <div className="conditions-content">
-                  {vehicle.rental_conditions.split('\n').map((condition, index) => (
-                    condition.trim() && (
-                      <div key={index} className="condition-item">
-                        <span className="condition-bullet">✓</span>
-                        <span className="condition-text">{condition.trim()}</span>
-                      </div>
-                    )
-                  ))}
-                </div>
-              )}
-              
-              {vehicle.terms_pdf && (
-                <div className="pdf-download">
-                  {!vehicle.rental_conditions && (
-                    <p style={{ marginBottom: '1rem', color: 'var(--text-secondary)' }}>
-                      Les conditions de location sont disponibles en PDF ci-dessous
-                    </p>
-                  )}
-                  <a 
-                    href={`http://localhost:5000${vehicle.terms_pdf}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="download-pdf-btn"
-                  >
-                    📄 Télécharger les conditions (PDF)
-                  </a>
-                </div>
-              )}
-            </div>
-          )}
 
           <div className="vehicle-actions">
             <button 

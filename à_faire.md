@@ -1,6 +1,3 @@
-Ne le supprime pas j'en ai besoin ici !
-
-
 - Réflichir sur comment faire le paiement, à quel moment, dans quel ordre, client paie puis l'agence accepte ? comment faire si l'agence n'accepte pas ? on rends l'argent au client ?
 
 - ? Pouvoir vérifier les documents rentrés par les clients (permis de conduire pour voir s'il est valide, et carte d'identité, pour voir si elle est fausse)

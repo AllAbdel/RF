@@ -7,7 +7,7 @@ const getAllVehicles = async (req, res) => {
     let query = `
       SELECT v.*, a.name as agency_name,
              (SELECT image_url FROM vehicle_images WHERE vehicle_id = v.id AND is_primary = 1 LIMIT 1) as primary_image,
-             (SELECT AVG(rating) FROM reviews WHERE vehicle_id = v.id) as avg_rating,
+             COALESCE((SELECT AVG(rating) FROM reviews WHERE vehicle_id = v.id), 0) as avg_rating,
              (SELECT COUNT(*) FROM reviews WHERE vehicle_id = v.id) as review_count,
              (SELECT end_date FROM reservations WHERE vehicle_id = v.id AND status IN ('accepted') AND end_date > NOW() ORDER BY end_date ASC LIMIT 1) as current_reservation_end
       FROM vehicles v

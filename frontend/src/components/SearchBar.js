@@ -48,16 +48,18 @@ const SearchBar = ({ filters = {}, onFilterChange }) => {
               onChange={handleChange}
             />
           </div>
-          <button type="submit" className="search-btn">
-            Rechercher
-          </button>
-          <button
-            type="button"
-            className="advanced-btn"
-            onClick={() => setShowAdvanced(!showAdvanced)}
-          >
-            {showAdvanced ? '▲ Moins de filtres' : '▼ Plus de filtres'}
-          </button>
+          <div className="search-buttons">
+            <button type="submit" className="search-btn">
+              Rechercher
+            </button>
+            <button
+              type="button"
+              className="advanced-btn"
+              onClick={() => setShowAdvanced(!showAdvanced)}
+            >
+              {showAdvanced ? '▲ Moins de filtres' : '▼ Plus de filtres'}
+            </button>
+          </div>
         </div>
 
         {showAdvanced && (
