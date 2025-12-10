@@ -1,0 +1,469 @@
+.comparison-floating {
+  position: fixed;
+  bottom: 2rem;
+  left: 2rem;
+  background: var(--bg-elevated);
+  border: 2px solid var(--accent-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 10px 40px rgba(99, 102, 241, 0.3);
+  padding: 1.5rem;
+  z-index: 998;
+  max-width: 350px;
+  animation: slideInLeft 0.3s ease-out;
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.comparison-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--border-primary);
+}
+
+.comparison-header h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.clear-btn {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s;
+}
+
+.clear-btn:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.comparison-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.comparison-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  transition: transform 0.2s;
+}
+
+.comparison-item:hover {
+  transform: translateX(5px);
+}
+
+.comparison-item img {
+  width: 60px;
+  height: 45px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+}
+
+.comparison-info {
+  flex: 1;
+}
+
+.vehicle-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem 0;
+}
+
+.vehicle-price {
+  font-size: 0.85rem;
+  color: white;
+  font-weight: 700;
+  margin: 0;
+}
+
+.remove-btn {
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  font-size: 1.5rem;
+  cursor: pointer;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+}
+
+.remove-btn:hover {
+  background: var(--error-color, #ef4444);
+  color: white;
+}
+
+.compare-btn {
+  width: 100%;
+  padding: 0.875rem;
+  background: var(--accent-gradient);
+  color: white !important;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-accent);
+  transition: all 0.3s;
+}
+
+.compare-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Modal de comparaison */
+.comparison-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.comparison-modal {
+  background: var(--bg-primary);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  max-width: 95vw;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem;
+  border-bottom: 2px solid var(--border-primary);
+  background: var(--bg-elevated);
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 800;
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 2.5rem;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.modal-close:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  transform: rotate(90deg);
+}
+
+.modal-content {
+  padding: 1rem;
+  overflow-y: auto;
+  overflow-x: auto;
+  flex: 1;
+  max-width: 95vw;
+}
+
+.comparison-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 2px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  width: 100%;
+}
+
+.comparison-row {
+  display: grid;
+  grid-template-columns: 180px repeat(3, 1fr);
+  width: 100%;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.comparison-row:last-child {
+  border-bottom: none;
+}
+
+.comparison-row.header-row {
+  background: var(--bg-elevated);
+  border-bottom: 3px solid var(--accent-primary);
+}
+
+.comparison-cell {
+  padding: 1rem 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-right: 1px solid var(--border-primary);
+  transition: background 0.2s;
+  min-height: 60px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.comparison-cell:last-child {
+  border-right: none;
+}
+
+.criteria-cell {
+  background: var(--bg-secondary);
+  font-weight: 700;
+  color: var(--text-primary);
+  justify-content: flex-start;
+  text-align: left;
+  position: sticky;
+  left: 0;
+  z-index: 10;
+}
+
+.vehicle-header {
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 1.25rem 0.75rem;
+}
+
+.vehicle-header-img {
+  width: 100px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  margin-bottom: 0.35rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.vehicle-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.vehicle-header p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.vehicle-status {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: rgba(34, 197, 94, 0.2);
+  color: #22c55e;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-top: 0.5rem;
+}
+
+.value-cell {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-weight: 600;
+  flex-direction: column;
+  gap: 0.25rem;
+  position: relative;
+  line-height: 1.3;
+}
+
+.value-cell:hover {
+  background: var(--bg-secondary);
+}
+
+.best-value {
+  background: rgba(99, 102, 241, 0.1);
+  border: 2px solid var(--accent-primary);
+  font-weight: 700;
+  color: var(--accent-primary);
+}
+
+.best-badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  background: var(--accent-gradient);
+  color: white;
+  border-radius: var(--radius-full);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 0.25rem;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  justify-content: flex-end;
+}
+
+.modal-btn {
+  padding: 0.875rem 2rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: var(--shadow-sm);
+}
+
+.modal-btn.primary {
+  background: var(--accent-gradient);
+  color: white;
+}
+
+.modal-btn.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+}
+
+.modal-btn.secondary {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.modal-btn.secondary:hover {
+  background: var(--bg-elevated);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .comparison-row {
+    grid-template-columns: 150px repeat(3, 1fr);
+    min-width: 750px;
+  }
+  
+  .vehicle-header-img {
+    width: 85px;
+    height: 60px;
+  }
+  
+  .comparison-cell {
+    padding: 0.875rem 0.625rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .comparison-floating {
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    max-width: none;
+  }
+
+  .comparison-modal {
+    padding: 1rem;
+    max-height: 95vh;
+  }
+
+  .modal-header {
+    padding: 1.5rem;
+  }
+
+  .modal-header h2 {
+    font-size: 1.35rem;
+  }
+
+  .modal-content {
+    padding: 1rem;
+  }
+
+  .comparison-row {
+    grid-template-columns: 120px repeat(auto-fit, minmax(180px, 1fr));
+    font-size: 0.85rem;
+  }
+
+  .comparison-cell {
+    padding: 0.875rem;
+  }
+
+  .vehicle-header-img {
+    width: 80px;
+    height: 55px;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .modal-btn {
+    width: 100%;
+  }
+}

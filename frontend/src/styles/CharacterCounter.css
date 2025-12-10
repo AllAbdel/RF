@@ -1,0 +1,41 @@
+.character-counter {
+  margin-top: 0.5rem;
+}
+
+.counter-text {
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+  font-weight: 500;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.character-counter.warning .counter-text {
+  color: var(--warning-color, #f59e0b);
+}
+
+.character-counter.error .counter-text {
+  color: var(--error-color, #ef4444);
+  font-weight: 600;
+}
+
+.counter-bar {
+  height: 4px;
+  background: var(--bg-secondary);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.counter-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+  transition: width 0.3s ease, background 0.3s ease;
+}
+
+.character-counter.warning .counter-fill {
+  background: linear-gradient(90deg, #f59e0b, #f97316);
+}
+
+.character-counter.error .counter-fill {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+}

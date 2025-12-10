@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { vehicleAPI, reservationAPI, messageAPI } from '../services/api';
+import { showToast } from '../components/Toast';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import ShareButton from '../components/ShareButton';
+import ImageLightbox from '../components/ImageLightbox';
 import '../styles/VehicleDetails.css';
 
 const VehicleDetails = () => {
@@ -13,8 +16,10 @@ const VehicleDetails = () => {
   const [vehicle, setVehicle] = useState(null);
   const [images, setImages] = useState([]);
   const [reviews, setReviews] = useState([]);
+  const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [showLightbox, setShowLightbox] = useState(false);
   const [showReservationForm, setShowReservationForm] = useState(false);
   const [reservationData, setReservationData] = useState({
     start_date: '',
@@ -34,6 +39,7 @@ const VehicleDetails = () => {
       setVehicle(response.data.vehicle);
       setImages(response.data.images);
       setReviews(response.data.reviews);
+      setReservations(response.data.reservations || []);
     } catch (error) {
       console.error('Erreur chargement véhicule:', error);
       alert('Erreur lors du chargement du véhicule');
@@ -47,14 +53,14 @@ const VehicleDetails = () => {
     
     // Si pas authentifié, rediriger vers la page de connexion
     if (!isAuthenticated) {
-      alert('Veuillez vous connecter pour réserver ce véhicule');
+      showToast('Veuillez vous connecter pour réserver ce véhicule', 'warning');
       navigate('/auth', { state: { returnTo: `/vehicle/${id}` } });
       return;
     }
 
     // Si authentifié mais pas client
     if (!isClient) {
-      alert('Vous devez être connecté en tant que client pour réserver');
+      showToast('Vous devez être connecté en tant que client pour réserver', 'warning');
       return;
     }
 
@@ -63,7 +69,7 @@ const VehicleDetails = () => {
       const availResponse = await vehicleAPI.checkAvailability(id, reservationData);
       
       if (!availResponse.data.available) {
-        alert('Ce véhicule n\'est pas disponible pour ces dates');
+        showToast('Ce véhicule n\'est pas disponible pour ces dates', 'error');
         return;
       }
 
@@ -73,33 +79,33 @@ const VehicleDetails = () => {
         ...reservationData
       });
 
-      alert('Réservation créée avec succès ! En attente de validation par l\'agence.');
+      showToast('Réservation créée avec succès ! En attente de validation par l\'agence.', 'success');
       navigate('/client');
     } catch (error) {
       console.error('Erreur réservation:', error);
-      alert(error.response?.data?.error || 'Erreur lors de la réservation');
+      showToast(error.response?.data?.error || 'Erreur lors de la réservation', 'error');
     }
   };
 
   const handleContactAgency = async () => {
     if (!isAuthenticated) {
-      alert('Veuillez vous connecter pour contacter l\'agence');
+      showToast('Veuillez vous connecter pour contacter l\'agence', 'warning');
       navigate('/auth', { state: { returnTo: `/vehicle/${id}` } });
       return;
     }
 
     if (!isClient) {
-      alert('Vous devez être connecté en tant que client pour contacter l\'agence');
+      showToast('Vous devez être connecté en tant que client pour contacter l\'agence', 'warning');
       return;
     }
 
     try {
       await messageAPI.getOrCreateConversation(vehicle.agency_id);
-      alert('Vous pouvez maintenant contacter l\'agence depuis votre messagerie');
+      showToast('Vous pouvez maintenant contacter l\'agence depuis votre messagerie', 'success');
       navigate('/client');
     } catch (error) {
       console.error('Erreur:', error);
-      alert('Erreur lors de la création de la conversation');
+      showToast('Erreur lors de la création de la conversation', 'error');
     }
   };
 
@@ -143,7 +149,7 @@ const VehicleDetails = () => {
       <div className="vehicle-details-container">
         <div className="vehicle-left-column">
           <div className="vehicle-images">
-            <div className="main-image">
+            <div className="main-image" onClick={() => images.length > 0 && setShowLightbox(true)} style={{ cursor: images.length > 0 ? 'zoom-in' : 'default' }}>
               {images.length > 0 ? (
                 <img 
                   src={`http://localhost:5000${images[selectedImage]?.image_url}`} 
@@ -152,6 +158,9 @@ const VehicleDetails = () => {
                 />
               ) : (
                 <img src="/no-image.svg" alt="Pas d'image" />
+              )}
+              {images.length > 0 && (
+                <div className="zoom-hint">Cliquer pour agrandir</div>
               )}
             </div>
             
@@ -178,9 +187,9 @@ const VehicleDetails = () => {
             </div>
           )}
 
-          {(vehicle.rental_conditions || vehicle.terms_pdf) && (
+          {(vehicle.rental_conditions || vehicle.rental_conditions_pdf) && (
             <div className="rental-conditions">
-              <h3>📋 Conditions de location de l'agence</h3>
+              <h3>Conditions de location de l'agence</h3>
               
               {vehicle.rental_conditions && (
                 <div className="conditions-content">
@@ -195,7 +204,7 @@ const VehicleDetails = () => {
                 </div>
               )}
               
-              {vehicle.terms_pdf && (
+              {vehicle.rental_conditions_pdf && (
                 <div className="pdf-download">
                   {!vehicle.rental_conditions && (
                     <p style={{ marginBottom: '1rem', color: 'var(--text-secondary)' }}>
@@ -203,12 +212,12 @@ const VehicleDetails = () => {
                     </p>
                   )}
                   <a 
-                    href={`http://localhost:5000${vehicle.terms_pdf}`}
+                    href={`http://localhost:5000${vehicle.rental_conditions_pdf}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="download-pdf-btn"
                   >
-                    📄 Télécharger les conditions (PDF)
+                    📄 Voir/Télécharger les conditions (PDF)
                   </a>
                 </div>
               )}
@@ -260,14 +269,14 @@ const VehicleDetails = () => {
           </div>
 
           <div className="vehicle-addresses">
-            <h3>📍 Adresses de prise en charge</h3>
+            <h3>Adresses de prise en charge</h3>
             <div className="address-info">
               <div className="address-item">
-                <strong>🚗 Récupération :</strong>
+                <strong>Récupération :</strong>
                 <p>{vehicle.pickup_address || vehicle.location}</p>
               </div>
               <div className="address-item">
-                <strong>🏁 Dépôt/Retour :</strong>
+                <strong>Dépôt/Retour :</strong>
                 <p>{vehicle.return_address || vehicle.location}</p>
               </div>
             </div>
@@ -277,14 +286,23 @@ const VehicleDetails = () => {
             <button 
               className="reserve-btn"
               onClick={() => {
+                if (reservations.length > 0) {
+                  showToast('Ce véhicule est actuellement réservé', 'warning');
+                  return;
+                }
                 if (!isAuthenticated) {
                   navigate('/auth', { state: { returnTo: `/vehicle/${id}` } });
                 } else {
                   setShowReservationForm(!showReservationForm);
                 }
               }}
+              disabled={reservations.length > 0}
+              style={{
+                opacity: reservations.length > 0 ? 0.5 : 1,
+                cursor: reservations.length > 0 ? 'not-allowed' : 'pointer'
+              }}
             >
-              {showReservationForm ? 'Annuler' : 'Réserver'}
+              {reservations.length > 0 ? 'Déjà réservé' : (showReservationForm ? 'Annuler' : 'Réserver')}
             </button>
             <button 
               className="contact-btn" 
@@ -292,14 +310,33 @@ const VehicleDetails = () => {
             >
               Contacter l'agence
             </button>
+            <ShareButton vehicle={vehicle} />
             {!isAuthenticated && (
               <p className="login-message">
                 Connectez-vous pour réserver ce véhicule
               </p>
             )}
+            {reservations.length > 0 && (
+              <div className="reserved-info">
+                <p>⚠️ Ce véhicule est actuellement réservé</p>
+                <ul>
+                  {reservations.map((res, idx) => (
+                    <li key={idx}>
+                      Jusqu'au {new Date(res.end_date).toLocaleDateString('fr-FR', { 
+                        day: '2-digit', 
+                        month: '2-digit', 
+                        year: 'numeric', 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                      })}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
 
-          {showReservationForm && isClient && (
+          {showReservationForm && isClient && reservations.length === 0 && (
             <form className="reservation-form" onSubmit={handleReservation}>
               <h3>Réserver ce véhicule</h3>
               
@@ -370,6 +407,14 @@ const VehicleDetails = () => {
         </div>
       )}
       </div>
+
+      {showLightbox && images.length > 0 && (
+        <ImageLightbox
+          imageUrl={`http://localhost:5000${images[selectedImage]?.image_url}`}
+          alt={`${vehicle.brand} ${vehicle.model}`}
+          onClose={() => setShowLightbox(false)}
+        />
+      )}
 
       <Footer />
     </div>

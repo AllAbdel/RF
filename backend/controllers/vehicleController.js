@@ -9,15 +9,17 @@ const getAllVehicles = async (req, res) => {
              (SELECT image_url FROM vehicle_images WHERE vehicle_id = v.id AND is_primary = 1 LIMIT 1) as primary_image,
              COALESCE((SELECT AVG(rating) FROM reviews WHERE vehicle_id = v.id), 0) as avg_rating,
              (SELECT COUNT(*) FROM reviews WHERE vehicle_id = v.id) as review_count,
-             (SELECT end_date FROM reservations WHERE vehicle_id = v.id AND status IN ('accepted') AND end_date > NOW() ORDER BY end_date ASC LIMIT 1) as current_reservation_end
+             (SELECT COUNT(*) FROM reservations WHERE vehicle_id = v.id AND status IN ('accepted', 'completed')) as reservation_count,
+             (SELECT end_date FROM reservations WHERE vehicle_id = v.id AND status IN ('accepted', 'pending') AND end_date > NOW() ORDER BY end_date ASC LIMIT 1) as current_reservation_end,
+             (SELECT start_date FROM reservations WHERE vehicle_id = v.id AND status IN ('accepted', 'pending') AND end_date > NOW() ORDER BY end_date ASC LIMIT 1) as current_reservation_start
       FROM vehicles v
       JOIN agencies a ON v.agency_id = a.id
     `;
     
     const params = [];
 
-    // Filtrer uniquement les véhicules disponibles
-    query += ` WHERE v.status = 'available'`;
+    // Afficher tous les véhicules (disponibles, loués et réservés)
+    query += ` WHERE v.status IN ('available', 'rented', 'reserved')`;
 
     if (search) {
       query += ` AND (v.brand LIKE ? OR v.model LIKE ? OR a.name LIKE ?)`;
@@ -67,7 +69,8 @@ const getVehicleById = async (req, res) => {
     const { id } = req.params;
 
     const [vehicles] = await db.query(
-      `SELECT v.*, a.name as agency_name, a.phone as agency_phone, a.email as agency_email, a.rental_conditions,
+      `SELECT v.*, a.name as agency_name, a.phone as agency_phone, a.email as agency_email, 
+              a.rental_conditions, a.rental_conditions_pdf,
               (SELECT AVG(rating) FROM reviews WHERE vehicle_id = v.id) as avg_rating,
               (SELECT COUNT(*) FROM reviews WHERE vehicle_id = v.id) as review_count
        FROM vehicles v
@@ -94,10 +97,22 @@ const getVehicleById = async (req, res) => {
       [id]
     );
 
+    // Récupérer les réservations actives pour bloquer les dates
+    const [reservations] = await db.query(
+      `SELECT start_date, end_date 
+       FROM reservations 
+       WHERE vehicle_id = ? 
+       AND status IN ('pending', 'accepted') 
+       AND end_date >= NOW()
+       ORDER BY start_date ASC`,
+      [id]
+    );
+
     res.json({
       vehicle: vehicles[0],
       images,
-      reviews
+      reviews,
+      reservations
     });
   } catch (error) {
     console.error('Erreur récupération véhicule:', error);

@@ -19,6 +19,9 @@ import ContractSignature from './components/ContractSignature';
 import VerifyEmail from './pages/VerifyEmail';
 import ResetPassword from './pages/ResetPassword';
 import TwoFactorSetup from './pages/TwoFactorSetup';
+import Toast from './components/Toast';
+import ScrollToTop from './components/ScrollToTop';
+import VehicleComparison from './components/VehicleComparison';
 
 import './styles/App.css';
 
@@ -76,6 +79,9 @@ function App() {
     <AuthProvider>
       <Router>
         <div className="App">
+          <Toast />
+          <ScrollToTop />
+          <VehicleComparison />
           <Routes>
             {/* Route d'accueil publique - accessible à tous */}
             <Route path="/" element={<HomePage />} />

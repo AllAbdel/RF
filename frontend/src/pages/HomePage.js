@@ -200,7 +200,6 @@ const HomePage = () => {
 
         {filteredVehicles.length === 0 ? (
           <div className="no-vehicles">
-            <div className="no-vehicles-icon">🚗</div>
             <h3>Aucun véhicule trouvé</h3>
             <p>Aucun véhicule ne correspond à vos critères de recherche.</p>
             <p className="suggestion">Essayez de modifier vos filtres ou de rechercher autre chose.</p>

@@ -114,7 +114,7 @@ const AgencyDashboard = () => {
           className="nav-btn"
           onClick={() => navigate('/')}
         >
-          🏠 Accueil
+          Accueil
         </button>
         <button
           className={`nav-btn ${activeTab === 'vehicles' ? 'active' : ''}`}
@@ -164,7 +164,7 @@ const AgencyDashboard = () => {
               className={`nav-btn ${activeTab === 'profile' ? 'active' : ''}`}
               onClick={() => setActiveTab('profile')}
             >
-              ⚙️ Profil
+              Profil
             </button>
           </>
         )}
@@ -173,7 +173,7 @@ const AgencyDashboard = () => {
           onClick={() => navigate('/messages')}
           style={{ marginLeft: 'auto' }}
         >
-          💬 Messages
+          Messages
         </button>
       </nav>
 
