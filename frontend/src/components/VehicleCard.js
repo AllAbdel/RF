@@ -42,6 +42,14 @@ const VehicleCard = ({ vehicle }) => {
     return `${hours}h ${minutes}m`;
   };
 
+  const isNewVehicle = () => {
+    if (!vehicle.created_at) return false;
+    const now = new Date();
+    const created = new Date(vehicle.created_at);
+    const diffDays = (now - created) / (1000 * 60 * 60 * 24);
+    return diffDays <= 7;
+  };
+
   const remainingTime = getRemainingTime(vehicle.current_reservation_end);
 
   return (
@@ -58,9 +66,16 @@ const VehicleCard = ({ vehicle }) => {
         {remainingTime && (
           <div className="status-badge reserved">Réservé - reste {remainingTime}</div>
         )}
-        {vehicle.avg_rating && (
+        {isNewVehicle() && (
+          <div className="status-badge new">Nouveau</div>
+        )}
+        {vehicle.avg_rating && parseFloat(vehicle.avg_rating) > 0 ? (
           <div className="rating-badge">
-            {`${parseFloat(vehicle.avg_rating).toFixed(1)}/5`}
+            ⭐ {parseFloat(vehicle.avg_rating).toFixed(1)}/5 {vehicle.review_count > 0 && `(${vehicle.review_count} avis)`}
+          </div>
+        ) : (
+          <div className="rating-badge no-rating">
+            Pas encore d'avis
           </div>
         )}
       </div>

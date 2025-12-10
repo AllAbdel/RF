@@ -125,7 +125,33 @@ const HomePage = () => {
   };
 
   if (loading) {
-    return <div className="loading">Chargement...</div>;
+    return (
+      <div className="home-page">
+        <Header />
+        <section className="hero-section">
+          <h2>Trouvez votre véhicule idéal</h2>
+          <p>Réservez en quelques clics parmi des centaines de véhicules disponibles</p>
+        </section>
+        <div className="home-content">
+          <div className="skeleton-loading">
+            <div className="skeleton-search"></div>
+            <div className="vehicles-grid">
+              {[1, 2, 3, 4, 5, 6].map(i => (
+                <div key={i} className="skeleton-card">
+                  <div className="skeleton-image"></div>
+                  <div className="skeleton-content">
+                    <div className="skeleton-title"></div>
+                    <div className="skeleton-text"></div>
+                    <div className="skeleton-text short"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
   }
 
   return (
@@ -174,7 +200,10 @@ const HomePage = () => {
 
         {filteredVehicles.length === 0 ? (
           <div className="no-vehicles">
-            <p>Aucun véhicule trouvé avec ces critères</p>
+            <div className="no-vehicles-icon">🚗</div>
+            <h3>Aucun véhicule trouvé</h3>
+            <p>Aucun véhicule ne correspond à vos critères de recherche.</p>
+            <p className="suggestion">Essayez de modifier vos filtres ou de rechercher autre chose.</p>
           </div>
         ) : (
           <>
