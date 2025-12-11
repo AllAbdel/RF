@@ -41,40 +41,94 @@ node_modules/
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
+bower_components/
 
 # ================================
 # BUILD & PRODUCTION
 # ================================
 /build
+build/
 /dist
+dist/
 /coverage
 *.tsbuildinfo
+frontend/build/
+backend/dist/
+.next/
+out/
+*.bundle.js
+*.bundle.js.map
 
 # ================================
-# UPLOADS & USER FILES
+# UPLOADS & USER FILES (FICHIERS LOURDS)
 # ================================
+# Tous les uploads utilisateurs
 backend/uploads/**/*
 !backend/uploads/.gitkeep
 !backend/uploads/agencies/.gitkeep
 !backend/uploads/vehicles/.gitkeep
+!backend/uploads/documents/.gitkeep
 uploads/
+
+# Documents et images uploadés
 *.pdf
 *.PDF
-
-# Documents sensibles
 **/documents/**/*.pdf
 **/documents/**/*.jpg
 **/documents/**/*.jpeg
 **/documents/**/*.png
+**/documents/**/*.gif
+**/documents/**/*.bmp
 backend/uploads/documents/
 backend/uploads/agencies/*
 !backend/uploads/agencies/.gitkeep
 backend/uploads/vehicles/*
 !backend/uploads/vehicles/.gitkeep
 
+# Images lourdes (sauf logos petits)
+*.raw
+*.RAW
+*.dng
+*.DNG
+*.psd
+*.PSD
+*.ai
+*.AI
+*.eps
+*.EPS
+*.tiff
+*.TIFF
+*.bmp
+*.BMP
+*.webp
+*.WEBP
+*.svg
+*.SVG
+
+# Fichiers média lourds
+*.mp4
+*.MP4
+*.mov
+*.MOV
+*.avi
+*.AVI
+*.mkv
+*.MKV
+*.wmv
+*.WMV
+*.flv
+*.FLV
+*.mp3
+*.MP3
+*.wav
+*.WAV
+*.flac
+*.FLAC
+
 # ================================
-# BASE DE DONNÉES
+# BASE DE DONNÉES (DONNÉES SENSIBLES)
 # ================================
+# Backups de base de données
 *.sql.backup
 *.sql.gz
 *.db
@@ -83,6 +137,14 @@ backend/uploads/vehicles/*
 *.dump
 database-backup/
 backups/
+dump/
+
+# Fichiers SQL avec données de test/production
+**/historical-data.sql
+**/historical-simple.sql
+**/test-data.sql
+**/setup-fresh-data.sql
+# Note: migration_*.sql et database.sql sont conservés (schéma uniquement)
 
 # ================================
 # LOGS
@@ -153,3 +215,14 @@ coverage/
 # ================================
 .history/
 .git-credentials
+
+# ================================
+# FICHIERS SPÉCIFIQUES AU PROJET
+# ================================
+# Fichier OCR lourd
+backend/fra.traineddata
+
+# Fichiers temporaires de scripts
+*.pid.txt
+.backend-pid.txt
+.frontend-pid.txt

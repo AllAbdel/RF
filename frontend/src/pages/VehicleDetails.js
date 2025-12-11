@@ -318,7 +318,7 @@ const VehicleDetails = () => {
             )}
             {reservations.length > 0 && (
               <div className="reserved-info">
-                <p>⚠️ Ce véhicule est actuellement réservé</p>
+                <p>Ce véhicule est actuellement réservé</p>
                 <ul>
                   {reservations.map((res, idx) => (
                     <li key={idx}>
