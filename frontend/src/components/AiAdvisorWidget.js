@@ -126,82 +126,123 @@ const AiAdvisorWidget = ({ agencyData, isFullPage = false }) => {
   // Mode full page (onglet dédié)
   if (isFullPage) {
     return (
-      <div className="h-full flex flex-col bg-gradient-to-br from-gray-50 to-gray-100">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-700 to-blue-600 p-6 text-white shadow-lg">
-          <div className="max-w-6xl mx-auto flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="bg-white/20 p-3 rounded-xl">
-                <BarChart2 size={28} />
+      <div className="h-full flex flex-col" style={{ 
+        background: 'var(--bg-secondary)'
+      }}>
+        {/* Header minimaliste */}
+        <div style={{ 
+          background: 'var(--bg-elevated)',
+          borderBottom: '1px solid var(--border-primary)'
+        }} className="px-8 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div style={{ 
+                background: 'var(--accent-primary)',
+                boxShadow: 'var(--shadow-accent)'
+              }} className="p-3 rounded-xl">
+                <BarChart2 size={26} strokeWidth={2.5} style={{ color: 'white' }} />
               </div>
               <div>
-                <h1 className="text-2xl font-bold">Assistant IA RentFlow</h1>
-                <p className="text-blue-100 flex items-center gap-2 mt-1">
-                  <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                  Service actif
+                <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Assistant IA RentFlow</h1>
+                <p className="flex items-center gap-2 mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
+                  <span className="w-2 h-2 rounded-full" style={{ background: 'var(--success)' }}></span>
+                  Service connecté
                 </p>
               </div>
             </div>
             <button 
               onClick={() => setAudioEnabled(!audioEnabled)} 
-              className="hover:bg-white/10 p-3 rounded-lg transition-colors"
+              style={{ 
+                background: 'var(--bg-secondary)',
+                color: 'var(--text-primary)',
+                border: '1px solid var(--border-secondary)'
+              }}
+              className="hover:opacity-80 p-3 rounded-xl transition-all"
             >
-              {audioEnabled ? <Volume2 size={24} /> : <VolumeX size={24} />}
+              {audioEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
             </button>
           </div>
         </div>
 
-        {/* Metrics Dashboard */}
+        {/* Metrics Dashboard épuré */}
         {analysisData && (
-          <div className="max-w-6xl mx-auto w-full px-6 py-4">
+          <div className="px-8 py-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-                <div className="flex items-center gap-3">
-                  <TrendingUp className="text-blue-600" size={24} />
+              <div style={{ 
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border-primary)',
+                boxShadow: 'var(--shadow-md)'
+              }} className="p-5 rounded-xl">
+                <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-500">Taux d'occupation</p>
-                    <p className="text-2xl font-bold text-gray-800">{analysisData.utilization_rate?.toFixed(0)}%</p>
+                    <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Taux d'occupation</p>
+                    <p className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>{analysisData.utilization_rate?.toFixed(0)}%</p>
                   </div>
+                  <TrendingUp size={32} style={{ color: 'var(--accent-primary)' }} />
                 </div>
               </div>
-              <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-                <div className="flex items-center gap-3">
-                  <BarChart2 className="text-green-600" size={24} />
+              <div style={{ 
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border-primary)',
+                boxShadow: 'var(--shadow-md)'
+              }} className="p-5 rounded-xl">
+                <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-500">Revenue récent</p>
-                    <p className="text-2xl font-bold text-gray-800">{analysisData.recent_revenue?.toFixed(0)}€</p>
+                    <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Revenue 30j</p>
+                    <p className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>{analysisData.recent_revenue?.toFixed(0)}€</p>
                   </div>
+                  <BarChart2 size={32} style={{ color: 'var(--success)' }} />
                 </div>
               </div>
-              <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-                <div className="flex items-center gap-3">
-                  <AlertTriangle className="text-orange-600" size={24} />
+              <div style={{ 
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border-primary)',
+                boxShadow: 'var(--shadow-md)'
+              }} className="p-5 rounded-xl">
+                <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-500">Satisfaction</p>
-                    <p className="text-2xl font-bold text-gray-800">{analysisData.satisfaction_rate?.toFixed(0)}%</p>
+                    <p className="text-sm font-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Satisfaction</p>
+                    <p className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>{analysisData.satisfaction_rate?.toFixed(0)}%</p>
                   </div>
+                  <AlertTriangle size={32} style={{ color: 'var(--warning)' }} />
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* Chat Container */}
-        <div className="flex-1 max-w-6xl mx-auto w-full px-6 pb-6 flex flex-col min-h-0">
-          <div className="bg-white rounded-xl shadow-lg flex-1 flex flex-col overflow-hidden border border-gray-200">
+        {/* Chat Container qui prend toute la largeur */}
+        <div className="flex-1 px-8 pb-8 flex flex-col min-h-0">
+          <div style={{ 
+            background: 'var(--bg-elevated)',
+            border: '1px solid var(--border-primary)',
+            boxShadow: 'var(--shadow-lg)'
+          }} className="rounded-2xl flex-1 flex flex-col overflow-hidden">
             
-            {/* Messages */}
+            {/* Messages épurés */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
               {messages.map((msg, idx) => (
-                <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fadeIn`}>
                   <div 
-                    className={`max-w-[80%] p-4 rounded-2xl text-sm leading-relaxed shadow-sm ${
-                      msg.role === 'user' 
-                        ? 'bg-blue-600 text-white rounded-br-none' 
-                        : msg.sentiment === 'warning'
-                        ? 'bg-orange-50 text-gray-800 border border-orange-200 rounded-bl-none'
-                        : 'bg-gray-50 text-gray-800 border border-gray-200 rounded-bl-none'
-                    }`}
+                    style={msg.role === 'user' 
+                      ? { 
+                          background: 'var(--accent-primary)',
+                          boxShadow: 'var(--shadow-accent)',
+                          color: 'white'
+                        }
+                      : msg.sentiment === 'warning'
+                      ? { 
+                          background: 'var(--warning-bg)',
+                          border: '1px solid var(--warning-border)',
+                          color: 'var(--text-primary)'
+                        }
+                      : { 
+                          background: 'var(--bg-secondary)',
+                          border: '1px solid var(--border-secondary)',
+                          color: 'var(--text-primary)'
+                        }
+                    }
+                    className="max-w-[75%] p-4 rounded-2xl text-sm leading-relaxed"
                   >
                     <div dangerouslySetInnerHTML={{ __html: formatMessage(msg.text) }} />
                   </div>
@@ -209,12 +250,15 @@ const AiAdvisorWidget = ({ agencyData, isFullPage = false }) => {
               ))}
               
               {isLoading && (
-                <div className="flex justify-start">
-                  <div className="bg-gray-50 p-4 rounded-2xl rounded-bl-none border border-gray-200">
+                <div className="flex justify-start animate-fadeIn">
+                  <div style={{ 
+                    background: 'var(--bg-secondary)',
+                    border: '1px solid var(--border-secondary)'
+                  }} className="p-4 rounded-2xl">
                     <div className="flex space-x-2">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      <div className="w-2.5 h-2.5 rounded-full animate-bounce" style={{ background: 'var(--accent-primary)' }}></div>
+                      <div className="w-2.5 h-2.5 rounded-full animate-bounce" style={{ background: 'var(--accent-primary)', animationDelay: '0.1s' }}></div>
+                      <div className="w-2.5 h-2.5 rounded-full animate-bounce" style={{ background: 'var(--accent-primary)', animationDelay: '0.2s' }}></div>
                     </div>
                   </div>
                 </div>
@@ -223,56 +267,95 @@ const AiAdvisorWidget = ({ agencyData, isFullPage = false }) => {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Quick Actions */}
-            <div className="p-4 bg-gray-50 flex gap-2 overflow-x-auto border-t border-gray-200">
+            {/* Quick Actions minimalistes */}
+            <div className="p-4 flex gap-2 overflow-x-auto" style={{ 
+              background: 'var(--bg-secondary)', 
+              borderTop: '1px solid var(--border-primary)' 
+            }}>
               <button 
                 onClick={handleAnalysis}
                 disabled={isLoading}
-                className="whitespace-nowrap px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white text-sm rounded-lg hover:from-blue-700 hover:to-blue-600 font-medium transition-all shadow-sm disabled:opacity-50"
+                style={{ 
+                  background: 'var(--accent-primary)',
+                  color: 'white',
+                  boxShadow: 'var(--shadow-accent)'
+                }}
+                className="whitespace-nowrap px-5 py-2.5 text-sm rounded-full font-semibold transition-all hover:opacity-90 disabled:opacity-50"
               >
                 ✨ Analyser ma flotte
               </button>
               <button 
                 onClick={() => { setInputText("Quelle est ma meilleure voiture ?"); handleSendMessage(); }}
                 disabled={isLoading}
-                className="whitespace-nowrap px-4 py-2 bg-green-100 text-green-700 text-sm rounded-lg hover:bg-green-200 font-medium transition-colors disabled:opacity-50"
+                style={{ 
+                  background: 'var(--success-bg)',
+                  color: 'var(--success)',
+                  border: '1px solid var(--success-border)'
+                }}
+                className="whitespace-nowrap px-5 py-2.5 text-sm rounded-full font-semibold transition-all hover:opacity-90 disabled:opacity-50"
               >
                 🏆 Meilleur véhicule
               </button>
               <button 
                 onClick={() => { setInputText("Comment augmenter mes revenus ?"); handleSendMessage(); }}
                 disabled={isLoading}
-                className="whitespace-nowrap px-4 py-2 bg-purple-100 text-purple-700 text-sm rounded-lg hover:bg-purple-200 font-medium transition-colors disabled:opacity-50"
+                style={{ 
+                  background: 'var(--info-bg)',
+                  color: 'var(--info)',
+                  border: '1px solid var(--info-border)'
+                }}
+                className="whitespace-nowrap px-5 py-2.5 text-sm rounded-full font-semibold transition-all hover:opacity-90 disabled:opacity-50"
               >
                 💰 Conseils Prix
               </button>
               <button 
                 onClick={() => { setInputText("Stratégie marketing ?"); handleSendMessage(); }}
                 disabled={isLoading}
-                className="whitespace-nowrap px-4 py-2 bg-orange-100 text-orange-700 text-sm rounded-lg hover:bg-orange-200 font-medium transition-colors disabled:opacity-50"
+                style={{ 
+                  background: 'var(--warning-bg)',
+                  color: 'var(--warning)',
+                  border: '1px solid var(--warning-border)'
+                }}
+                className="whitespace-nowrap px-5 py-2.5 text-sm rounded-full font-semibold transition-all hover:opacity-90 disabled:opacity-50"
               >
                 📢 Marketing
               </button>
             </div>
 
-            {/* Input */}
-            <div className="p-4 bg-white border-t border-gray-200">
-              <div className="flex items-center gap-3">
+            {/* Input épuré */}
+            <div className="p-5" style={{ 
+              background: 'var(--bg-secondary)', 
+              borderTop: '1px solid var(--border-primary)' 
+            }}>
+              <div className="flex items-center gap-3" style={{ 
+                background: 'var(--bg-tertiary)',
+                borderRadius: '12px',
+                padding: '4px',
+                border: '1px solid var(--border-secondary)'
+              }}>
                 <input
                   type="text"
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && !isLoading && handleSendMessage()}
-                  placeholder="Posez votre question..."
+                  placeholder="Posez votre question à l'assistant IA..."
                   disabled={isLoading}
-                  className="flex-1 bg-gray-100 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 text-sm disabled:opacity-50"
+                  style={{ color: 'var(--text-primary)' }}
+                  className="flex-1 bg-transparent px-4 py-3 outline-none text-sm placeholder-gray-500 disabled:opacity-50"
                 />
                 <button 
                   onClick={handleSendMessage}
                   disabled={!inputText.trim() || isLoading}
-                  className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={inputText.trim() && !isLoading ? { 
+                    background: 'var(--accent-primary)',
+                    boxShadow: 'var(--shadow-accent)'
+                  } : { 
+                    background: 'var(--bg-hover)',
+                    color: 'var(--text-tertiary)'
+                  }}
+                  className="p-3 rounded-lg transition-all hover:opacity-90 disabled:opacity-50"
                 >
-                  <Send size={20} />
+                  <Send size={20} style={{ color: inputText.trim() && !isLoading ? 'white' : 'var(--text-tertiary)' }} />
                 </button>
               </div>
             </div>
@@ -288,65 +371,104 @@ const AiAdvisorWidget = ({ agencyData, isFullPage = false }) => {
       {!isOpen && (
         <button 
           onClick={() => setIsOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg flex items-center gap-2 transition-all transform hover:scale-105"
+          style={{ 
+            background: 'var(--accent-primary)',
+            boxShadow: 'var(--shadow-accent)'
+          }}
+          className="rounded-full p-4 flex items-center gap-2 transition-all transform hover:scale-110"
         >
           <div className="relative">
-            <MessageCircle size={28} />
+            <MessageCircle size={28} strokeWidth={2.5} style={{ color: 'white' }} />
             <span className="absolute -top-1 -right-1 flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ background: 'var(--success)' }}></span>
+              <span className="relative inline-flex rounded-full h-3 w-3" style={{ background: 'var(--success)' }}></span>
             </span>
           </div>
         </button>
       )}
 
       {isOpen && (
-        <div className="bg-white rounded-2xl shadow-2xl w-[380px] flex flex-col overflow-hidden border border-gray-200 h-[600px]">
-          {/* Header compact */}
-          <div className="bg-gradient-to-r from-blue-700 to-blue-600 p-4 text-white flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <div className="bg-white/20 p-2 rounded-full">
-                <BarChart2 size={20} />
+        <div style={{ 
+          background: 'var(--bg-elevated)',
+          border: '1px solid var(--border-primary)',
+          boxShadow: 'var(--shadow-lg)'
+        }} className="rounded-2xl w-[400px] flex flex-col overflow-hidden h-[600px]">
+          {/* Header minimaliste */}
+          <div style={{ 
+            background: 'var(--bg-secondary)',
+            borderBottom: '1px solid var(--border-primary)'
+          }} className="p-4 flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <div style={{ 
+                background: 'var(--accent-primary)'
+              }} className="p-2 rounded-lg">
+                <BarChart2 size={20} strokeWidth={2.5} style={{ color: 'white' }} />
               </div>
               <div>
-                <h3 className="font-bold text-sm">Assistant IA</h3>
-                <p className="text-xs text-blue-100 flex items-center gap-1">
-                  <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span> En ligne
+                <h3 className="font-bold text-sm" style={{ color: 'var(--text-primary)' }}>Assistant IA</h3>
+                <p className="text-xs flex items-center gap-1.5 mt-0.5" style={{ color: 'var(--text-secondary)' }}>
+                  <span className="w-2 h-2 rounded-full" style={{ background: 'var(--success)' }}></span>
+                  Connecté
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <button onClick={() => setAudioEnabled(!audioEnabled)} className="hover:bg-white/10 p-1 rounded">
-                {audioEnabled ? <Volume2 size={18} /> : <VolumeX size={18} />}
+              <button 
+                onClick={() => setAudioEnabled(!audioEnabled)} 
+                style={{ 
+                  background: 'var(--bg-tertiary)',
+                  color: 'var(--text-primary)'
+                }} 
+                className="hover:opacity-80 p-2 rounded-lg transition-all"
+              >
+                {audioEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
               </button>
-              <button onClick={() => setIsOpen(false)} className="hover:bg-white/10 p-1 rounded">
-                <X size={20} />
+              <button 
+                onClick={() => setIsOpen(false)} 
+                style={{ 
+                  background: 'var(--bg-tertiary)',
+                  color: 'var(--text-primary)'
+                }} 
+                className="hover:opacity-80 p-2 rounded-lg transition-all"
+              >
+                <X size={18} />
               </button>
             </div>
           </div>
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 bg-gray-50 space-y-3">
+          {/* Messages épurés */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ background: 'var(--bg-secondary)' }}>
             {messages.map((msg, idx) => (
-              <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fadeIn`}>
                 <div 
-                  className={`max-w-[85%] p-3 rounded-xl text-sm leading-relaxed shadow-sm ${
-                    msg.role === 'user' 
-                      ? 'bg-blue-600 text-white rounded-br-none' 
-                      : 'bg-white text-gray-800 border border-gray-100 rounded-bl-none'
-                  }`}
+                  style={msg.role === 'user' 
+                    ? { 
+                        background: 'var(--accent-primary)',
+                        boxShadow: 'var(--shadow-accent)',
+                        color: 'white'
+                      }
+                    : { 
+                        background: 'var(--bg-elevated)',
+                        border: '1px solid var(--border-secondary)',
+                        color: 'var(--text-primary)'
+                      }
+                  }
+                  className="max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed"
                 >
                   <div dangerouslySetInnerHTML={{ __html: formatMessage(msg.text) }} />
                 </div>
               </div>
             ))}
             {isLoading && (
-              <div className="flex justify-start">
-                <div className="bg-white p-3 rounded-xl rounded-bl-none border border-gray-100">
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+              <div className="flex justify-start animate-fadeIn">
+                <div style={{ 
+                  background: 'var(--bg-elevated)',
+                  border: '1px solid var(--border-secondary)'
+                }} className="p-3 rounded-2xl">
+                  <div className="flex space-x-1.5">
+                    <div className="w-2 h-2 rounded-full animate-bounce" style={{ background: 'var(--accent-primary)' }}></div>
+                    <div className="w-2 h-2 rounded-full animate-bounce" style={{ background: 'var(--accent-primary)', animationDelay: '0.1s' }}></div>
+                    <div className="w-2 h-2 rounded-full animate-bounce" style={{ background: 'var(--accent-primary)', animationDelay: '0.2s' }}></div>
                   </div>
                 </div>
               </div>
@@ -354,27 +476,48 @@ const AiAdvisorWidget = ({ agencyData, isFullPage = false }) => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Quick actions */}
-          <div className="p-2 bg-gray-50 flex gap-2 overflow-x-auto border-t border-gray-100">
+          {/* Quick actions minimalistes */}
+          <div className="p-3 flex gap-2 overflow-x-auto" style={{ 
+            background: 'var(--bg-tertiary)', 
+            borderTop: '1px solid var(--border-primary)' 
+          }}>
             <button 
               onClick={handleAnalysis}
               disabled={isLoading}
-              className="whitespace-nowrap px-3 py-1 bg-blue-100 text-blue-700 text-xs rounded-full hover:bg-blue-200 font-medium transition-colors disabled:opacity-50"
+              style={{ 
+                background: 'var(--accent-primary)',
+                color: 'white',
+                boxShadow: 'var(--shadow-sm)'
+              }}
+              className="whitespace-nowrap px-4 py-2 text-xs rounded-full font-semibold transition-all hover:opacity-90 disabled:opacity-50"
             >
               ✨ Analyser
             </button>
             <button 
               onClick={() => { setInputText("Conseils prix ?"); handleSendMessage(); }}
               disabled={isLoading}
-              className="whitespace-nowrap px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full hover:bg-green-200 font-medium transition-colors disabled:opacity-50"
+              style={{ 
+                background: 'var(--success-bg)',
+                color: 'var(--success)',
+                border: '1px solid var(--success-border)'
+              }}
+              className="whitespace-nowrap px-4 py-2 text-xs rounded-full font-semibold transition-all hover:opacity-90 disabled:opacity-50"
             >
               💰 Prix
             </button>
           </div>
 
-          {/* Input */}
-          <div className="p-3 bg-white border-t border-gray-200">
-            <div className="flex items-center gap-2 bg-gray-100 rounded-full px-4 py-2">
+          {/* Input épuré */}
+          <div className="p-3" style={{ 
+            background: 'var(--bg-tertiary)', 
+            borderTop: '1px solid var(--border-primary)' 
+          }}>
+            <div className="flex items-center gap-2" style={{ 
+              background: 'var(--bg-secondary)',
+              borderRadius: '12px',
+              padding: '4px',
+              border: '1px solid var(--border-secondary)'
+            }}>
               <input
                 type="text"
                 value={inputText}
@@ -382,16 +525,22 @@ const AiAdvisorWidget = ({ agencyData, isFullPage = false }) => {
                 onKeyDown={(e) => e.key === 'Enter' && !isLoading && handleSendMessage()}
                 placeholder="Votre question..."
                 disabled={isLoading}
-                className="flex-1 bg-transparent outline-none text-sm text-gray-700 disabled:opacity-50"
+                style={{ color: 'var(--text-primary)' }}
+                className="flex-1 bg-transparent outline-none text-sm placeholder-gray-500 px-3 py-2 disabled:opacity-50"
               />
               <button 
                 onClick={handleSendMessage}
                 disabled={!inputText.trim() || isLoading}
-                className={`p-2 rounded-full transition-colors ${
-                  inputText.trim() && !isLoading ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-400 bg-gray-200'
-                }`}
+                style={inputText.trim() && !isLoading ? { 
+                  background: 'var(--accent-primary)',
+                  boxShadow: 'var(--shadow-sm)'
+                } : { 
+                  background: 'var(--bg-hover)',
+                  color: 'var(--text-tertiary)'
+                }}
+                className="p-2.5 rounded-lg transition-all hover:opacity-90 disabled:opacity-50"
               >
-                <Send size={16} />
+                <Send size={18} style={{ color: inputText.trim() && !isLoading ? 'white' : 'var(--text-tertiary)' }} />
               </button>
             </div>
           </div>

@@ -202,7 +202,6 @@ const AgencyDashboard = () => {
         <button
           className={`nav-btn ${activeTab === 'ai-assistant' ? 'active' : ''}`}
           onClick={() => setActiveTab('ai-assistant')}
-          style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', fontWeight: 'bold' }}
         >
           🤖 Assistance IA
         </button>
