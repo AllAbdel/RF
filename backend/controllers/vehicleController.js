@@ -129,11 +129,8 @@ const createVehicle = async (req, res) => {
 
     // Récupérer le fichier PDF s'il existe
     let termsPdfPath = null;
-    if (req.files) {
-      const termsPdfFile = req.files.find(f => f.fieldname === 'terms_pdf');
-      if (termsPdfFile) {
-        termsPdfPath = `/uploads/vehicles/terms/${termsPdfFile.filename}`;
-      }
+    if (req.files && req.files.terms_pdf && req.files.terms_pdf[0]) {
+      termsPdfPath = `/uploads/vehicles/terms/${req.files.terms_pdf[0].filename}`;
     }
 
     const [result] = await db.query(
@@ -145,15 +142,12 @@ const createVehicle = async (req, res) => {
     );
 
     // Gérer les images si elles sont uploadées
-    if (req.files && req.files.length > 0) {
-      for (let i = 0; i < req.files.length; i++) {
-        // Ignorer le fichier PDF dans le traitement des images
-        if (req.files[i].fieldname === 'images') {
-          await db.query(
-            'INSERT INTO vehicle_images (vehicle_id, image_url, is_primary) VALUES (?, ?, ?)',
-            [result.insertId, `/uploads/vehicles/${req.files[i].filename}`, i === 0]
-          );
-        }
+    if (req.files && req.files.images && req.files.images.length > 0) {
+      for (let i = 0; i < req.files.images.length; i++) {
+        await db.query(
+          'INSERT INTO vehicle_images (vehicle_id, image_url, is_primary) VALUES (?, ?, ?)',
+          [result.insertId, `/uploads/vehicles/${req.files.images[i].filename}`, i === 0]
+        );
       }
     }
 
@@ -219,11 +213,10 @@ const updateVehicle = async (req, res) => {
     }
 
     // Ajouter les nouvelles images
-    if (req.files && req.files.length > 0) {
-      const imageFiles = req.files.filter(f => f.fieldname === 'images');
-      console.log('➕ Nouvelles images:', imageFiles.length);
+    if (req.files && req.files.images && req.files.images.length > 0) {
+      console.log('➕ Nouvelles images:', req.files.images.length);
       
-      for (const file of imageFiles) {
+      for (const file of req.files.images) {
         await db.query(
           'INSERT INTO vehicle_images (vehicle_id, image_url) VALUES (?, ?)',
           [id, `/uploads/vehicles/${file.filename}`]
@@ -233,12 +226,9 @@ const updateVehicle = async (req, res) => {
 
     // Récupérer le nouveau fichier PDF s'il existe
     let termsPdfPath = vehicles[0].terms_pdf; // Conserver l'ancien si pas de nouveau
-    if (req.files) {
-      const termsPdfFile = req.files.find(f => f.fieldname === 'terms_pdf');
-      if (termsPdfFile) {
-        termsPdfPath = `/uploads/vehicles/terms/${termsPdfFile.filename}`;
-        // TODO: Supprimer l'ancien PDF si nécessaire
-      }
+    if (req.files && req.files.terms_pdf && req.files.terms_pdf[0]) {
+      termsPdfPath = `/uploads/vehicles/terms/${req.files.terms_pdf[0].filename}`;
+      // TODO: Supprimer l'ancien PDF si nécessaire
     }
 
     await db.query(

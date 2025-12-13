@@ -43,14 +43,48 @@ if ($nodeProcesses) {
 Start-Sleep -Seconds 1
 
 # ========================================
-# 3. Demarrer Backend (vraiment en arriere-plan)
+# 3. Demarrer Service IA Python (optionnel)
 # ========================================
-Write-Host "`n[3/3] Demarrage du backend..." -ForegroundColor Yellow
+Write-Host "`n[3/4] Demarrage du service IA..." -ForegroundColor Yellow
 
-$backendJob = Start-Job -ScriptBlock {
-    Set-Location "E:\Perso\RentFlow-V2\backend"
-    node server.js
+try {
+    $pythonVersion = python --version 2>&1
+    
+    # Vérifier si fastapi est installé
+    $pipList = pip list 2>&1 | Out-String
+    if ($pipList -notmatch "fastapi") {
+        Write-Host "Installation des dependances IA..." -ForegroundColor Yellow
+        pip install -q -r backend\requirements.txt
+    }
+    
+    $aiJob = Start-Job -ScriptBlock {
+        param($path)
+        Set-Location "$path\backend\services"
+        python ai_advisor_api.py 2>&1 | Out-Null
+    } -ArgumentList $rootPath
+    
+    Start-Sleep -Seconds 3
+    $aiPort = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue
+    if ($aiPort) {
+        Write-Host "Service IA demarre (port 8000)" -ForegroundColor Green
+    } else {
+        Write-Host "Service IA en cours de demarrage..." -ForegroundColor Yellow
+    }
+} catch {
+    Write-Host "Python non installe - Service IA desactive" -ForegroundColor Gray
 }
+
+# ========================================
+# 4. Demarrer Backend Node.js
+# ========================================
+Write-Host "`n[4/4] Demarrage du backend..." -ForegroundColor Yellow
+
+$rootPath = $PWD.Path
+$backendJob = Start-Job -ScriptBlock {
+    param($path)
+    Set-Location "$path\backend"
+    node server.js
+} -ArgumentList $rootPath
 
 Start-Sleep -Seconds 3
 
@@ -63,12 +97,12 @@ if ($backendPort) {
 }
 
 # ========================================
-# 4. Demarrer Frontend (vraiment en arriere-plan)
+# 5. Demarrer Frontend React
 # ========================================
 Write-Host "`nDemarrage du frontend..." -ForegroundColor Yellow
 
 # Verifier que node_modules existe
-$frontendPath = "E:\Perso\RentFlow-V2\frontend"
+$frontendPath = Join-Path $PWD.Path "frontend"
 if (-not (Test-Path "$frontendPath\node_modules")) {
     Write-Host "node_modules manquant dans frontend" -ForegroundColor Red
     Write-Host "`nEXECUTEZ:" -ForegroundColor Yellow
@@ -79,10 +113,11 @@ if (-not (Test-Path "$frontendPath\node_modules")) {
 }
 
 $frontendJob = Start-Job -ScriptBlock {
-    Set-Location "E:\Perso\RentFlow-V2\frontend"
+    param($path)
+    Set-Location "$path\frontend"
     $env:BROWSER = "none"
     npm start 2>&1 | Out-Null
-}
+} -ArgumentList $rootPath
 
 Write-Host "Frontend en cours de demarrage..." -ForegroundColor Green
 Start-Sleep -Seconds 8
@@ -109,12 +144,18 @@ Write-Host "   RentFlow demarre avec succes !" -ForegroundColor Green
 Write-Host "========================================`n" -ForegroundColor Cyan
 
 Write-Host "URLs d'acces:" -ForegroundColor Yellow
-Write-Host "   Frontend: http://localhost:3000" -ForegroundColor White
-Write-Host "   Backend:  http://localhost:5000" -ForegroundColor White
+Write-Host "   Frontend:   http://localhost:3000" -ForegroundColor White
+Write-Host "   Backend:    http://localhost:5000" -ForegroundColor White
+if ($aiJob) {
+    Write-Host "   Service IA: http://localhost:8000" -ForegroundColor White
+}
 
 Write-Host "`nJobs en cours:" -ForegroundColor Yellow
-Write-Host "   Backend Job ID:  $($backendJob.Id)" -ForegroundColor Gray
-Write-Host "   Frontend Job ID: $($frontendJob.Id)" -ForegroundColor Gray
+if ($aiJob) {
+    Write-Host "   Service IA Job ID: $($aiJob.Id)" -ForegroundColor Gray
+}
+Write-Host "   Backend Job ID:    $($backendJob.Id)" -ForegroundColor Gray
+Write-Host "   Frontend Job ID:   $($frontendJob.Id)" -ForegroundColor Gray
 
 Write-Host "`nPour arreter les serveurs:" -ForegroundColor Yellow
 Write-Host "   Executez: .\stop.ps1" -ForegroundColor White

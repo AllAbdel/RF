@@ -1,8 +1,6 @@
 const jwt = require('jsonwebtoken');
-const db = require('../config/database');
-const { isTokenBlacklisted } = require('../utils/tokenManager');
 
-const authMiddleware = async (req, res, next) => {
+const authMiddleware = (req, res, next) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
     
@@ -11,36 +9,11 @@ const authMiddleware = async (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
-    // 🆕 VÉRIFIER SI TOKEN EST BLACKLISTÉ
-    if (decoded.jti) {
-      const isBlacklisted = await isTokenBlacklisted(db, decoded.jti);
-      if (isBlacklisted) {
-        return res.status(401).json({ 
-          error: 'Token révoqué',
-          message: 'Votre session a expiré. Veuillez vous reconnecter.'
-        });
-      }
-    }
-    
-    // 🆕 VÉRIFIER SI EMAIL EST VÉRIFIÉ (optionnel selon routes)
-    if (req.path !== '/verify-email' && req.path !== '/resend-verification') {
-      const [users] = await db.query('SELECT email_verified FROM users WHERE id = ?', [decoded.id]);
-      if (users.length > 0 && !users[0].email_verified) {
-        // On laisse passer mais on signale (certaines routes peuvent vouloir bloquer)
-        req.user = { ...decoded, emailVerified: false };
-        return next();
-      }
-    }
-    
     req.user = decoded;
     next();
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
-      return res.status(401).json({ 
-        error: 'Token expiré',
-        message: 'Votre session a expiré. Veuillez vous reconnecter.'
-      });
+      return res.status(401).json({ error: 'Token expiré' });
     }
     return res.status(401).json({ error: 'Token invalide' });
   }

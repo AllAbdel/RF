@@ -10,23 +10,54 @@ import AgencyJoinRequests from '../components/AgencyJoinRequests';
 import AgencySettings from '../components/AgencySettings';
 import DocumentValidation from '../components/DocumentValidation';
 import AgencyProfile from '../components/AgencyProfile';
+import AiAdvisorWidget from '../components/AiAdvisorWidget';
 import '../styles/Agency.css';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const AgencyDashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('vehicles');
+  const location = useLocation();
+  
+  // Récupérer le paramètre 'tab' de l'URL
+  const urlParams = new URLSearchParams(location.search);
+  const tabFromUrl = urlParams.get('tab');
+  
+  const [activeTab, setActiveTab] = useState(tabFromUrl || 'vehicles');
   const [vehicles, setVehicles] = useState([]);
   const [reservations, setReservations] = useState([]);
   const [stats, setStats] = useState(null);
   const [showVehicleForm, setShowVehicleForm] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [aiContext, setAiContext] = useState(null);
+
+  // Mettre à jour activeTab quand l'URL change
+  useEffect(() => {
+    if (tabFromUrl && tabFromUrl !== activeTab) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [tabFromUrl]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     loadData();
   }, [activeTab]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Charger le contexte pour l'IA
+  useEffect(() => {
+    const loadAiContext = async () => {
+      try {
+        const response = await agencyAPI.getAiContext();
+        setAiContext(response.data.context);
+      } catch (error) {
+        console.error('Erreur chargement contexte IA:', error);
+      }
+    };
+    
+    if (activeTab === 'ai-assistant') {
+      loadAiContext();
+    }
+  }, [activeTab]);
 
   const loadData = async () => {
     setLoading(true);
@@ -169,6 +200,13 @@ const AgencyDashboard = () => {
           </>
         )}
         <button
+          className={`nav-btn ${activeTab === 'ai-assistant' ? 'active' : ''}`}
+          onClick={() => setActiveTab('ai-assistant')}
+          style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', fontWeight: 'bold' }}
+        >
+          🤖 Assistance IA
+        </button>
+        <button
           className={`nav-btn ${activeTab === 'messages' ? 'active' : ''}`}
           onClick={() => navigate('/messages')}
           style={{ marginLeft: 'auto' }}
@@ -249,6 +287,14 @@ const AgencyDashboard = () => {
 
             {activeTab === 'profile' && (user?.role === 'admin' || user?.role === 'super_admin') && (
               <AgencyProfile />
+            )}
+
+            {activeTab === 'ai-assistant' && (
+              aiContext ? (
+                <AiAdvisorWidget isFullPage={true} agencyData={aiContext} />
+              ) : (
+                <div className="loading">Chargement du contexte IA...</div>
+              )
             )}
           </>
         )}

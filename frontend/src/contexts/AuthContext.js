@@ -13,77 +13,72 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token'));
-  const [refreshToken, setRefreshToken] = useState(localStorage.getItem('refreshToken'));
+  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    // Lire le token du localStorage une seule fois au démarrage
+    const storedToken = localStorage.getItem('token');
+
+    // Si on a un token, essayer de charger l'utilisateur
+    if (storedToken) {
+      setToken(storedToken);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
       loadUser();
     } else {
+      // Sinon, nettoyer tout et ne rien faire
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      delete axios.defaults.headers.common['Authorization'];
       setLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  }, []);
 
   const loadUser = async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/auth/profile');
       setUser(response.data.user);
     } catch (error) {
-      console.error('Erreur chargement utilisateur:', error);
-      logout();
+      // Si c'est juste une erreur 401, l'utilisateur n'est pas connecté (normal)
+      if (error.response?.status === 401) {
+        // Token expiré, nettoyer silencieusement
+        cleanupAuth();
+      } else {
+        // Autre erreur, la logger
+        console.error('Erreur chargement utilisateur:', error);
+        cleanupAuth();
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const login = async (email, password, userType, twoFactorToken = null) => {
+  const cleanupAuth = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setToken(null);
+    setUser(null);
+    delete axios.defaults.headers.common['Authorization'];
+  };
+
+  const login = async (email, password, userType) => {
     try {
-      const payload = {
+      const response = await axios.post('http://localhost:5000/api/auth/login', {
         email,
         password,
         user_type: userType
-      };
+      });
       
-      // Ajouter le code 2FA si fourni
-      if (twoFactorToken) {
-        payload.twoFactorToken = twoFactorToken;
-      }
+      const { token: newToken, user } = response.data;
       
-      const response = await axios.post('http://localhost:5000/api/auth/login', payload);
-      
-      // Cas 1: 2FA requis
-      if (response.data.requires2FA) {
-        return { 
-          success: false, 
-          requires2FA: true,
-          message: 'Code 2FA requis'
-        };
-      }
-      
-      // Cas 2: Email non vérifié
-      if (response.data.emailVerificationRequired) {
-        return {
-          success: false,
-          emailVerificationRequired: true,
-          message: 'Veuillez vérifier votre email avant de vous connecter'
-        };
-      }
-      
-      // Cas 3: Connexion réussie
-      const { accessToken, refreshToken: newRefreshToken, user } = response.data;
-      
-      // Sauvegarder les tokens
-      localStorage.setItem('token', accessToken);
-      localStorage.setItem('refreshToken', newRefreshToken);
+      // Sauvegarder le token
+      localStorage.setItem('token', newToken);
       localStorage.setItem('user', JSON.stringify(user));
       
-      setToken(accessToken);
-      setRefreshToken(newRefreshToken);
+      setToken(newToken);
       setUser(user);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+      axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
       
       return { success: true };
     } catch (error) {
@@ -100,25 +95,14 @@ export const AuthProvider = ({ children }) => {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
-      // Si vérification email requise
-      if (response.data.emailVerificationRequired) {
-        return {
-          success: true,
-          emailVerificationRequired: true,
-          message: 'Veuillez vérifier votre email'
-        };
-      }
+      const { token: newToken, user } = response.data;
       
-      const { accessToken, refreshToken: newRefreshToken, user } = response.data;
-      
-      localStorage.setItem('token', accessToken);
-      localStorage.setItem('refreshToken', newRefreshToken);
+      localStorage.setItem('token', newToken);
       localStorage.setItem('user', JSON.stringify(user));
       
-      setToken(accessToken);
-      setRefreshToken(newRefreshToken);
+      setToken(newToken);
       setUser(user);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+      axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
       
       return { success: true };
     } catch (error) {
@@ -129,25 +113,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = async () => {
-    try {
-      // Appeler le logout serveur pour blacklister le token
-      if (token) {
-        await axios.post('http://localhost:5000/api/auth/logout');
-      }
-    } catch (error) {
-      console.error('Erreur logout serveur:', error);
-    } finally {
-      // Nettoyer le localStorage
-      localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('user');
-      
-      setToken(null);
-      setRefreshToken(null);
-      setUser(null);
-      delete axios.defaults.headers.common['Authorization'];
-    }
+  const logout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    delete axios.defaults.headers.common['Authorization'];
+    window.location.href = '/';
   };
 
   const value = {

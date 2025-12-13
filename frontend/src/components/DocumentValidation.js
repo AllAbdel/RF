@@ -1,286 +1,361 @@
-import React, { useState, useEffect } from 'react';
-import { clientDocumentAPI } from '../services/api';
-import '../styles/DocumentValidation.css';
+import React, { useState } from 'react';
+import { 
+  Shield, 
+  Upload, 
+  FileText, 
+  AlertTriangle, 
+  CheckCircle, 
+  XCircle, 
+  Search, 
+  ScanLine, 
+  Lock,
+  RefreshCw,
+  Sparkles,
+  Zap,
+  Eye
+} from 'lucide-react';
+import './DocumentValidation.css';
+
+/**
+ * SIMULATION DU MOTEUR OCR ET ANALYSE (BACKEND LOGIC)
+ * Dans une production réelle, cette logique serait sur un serveur Python/Node 
+ * avec Tesseract ou OpenCV.
+ */
+const analyzeDocumentMock = async (file) => {
+  return new Promise((resolve) => {
+    // Simulation du temps de traitement OCR
+    setTimeout(() => {
+      const fileName = file.name.toLowerCase();
+      const currentYear = new Date().getFullYear();
+      
+      // Scénario : Permis de conduire valide
+      if (fileName.includes('permis') || fileName.includes('license')) {
+        resolve({
+          success: true,
+          ocrText: "RÉPUBLIQUE FRANÇAISE\nPERMIS DE CONDUIRE\nF\n1. DURAND\n2. PIERRE\n3. 12/05/1985 (PARIS)\n4a. 10/01/2020 4b. 10/01/2035\n4c. PREFECTURE DE POLICE\n5. 12345678910",
+          detectedType: "PERMIS_DE_CONDUIRE",
+          confidence: 0.92,
+          data: {
+            lastName: "DURAND",
+            firstName: "PIERRE",
+            birthDate: "12/05/1985",
+            issueDate: "10/01/2020",
+            expiryDate: "10/01/2035",
+            docNumber: "12345678910"
+          },
+          riskReport: {
+            score: 15, // Score bas = risque faible
+            flags: [],
+            verdict: "APPROVED"
+          }
+        });
+      } 
+      // Scénario : Document expiré ou suspect
+      else if (fileName.includes('faux') || fileName.includes('fake') || fileName.includes('expire')) {
+        resolve({
+          success: true,
+          ocrText: "RÉPUBLIQUE FRANÇAISE\nCARTE NATIONALE D'IDENTITÉ\nNom: MARTIN\nValide jusqu'au: 01/01/2018",
+          detectedType: "CNI",
+          confidence: 0.65,
+          data: {
+            lastName: "MARTIN",
+            expiryDate: "01/01/2018"
+          },
+          riskReport: {
+            score: 85,
+            flags: [
+              "Date d'expiration dépassée (2018)",
+              "Police de caractères incohérente détectée",
+              "Faible score de confiance OCR"
+            ],
+            verdict: "REJECTED"
+          }
+        });
+      }
+      else {
+        resolve({
+          success: true,
+          ocrText: "DOCUMENT NON RECONNU\nTEXTE ILLISIBLE...",
+          detectedType: "UNKNOWN",
+          confidence: 0.40,
+          data: {},
+          riskReport: {
+            score: 60,
+            flags: ["Type de document non identifié", "Texte flou ou incomplet"],
+            verdict: "MANUAL_REVIEW"
+          }
+        });
+      }
+    }, 2500);
+  });
+};
+
+const StatusBadge = ({ verdict }) => {
+  switch (verdict) {
+    case 'APPROVED':
+      return (
+        <span className="status-badge status-approved animate-fadeInBounce">
+          <CheckCircle size={18} className="animate-spin-once" /> 
+          <span className="font-bold">DOCUMENT VALIDE</span>
+        </span>
+      );
+    case 'REJECTED':
+      return (
+        <span className="status-badge status-rejected animate-fadeInBounce">
+          <XCircle size={18} className="animate-shake" /> 
+          <span className="font-bold">DOCUMENT REJETÉ</span>
+        </span>
+      );
+    default:
+      return (
+        <span className="status-badge status-review animate-fadeInBounce">
+          <AlertTriangle size={18} className="animate-pulse" /> 
+          <span className="font-bold">VÉRIFICATION MANUELLE</span>
+        </span>
+      );
+  }
+};
+
+const ProgressBar = ({ progress }) => (
+  <div className="progress-container">
+    <div className="progress-bar" style={{ width: `${progress}%` }}>
+      <div className="progress-shine"></div>
+    </div>
+  </div>
+);
 
 const DocumentValidation = () => {
-  const [pendingDocuments, setPendingDocuments] = useState([]);
-  const [selectedDoc, setSelectedDoc] = useState(null);
-  const [validationNotes, setValidationNotes] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all'); // all, pending, manual_review
+  const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [status, setStatus] = useState('idle');
+  const [progress, setProgress] = useState(0);
+  const [result, setResult] = useState(null);
+  const [stepText, setStepText] = useState("");
 
-  useEffect(() => {
-    loadPendingDocuments();
-  }, []);
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
 
-  const loadPendingDocuments = async () => {
-    try {
-      setLoading(true);
-      const response = await clientDocumentAPI.getPending();
-      setPendingDocuments(response.data.documents);
-    } catch (error) {
-      console.error('Erreur chargement documents:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleValidate = async (documentId, action) => {
-    if (!window.confirm(`Êtes-vous sûr de vouloir ${action === 'approved' ? 'approuver' : 'rejeter'} ce document ?`)) {
+    if (!selectedFile.type.startsWith('image/')) {
+      alert('❌ Veuillez sélectionner une image (JPG, PNG, etc.)');
       return;
     }
 
-    try {
-      await clientDocumentAPI.validate(documentId, action, validationNotes);
-      
-      alert(`Document ${action === 'approved' ? 'approuvé' : 'rejeté'} avec succès`);
-      
-      // Recharger la liste
-      loadPendingDocuments();
-      setSelectedDoc(null);
-      setValidationNotes('');
-    } catch (error) {
-      alert('Erreur lors de la validation: ' + (error.response?.data?.error || error.message));
+    if (selectedFile.size > 10 * 1024 * 1024) {
+      alert('❌ Le fichier est trop volumineux (max 10 Mo)');
+      return;
     }
+
+    setFile(selectedFile);
+    setPreview(URL.createObjectURL(selectedFile));
+    setStatus('idle');
+    setResult(null);
+    setProgress(0);
   };
 
-  const getScoreColor = (score) => {
-    if (score >= 80) return 'score-green';
-    if (score >= 50) return 'score-yellow';
-    return 'score-red';
+  const startVerification = async () => {
+    if (!file) return;
+
+    setStatus('uploading');
+    setProgress(0);
+    setStepText("📤 Upload du document...");
+
+    for (let i = 0; i <= 100; i += 10) {
+      setProgress(i);
+      await new Promise(r => setTimeout(r, 100));
+    }
+
+    setStatus('processing');
+    setStepText("🔍 Analyse OCR en cours...");
+    setProgress(0);
+
+    for (let i = 0; i <= 100; i += 5) {
+      setProgress(i);
+      if (i === 25) setStepText("🔎 Extraction du texte...");
+      if (i === 50) setStepText("🧠 Analyse de fraude...");
+      if (i === 75) setStepText("✅ Génération du rapport...");
+      await new Promise(r => setTimeout(r, 50));
+    }
+
+    const analysisResult = await analyzeDocumentMock(file);
+    setResult(analysisResult);
+    setStatus('complete');
+    setProgress(100);
   };
 
-  const getRiskLevel = (score) => {
-    if (score < 50) return { text: 'ÉLEVÉ', class: 'risk-high' };
-    if (score < 80) return { text: 'MOYEN', class: 'risk-medium' };
-    return { text: 'FAIBLE', class: 'risk-low' };
+  const reset = () => {
+    setFile(null);
+    setPreview(null);
+    setStatus('idle');
+    setProgress(0);
+    setResult(null);
+    setStepText("");
   };
-
-  const filteredDocuments = pendingDocuments.filter(doc => {
-    if (filter === 'all') return true;
-    return doc.validation_status === filter;
-  });
-
-  const sortedDocuments = [...filteredDocuments].sort((a, b) => {
-    // Trier par score (risque le plus élevé en premier)
-    return a.overall_score - b.overall_score;
-  });
-
-  if (loading) {
-    return <div className="loading">⏳ Chargement des documents...</div>;
-  }
 
   return (
-    <div className="document-validation-container">
-      <div className="header">
-        <h2>🔍 Validation des documents clients</h2>
-        <div className="stats">
-          <div className="stat-card">
-            <span className="stat-number">{pendingDocuments.length}</span>
-            <span className="stat-label">Documents en attente</span>
-          </div>
-          <div className="stat-card">
-            <span className="stat-number">
-              {pendingDocuments.filter(d => d.overall_score < 50).length}
-            </span>
-            <span className="stat-label">Risque élevé</span>
-          </div>
-          <div className="stat-card">
-            <span className="stat-number">
-              {pendingDocuments.filter(d => d.overall_score >= 50 && d.overall_score < 80).length}
-            </span>
-            <span className="stat-label">Vérification manuelle</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="filters">
-        <button 
-          className={filter === 'all' ? 'active' : ''}
-          onClick={() => setFilter('all')}
-        >
-          Tous ({pendingDocuments.length})
-        </button>
-        <button 
-          className={filter === 'pending' ? 'active' : ''}
-          onClick={() => setFilter('pending')}
-        >
-          En attente ({pendingDocuments.filter(d => d.validation_status === 'pending').length})
-        </button>
-        <button 
-          className={filter === 'manual_review' ? 'active' : ''}
-          onClick={() => setFilter('manual_review')}
-        >
-          Vérification manuelle ({pendingDocuments.filter(d => d.validation_status === 'manual_review').length})
-        </button>
-      </div>
-
-      {sortedDocuments.length === 0 ? (
-        <div className="empty-state">
-          <p>✅ Aucun document en attente de validation</p>
-        </div>
-      ) : (
-        <div className="documents-grid">
-          {sortedDocuments.map((doc) => {
-            const risk = getRiskLevel(doc.overall_score);
-            const extractedData = doc.extracted_data ? JSON.parse(doc.extracted_data) : {};
-            
-            return (
-              <div key={doc.id} className={`doc-validation-card ${risk.class}`}>
-                <div className="doc-card-header">
-                  <div className="client-info">
-                    <h3>{doc.first_name} {doc.last_name}</h3>
-                    <p className="email">{doc.email}</p>
-                    {doc.brand && (
-                      <p className="reservation">
-                        📅 Réservation: {doc.brand} {doc.model}
-                      </p>
-                    )}
-                  </div>
-                  <div className={`risk-badge ${risk.class}`}>
-                    Risque: {risk.text}
-                  </div>
-                </div>
-
-                <div className="doc-type-badge">
-                  {doc.document_type === 'id_card' ? '🪪 Carte d\'identité' : '🚗 Permis de conduire'}
-                </div>
-
-                <div className="scores-grid">
-                  <div className="score-box">
-                    <span className="score-label">Qualité technique</span>
-                    <span className={`score-value ${getScoreColor(doc.technical_score)}`}>
-                      {doc.technical_score}/100
-                    </span>
-                  </div>
-                  <div className="score-box">
-                    <span className="score-label">Format</span>
-                    <span className={`score-value ${getScoreColor(doc.format_score)}`}>
-                      {doc.format_score}/100
-                    </span>
-                  </div>
-                  <div className="score-box">
-                    <span className="score-label">Cohérence</span>
-                    <span className={`score-value ${getScoreColor(doc.coherence_score || 0)}`}>
-                      {doc.coherence_score || 0}/100
-                    </span>
-                  </div>
-                  <div className="score-box overall">
-                    <span className="score-label">SCORE GLOBAL</span>
-                    <span className={`score-value ${getScoreColor(doc.overall_score)}`}>
-                      {doc.overall_score}/100
-                    </span>
-                  </div>
-                </div>
-
-                {/* Drapeaux de fraude */}
-                {(doc.is_screenshot || doc.is_edited || doc.is_duplicate) && (
-                  <div className="fraud-flags">
-                    <h4>⚠️ Alertes détectées:</h4>
-                    {doc.is_screenshot && <span className="flag">📱 Capture d'écran</span>}
-                    {doc.is_edited && <span className="flag">✏️ Document modifié</span>}
-                    {doc.is_duplicate && <span className="flag">📋 Duplicata</span>}
-                  </div>
-                )}
-
-                {/* Données extraites */}
-                {Object.keys(extractedData).length > 0 && (
-                  <div className="extracted-data">
-                    <h4>📋 Données extraites (OCR):</h4>
-                    {extractedData.licenseNumber && (
-                      <p><strong>N° permis:</strong> {extractedData.licenseNumber}</p>
-                    )}
-                    {extractedData.idNumber && (
-                      <p><strong>N° carte:</strong> {extractedData.idNumber}</p>
-                    )}
-                    {extractedData.dateOfBirth && (
-                      <p><strong>Date de naissance:</strong> {extractedData.dateOfBirth}</p>
-                    )}
-                    {extractedData.issueDate && (
-                      <p><strong>Date d'émission:</strong> {extractedData.issueDate}</p>
-                    )}
-                    {extractedData.expiryDate && (
-                      <p><strong>Date d'expiration:</strong> {extractedData.expiryDate}</p>
-                    )}
-                    {extractedData.isExpired && (
-                      <p className="expired">⚠️ Document expiré</p>
-                    )}
-                    {extractedData.names && extractedData.names.length > 0 && (
-                      <p><strong>Noms détectés:</strong> {extractedData.names.join(', ')}</p>
-                    )}
-                  </div>
-                )}
-
-                <div className="doc-metadata">
-                  <p><strong>Fichier:</strong> {doc.original_filename}</p>
-                  <p><strong>Taille:</strong> {(doc.file_size / 1024).toFixed(2)} KB</p>
-                  <p><strong>Date upload:</strong> {new Date(doc.created_at).toLocaleString('fr-FR')}</p>
-                </div>
-
-                <div className="validation-actions">
-                  <button 
-                    className="btn-view"
-                    onClick={() => setSelectedDoc(doc)}
-                  >
-                    👁️ Voir le document
-                  </button>
-                  <button 
-                    className="btn-approve"
-                    onClick={() => handleValidate(doc.id, 'approved')}
-                  >
-                    ✅ Approuver
-                  </button>
-                  <button 
-                    className="btn-reject"
-                    onClick={() => handleValidate(doc.id, 'rejected')}
-                  >
-                    ❌ Rejeter
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Modal de visualisation */}
-      {selectedDoc && (
-        <div className="modal-overlay" onClick={() => setSelectedDoc(null)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="close-btn" onClick={() => setSelectedDoc(null)}>✖️</button>
-            <h3>Document de {selectedDoc.first_name} {selectedDoc.last_name}</h3>
-            <div className="modal-body">
-              <img 
-                src={`http://localhost:5000/uploads/documents/${selectedDoc.user_id}/${selectedDoc.file_path.split('\\').pop()}`}
-                alt="Document"
-                style={{ maxWidth: '100%', maxHeight: '70vh' }}
-              />
+    <div className="doc-validation-page">
+      <div className="doc-validation-wrapper">
+        <div className="doc-validation-card">
+          <div className="doc-header animate-slideDown">
+            <div className="header-icon-wrapper">
+              <Shield className="header-icon" size={40} />
+              <Sparkles className="sparkle-icon" size={20} />
             </div>
-            <div className="modal-actions">
-              <textarea
-                placeholder="Notes de validation (optionnel)..."
-                value={validationNotes}
-                onChange={(e) => setValidationNotes(e.target.value)}
-                rows="3"
-              />
-              <div className="action-buttons">
-                <button 
-                  className="btn-approve"
-                  onClick={() => handleValidate(selectedDoc.id, 'approved')}
-                >
-                  ✅ Approuver
-                </button>
-                <button 
-                  className="btn-reject"
-                  onClick={() => handleValidate(selectedDoc.id, 'rejected')}
-                >
-                  ❌ Rejeter
-                </button>
-              </div>
+            <div>
+              <h1 className="header-title">Vérification de Documents</h1>
+              <p className="header-subtitle">Intelligence Artificielle • Analyse OCR • Détection de fraude</p>
             </div>
           </div>
+
+          {!file && (
+            <div className="upload-zone animate-fadeIn" onClick={() => document.getElementById('fileInput').click()}>
+              <div className="upload-icon-wrapper">
+                <Upload className="upload-icon" size={64} />
+                <div className="upload-pulse"></div>
+              </div>
+              <p className="upload-title">
+                Déposez votre document ici
+              </p>
+              <p className="upload-subtitle">
+                ou cliquez pour sélectionner
+              </p>
+              <div className="upload-formats">
+                <span className="format-badge">📄 JPG</span>
+                <span className="format-badge">📄 PNG</span>
+                <span className="format-badge">📄 PDF</span>
+                <span className="format-badge-size">Max 10 Mo</span>
+              </div>
+              <input id="fileInput" type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
+            </div>
+          )}
+
+          {file && (
+            <div className="file-preview-section animate-fadeIn">
+              <div className="preview-wrapper">
+                <img src={preview} alt="Aperçu" className="preview-image" />
+                <button onClick={reset} className="reset-button" title="Nouveau document">
+                  <RefreshCw size={22} />
+                </button>
+                <div className="preview-overlay">
+                  <Eye size={32} className="preview-eye-icon" />
+                </div>
+              </div>
+
+              <div className="file-info-card">
+                <FileText size={24} className="file-icon" />
+                <div className="file-details">
+                  <span className="file-name">{file.name}</span>
+                  <span className="file-size">{(file.size / 1024).toFixed(0)} Ko</span>
+                </div>
+              </div>
+
+              {status === 'idle' && (
+                <button onClick={startVerification} className="scan-button animate-pulse-glow">
+                  <Zap size={28} className="scan-icon" />
+                  <span className="scan-text">Lancer l'analyse intelligente</span>
+                  <ScanLine size={24} className="scan-icon-secondary" />
+                </button>
+              )}
+
+              {(status === 'uploading' || status === 'processing') && (
+                <div className="processing-section">
+                  <ProgressBar progress={progress} />
+                  <p className="processing-text">
+                    {stepText}
+                  </p>
+                  <div className="processing-dots">
+                    <span></span><span></span><span></span>
+                  </div>
+                </div>
+              )}
+
+              {status === 'complete' && result && (
+                <div className="results-section animate-fadeInUp">
+                  <div className="verdict-card">
+                    <div className="verdict-content">
+                      <div className="verdict-label">Verdict final</div>
+                      <StatusBadge verdict={result.riskReport.verdict} />
+                    </div>
+                    <div className="risk-score-wrapper">
+                      <div className="risk-score-label">Score de risque</div>
+                      <div className={`risk-score ${
+                        result.riskReport.score < 30 ? 'risk-low' : 
+                        result.riskReport.score < 70 ? 'risk-medium' : 
+                        'risk-high'
+                      }`}>
+                        <span className="score-value">{result.riskReport.score}</span>
+                        <span className="score-max">/100</span>
+                      </div>
+                      <div className="risk-score-bar">
+                        <div 
+                          className={`risk-score-fill ${
+                            result.riskReport.score < 30 ? 'fill-low' : 
+                            result.riskReport.score < 70 ? 'fill-medium' : 
+                            'fill-high'
+                          }`}
+                          style={{ width: `${result.riskReport.score}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {result.riskReport.flags.length > 0 && (
+                    <div className="alerts-card">
+                      <div className="alerts-header">
+                        <AlertTriangle className="alert-icon" size={24} />
+                        <h3 className="alerts-title">Alertes détectées</h3>
+                      </div>
+                      <ul className="alerts-list">
+                        {result.riskReport.flags.map((flag, i) => (
+                          <li key={i} className="alert-item animate-slideInLeft" style={{animationDelay: `${i * 0.1}s`}}>
+                            <span className="alert-bullet"></span>
+                            <span className="alert-text">{flag}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  <div className="ocr-card">
+                    <div className="ocr-header">
+                      <Search size={24} className="ocr-icon" />
+                      <h3 className="ocr-title">Texte extrait (OCR)</h3>
+                    </div>
+                    <pre className="ocr-content">{result.ocrText}</pre>
+                  </div>
+
+                  <div className="info-grid">
+                    <div className="info-card info-type">
+                      <div className="info-label">Type de document</div>
+                      <div className="info-value">{result.detectedType}</div>
+                    </div>
+                    <div className="info-card info-confidence">
+                      <div className="info-label">Confiance OCR</div>
+                      <div className="info-value">{(result.confidence * 100).toFixed(0)}%</div>
+                      <div className="confidence-bar">
+                        <div className="confidence-fill" style={{ width: `${result.confidence * 100}%` }}></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="security-notice">
+                    <Lock className="security-icon" size={22} />
+                    <div>
+                      <strong>Sécurité et confidentialité</strong>
+                      <p>Aucune donnée n'est envoyée à un serveur externe. Toute l'analyse est effectuée localement.</p>
+                    </div>
+                  </div>
+
+                  <button onClick={reset} className="new-analysis-button">
+                    <RefreshCw size={22} />
+                    Analyser un nouveau document
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };

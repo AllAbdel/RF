@@ -11,7 +11,7 @@ import { useNavigate } from 'react-router-dom';
 
 
 const ClientDashboard = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('search');
   const [vehicles, setVehicles] = useState([]);
@@ -27,12 +27,22 @@ const ClientDashboard = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    // Attendre que l'authentification soit terminée
+    if (authLoading) {
+      return;
+    }
+    
+    // Ne rien faire si l'utilisateur n'est pas connecté
+    if (!user) {
+      return;
+    }
+    
     if (activeTab === 'search') {
       loadVehicles();
     } else if (activeTab === 'reservations') {
       loadReservations();
     }
-  }, [activeTab, filters]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activeTab, filters, user, authLoading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadVehicles = async () => {
     setLoading(true);
@@ -47,12 +57,21 @@ const ClientDashboard = () => {
   };
 
   const loadReservations = async () => {
+    // Ne rien faire si l'utilisateur n'est pas authentifié
+    if (!user) {
+      return;
+    }
+    
     setLoading(true);
     try {
       const response = await reservationAPI.getClientReservations();
       setReservations(response.data.reservations);
     } catch (error) {
       console.error('Erreur chargement réservations:', error);
+      // Si erreur 401, l'utilisateur n'est pas connecté - ne rien faire
+      if (error.response?.status === 401) {
+        return;
+      }
     } finally {
       setLoading(false);
     }

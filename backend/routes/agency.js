@@ -15,7 +15,8 @@ const {
   acceptInvitation,
   getPendingInvitations,
   getDetailedStats,
-  promoteMember
+  promoteMember,
+  getAiContext
 } = require('../controllers/agencyController');
 const { authMiddleware, isAgencyMember, isAgencyAdmin, isSuperAdmin } = require('../middleware/auth');
 const { uploadAgencyFiles } = require('../middleware/upload');
@@ -35,6 +36,7 @@ router.post('/members/:userId/promote', authMiddleware, isSuperAdmin, promoteMem
 router.delete('/members/:member_id', authMiddleware, isAgencyAdmin, removeMember);
 router.get('/stats', authMiddleware, isAgencyMember, getAgencyStats);
 router.get('/stats/detailed', authMiddleware, isAgencyMember, getDetailedStats);
+router.get('/ai-context', authMiddleware, isAgencyMember, getAiContext);
 router.put('/info', authMiddleware, isAgencyAdmin, uploadAgencyFiles.fields([
   { name: 'logo', maxCount: 1 },
   { name: 'rental_conditions_pdf', maxCount: 1 }

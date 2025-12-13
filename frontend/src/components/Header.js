@@ -33,8 +33,18 @@ const Header = () => {
               
               {isAgency && (
                 <>
-                  <Link to="/" className="nav-link">Recherche Véhicules</Link>
-                  <Link to="/agency" className="nav-link">Dashboard</Link>
+                  <Link to="/agency?tab=vehicles" className="nav-link">Véhicules</Link>
+                  <Link to="/agency?tab=reservations" className="nav-link">Réservations</Link>
+                  <Link to="/agency?tab=stats" className="nav-link">Statistiques</Link>
+                  <Link to="/agency?tab=documents" className="nav-link">Documents</Link>
+                  <Link to="/agency?tab=ai-assistant" className="nav-link">Assistant IA</Link>
+                  {(user?.role === 'admin' || user?.role === 'super_admin') && (
+                    <>
+                      <Link to="/agency?tab=members" className="nav-link">Membres</Link>
+                      <Link to="/agency?tab=settings" className="nav-link">Paramètres</Link>
+                      <Link to="/agency?tab=profile" className="nav-link">Profil</Link>
+                    </>
+                  )}
                   <Link to="/messages" className="nav-link">Messages</Link>
                 </>
               )}

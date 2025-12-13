@@ -1,27 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../config/database');
-const { validatePasswordStrength, checkPasswordHistory, addToPasswordHistory } = require('../utils/passwordValidator');
-const { 
-  generateAccessToken, 
-  generateRefreshToken, 
-  verifyRefreshToken,
-  storeRefreshToken, 
-  validateRefreshToken,
-  revokeRefreshToken,
-  revokeAllUserRefreshTokens,
-  blacklistToken,
-  isTokenBlacklisted,
-  generateVerificationToken,
-  generateResetToken,
-  getExpirationDate
-} = require('../utils/tokenManager');
-const { 
-  sendVerificationEmail, 
-  sendPasswordResetEmail, 
-  sendPasswordResetConfirmation 
-} = require('../services/emailService');
-const { logLoginAttempt, checkSuspiciousActivity } = require('../middleware/rateLimiter');
 
 const register = async (req, res) => {
   try {
@@ -33,14 +12,9 @@ const register = async (req, res) => {
       return res.status(400).json({ error: 'Cet email est déjà utilisé' });
     }
 
-    // 🆕 VALIDATION FORCE DU MOT DE PASSE
-    const passwordValidation = validatePasswordStrength(password);
-    if (!passwordValidation.isValid) {
-      return res.status(400).json({ 
-        error: 'Mot de passe trop faible',
-        details: passwordValidation.errors,
-        strength: passwordValidation.strength
-      });
+    // Validation basique du mot de passe (minimum 6 caractères)
+    if (!password || password.length < 6) {
+      return res.status(400).json({ error: 'Le mot de passe doit contenir au moins 6 caractères' });
     }
 
     // Validation pour les clients : âge minimum et permis (sauf si c'est une demande d'adhésion à une agence)
@@ -91,67 +65,37 @@ const register = async (req, res) => {
       agencyId = agencyResult.insertId;
     }
 
-    // 🆕 GÉNÉRATION TOKEN DE VÉRIFICATION EMAIL
-    const verificationToken = generateVerificationToken();
-    const verificationExpires = getExpirationDate(24); // Expire dans 24h
-    
-    // En développement, on vérifie automatiquement l'email
-    const isDevelopment = process.env.NODE_ENV !== 'production';
-    const emailVerified = isDevelopment ? true : false;
-
     // Créer l'utilisateur
     const [result] = await db.query(
       `INSERT INTO users (
         email, password, first_name, last_name, phone, birth_date, license_date, 
-        user_type, agency_id, role, email_verified, verification_token, verification_token_expires
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        user_type, agency_id, role
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         email, hashedPassword, first_name, last_name, phone, 
         birth_date || null, license_date || null, user_type, agencyId, 
-        user_type === 'agency_member' ? 'super_admin' : 'member',
-        emailVerified, verificationToken, verificationExpires
+        user_type === 'agency_member' ? 'super_admin' : 'member'
       ]
     );
 
     const userId = result.insertId;
 
-    // 🆕 AJOUTER MOT DE PASSE À L'HISTORIQUE
-    await addToPasswordHistory(db, userId, hashedPassword);
-
-    // 🆕 ENVOYER EMAIL DE VÉRIFICATION (uniquement en production)
-    if (!isDevelopment) {
-      try {
-        await sendVerificationEmail(email, first_name, verificationToken);
-        console.log(`✅ Email de vérification envoyé à ${email}`);
-      } catch (emailError) {
-        console.error('⚠️ Erreur envoi email vérification:', emailError);
-      }
-    } else {
-      console.log(`🔧 MODE DEV: Email auto-vérifié pour ${email}`);
-    }
-
-    // 🆕 GÉNÉRER ACCESS TOKEN ET REFRESH TOKEN
-    const user = {
-      id: userId,
-      email,
-      user_type,
-      agency_id: agencyId,
-      role: user_type === 'agency_member' ? 'super_admin' : 'member'
-    };
-    
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(userId);
-    
-    // Stocker le refresh token
-    await storeRefreshToken(db, userId, refreshToken);
+    // Générer un simple token JWT
+    const token = jwt.sign(
+      {
+        id: userId,
+        email,
+        user_type,
+        agency_id: agencyId,
+        role: user_type === 'agency_member' ? 'super_admin' : 'member'
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
 
     res.status(201).json({
-      message: isDevelopment 
-        ? 'Inscription réussie ! Vous pouvez maintenant vous connecter.'
-        : 'Inscription réussie ! Veuillez vérifier votre email pour activer votre compte.',
-      accessToken,
-      refreshToken,
-      emailVerificationRequired: !isDevelopment,
+      message: 'Inscription réussie !',
+      token,
       user: {
         id: userId,
         email,
@@ -159,30 +103,22 @@ const register = async (req, res) => {
         last_name,
         user_type,
         agency_id: agencyId,
-        role: user.role,
-        email_verified: emailVerified
+        role: user_type === 'agency_member' ? 'super_admin' : 'member'
       }
     });
   } catch (error) {
     console.error('Erreur inscription:', error);
-    res.status(500).json({ error: 'Erreur lors de l\'inscription' });
+    console.error('Stack:', error.stack);
+    res.status(500).json({ 
+      error: 'Erreur lors de l\'inscription',
+      details: process.env.NODE_ENV !== 'production' ? error.message : undefined
+    });
   }
 };
 
 const login = async (req, res) => {
   try {
-    const { email, password, user_type, twofa_code } = req.body;
-    const ipAddress = req.ip || req.connection.remoteAddress;
-
-    // 🆕 VÉRIFIER ACTIVITÉ SUSPECTE
-    const suspiciousCheck = await checkSuspiciousActivity(db, email, ipAddress);
-    if (suspiciousCheck.isSuspicious) {
-      return res.status(429).json({ 
-        error: 'Compte temporairement bloqué',
-        message: suspiciousCheck.message,
-        failedAttempts: suspiciousCheck.failedAttempts
-      });
-    }
+    const { email, password, user_type } = req.body;
 
     // Récupérer l'utilisateur
     const [users] = await db.query(
@@ -191,8 +127,6 @@ const login = async (req, res) => {
     );
 
     if (users.length === 0) {
-      // 🆕 LOGGER TENTATIVE ÉCHOUÉE
-      await logLoginAttempt(db, email, ipAddress, false);
       return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
     }
 
@@ -201,62 +135,25 @@ const login = async (req, res) => {
     // Vérifier le mot de passe
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-      // 🆕 LOGGER TENTATIVE ÉCHOUÉE
-      await logLoginAttempt(db, email, ipAddress, false);
       return res.status(401).json({ error: 'Email ou mot de passe incorrect' });
     }
 
-    // 🆕 VÉRIFIER SI EMAIL EST VÉRIFIÉ
-    if (!user.email_verified) {
-      return res.status(403).json({ 
-        error: 'Email non vérifié',
-        message: 'Veuillez vérifier votre email avant de vous connecter.',
-        requiresEmailVerification: true
-      });
-    }
-
-    // 🆕 VÉRIFIER 2FA SI ACTIVÉ
-    if (user.twofa_enabled) {
-      if (!twofa_code) {
-        return res.status(200).json({
-          requires2FA: true,
-          message: 'Code d\'authentification requis',
-          userId: user.id // Pour la prochaine étape
-        });
-      }
-
-      // Vérifier le code 2FA
-      const { verify2FAAuthentication } = require('../utils/twoFactorAuth');
-      const verification = await verify2FAAuthentication(db, user.id, twofa_code);
-      
-      if (!verification.valid) {
-        await logLoginAttempt(db, email, ipAddress, false);
-        return res.status(401).json({ 
-          error: 'Code 2FA invalide',
-          message: verification.message
-        });
-      }
-
-      // Si code backup utilisé, prévenir l'utilisateur
-      if (verification.method === 'backup' && verification.remainingCodes < 3) {
-        console.log(`⚠️ Utilisateur ${user.id} a ${verification.remainingCodes} codes de secours restants`);
-      }
-    }
-
-    // 🆕 LOGGER CONNEXION RÉUSSIE
-    await logLoginAttempt(db, email, ipAddress, true);
-
-    // 🆕 GÉNÉRER ACCESS TOKEN ET REFRESH TOKEN
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user.id);
-    
-    // Stocker le refresh token
-    await storeRefreshToken(db, user.id, refreshToken);
+    // Générer un simple token JWT
+    const token = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+        user_type: user.user_type,
+        agency_id: user.agency_id,
+        role: user.role
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
 
     res.json({
       message: 'Connexion réussie',
-      accessToken,
-      refreshToken,
+      token,
       user: {
         id: user.id,
         email: user.email,
@@ -264,8 +161,7 @@ const login = async (req, res) => {
         last_name: user.last_name,
         user_type: user.user_type,
         agency_id: user.agency_id,
-        role: user.role,
-        twofa_enabled: user.twofa_enabled
+        role: user.role
       }
     });
   } catch (error) {

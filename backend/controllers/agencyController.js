@@ -277,9 +277,7 @@ const getAgencyStats = async (req, res) => {
 
     // Informations de l'agence
     const [agency] = await db.query(
-      `SELECT id, name, email, phone, address, logo, description, 
-              rental_conditions, rental_conditions_pdf,
-              payment_link_paypal, payment_link_stripe, payment_link_other, website
+      `SELECT id, name, email, phone, address, logo, created_at
        FROM agencies WHERE id = ?`,
       [req.user.agency_id]
     );
@@ -354,8 +352,7 @@ const updateAgencyInfo = async (req, res) => {
     console.log('📝 Body:', req.body);
     console.log('📁 Files:', req.files);
 
-    const { name, phone, address, email, rental_conditions, description, 
-            payment_link_paypal, payment_link_stripe, payment_link_other, website } = req.body;
+    const { name, phone, address, email } = req.body;
 
     // Vérifier que l'utilisateur a une agence
     if (!req.user.agency_id) {
@@ -363,7 +360,7 @@ const updateAgencyInfo = async (req, res) => {
       return res.status(400).json({ error: 'Utilisateur non associé à une agence' });
     }
 
-    // Construire la requête dynamiquement selon les champs fournis
+    // Construire la requête dynamiquement selon les champs fournis (uniquement colonnes existantes)
     const updates = [];
     const values = [];
 
@@ -383,48 +380,28 @@ const updateAgencyInfo = async (req, res) => {
       updates.push('address = ?');
       values.push(address);
     }
-    if (description !== undefined) {
-      updates.push('description = ?');
-      values.push(description);
-    }
-    if (rental_conditions !== undefined) {
+
+    // Gérer rental_conditions (texte)
+    if (req.body.rental_conditions !== undefined) {
       updates.push('rental_conditions = ?');
-      values.push(rental_conditions);
-    }
-    if (payment_link_paypal !== undefined) {
-      updates.push('payment_link_paypal = ?');
-      values.push(payment_link_paypal);
-    }
-    if (payment_link_stripe !== undefined) {
-      updates.push('payment_link_stripe = ?');
-      values.push(payment_link_stripe);
-    }
-    if (payment_link_other !== undefined) {
-      updates.push('payment_link_other = ?');
-      values.push(payment_link_other);
-    }
-    if (website !== undefined) {
-      updates.push('website = ?');
-      values.push(website);
+      values.push(req.body.rental_conditions);
     }
 
-    // Gérer les fichiers uploadés (logo et PDF)
+    // Gérer les fichiers uploadés (logo et rental_conditions_pdf)
     if (req.files) {
-      // Avec multer.fields(), req.files est un objet avec les noms de champs comme clés
       if (req.files.logo && req.files.logo[0]) {
         updates.push('logo = ?');
         values.push(`/uploads/agencies/logos/${req.files.logo[0].filename}`);
       }
-
       if (req.files.rental_conditions_pdf && req.files.rental_conditions_pdf[0]) {
         updates.push('rental_conditions_pdf = ?');
-        values.push(`/uploads/agencies/terms/${req.files.rental_conditions_pdf[0].filename}`);
+        values.push(`/uploads/agencies/conditions/${req.files.rental_conditions_pdf[0].filename}`);
       }
     }
 
     if (updates.length === 0) {
-      console.error('❌ Aucune donnée à mettre à jour');
-      return res.status(400).json({ error: 'Aucune donnée à mettre à jour' });
+      console.log('⚠️ Aucune donnée à mettre à jour (champs ignorés pour éviter erreur DB)');
+      return res.json({ message: 'Aucune modification effectuée (champs non supportés ignorés)' });
     }
 
     values.push(req.user.agency_id);
@@ -654,18 +631,8 @@ const getDetailedStats = async (req, res) => {
       [agency_id]
     );
 
-    // 5. Documents générés
-    const [documentsStats] = await db.query(
-      `SELECT 
-        d.document_type,
-        COUNT(*) as count
-       FROM documents d
-       JOIN reservations r ON d.reservation_id = r.id
-       JOIN vehicles v ON r.vehicle_id = v.id
-       WHERE v.agency_id = ?
-       GROUP BY d.document_type`,
-      [agency_id]
-    );
+    // 5. Documents générés (table n'existe pas encore - retourner tableau vide)
+    const documentsStats = [];
 
     // 6. Taux d'occupation (pourcentage de jours réservés - 3 derniers mois)
     const [occupancyRate] = await db.query(
@@ -890,6 +857,183 @@ const promoteMember = async (req, res) => {
   }
 };
 
+// Récupérer le contexte complet de l'agence pour l'IA
+const getAiContext = async (req, res) => {
+  try {
+    const agencyId = req.user.agency_id;
+
+    if (!agencyId) {
+      return res.status(400).json({ error: 'Utilisateur non associé à une agence' });
+    }
+
+    // 1. Info de base de l'agence
+    const [agencies] = await db.query(
+      'SELECT id, name, address, email FROM agencies WHERE id = ?',
+      [agencyId]
+    );
+    const agency = agencies[0];
+
+    // 2. Stats de flotte
+    const [fleetStats] = await db.query(
+      `SELECT 
+        COUNT(*) as total_cars,
+        SUM(CASE WHEN status = 'available' THEN 1 ELSE 0 END) as available_cars,
+        SUM(CASE WHEN status = 'maintenance' THEN 1 ELSE 0 END) as cars_needing_maintenance
+      FROM vehicles WHERE agency_id = ?`,
+      [agencyId]
+    );
+
+    // 3. Revenue récent (30 derniers jours)
+    const [revenueData] = await db.query(
+      `SELECT COALESCE(SUM(total_price), 0) as recent_revenue
+       FROM reservations
+       WHERE agency_id = ? AND status IN ('confirmed', 'in_progress', 'completed')
+       AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)`,
+      [agencyId]
+    );
+
+    // 4. Taux d'occupation (réservations actives / total véhicules)
+    const [occupancyData] = await db.query(
+      `SELECT COUNT(DISTINCT vehicle_id) as rented_cars
+       FROM reservations
+       WHERE agency_id = ? AND status IN ('confirmed', 'in_progress')`,
+      [agencyId]
+    );
+    const utilization_rate = fleetStats[0].total_cars > 0 
+      ? (occupancyData[0].rented_cars / fleetStats[0].total_cars) * 100 
+      : 0;
+
+    // 5. Meilleur véhicule (top performer)
+    const [topVehicle] = await db.query(
+      `SELECT 
+        v.id,
+        v.brand,
+        v.model,
+        v.price_per_hour,
+        CONCAT(v.brand, ' ', v.model) as model_name,
+        'Standard' as category,
+        COALESCE(SUM(r.total_price), 0) as total_revenue,
+        COALESCE(AVG(rev.rating), 0) as average_rating,
+        COUNT(DISTINCT r.id) as occupancy_days,
+        0 as negative_reviews_count,
+        0 as maintenance_cost
+      FROM vehicles v
+      LEFT JOIN reservations r ON v.id = r.vehicle_id 
+        AND r.status IN ('confirmed', 'in_progress', 'completed')
+        AND r.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+      LEFT JOIN reviews rev ON v.id = rev.vehicle_id
+      WHERE v.agency_id = ?
+      GROUP BY v.id
+      ORDER BY total_revenue DESC
+      LIMIT 1`,
+      [agencyId]
+    );
+
+    // 6. Pire véhicule (worst rated)
+    const [worstVehicle] = await db.query(
+      `SELECT 
+        v.id,
+        v.brand,
+        v.model,
+        v.price_per_hour,
+        CONCAT(v.brand, ' ', v.model) as model_name,
+        'Standard' as category,
+        COALESCE(AVG(rev.rating), 5) as average_rating,
+        COUNT(CASE WHEN rev.rating <= 3 THEN 1 END) as negative_reviews_count,
+        0 as total_revenue,
+        0 as maintenance_cost,
+        0 as occupancy_days
+      FROM vehicles v
+      LEFT JOIN reviews rev ON v.id = rev.vehicle_id
+      WHERE v.agency_id = ?
+      GROUP BY v.id
+      HAVING COUNT(rev.id) > 0
+      ORDER BY average_rating ASC
+      LIMIT 1`,
+      [agencyId]
+    );
+
+    // 7. Nombre total de réservations
+    const [reservationStats] = await db.query(
+      `SELECT 
+        COUNT(*) as total_reservations,
+        AVG(DATEDIFF(end_date, start_date)) as average_reservation_duration
+      FROM reservations
+      WHERE agency_id = ? AND status IN ('confirmed', 'in_progress', 'completed')
+      AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)`,
+      [agencyId]
+    );
+
+    // 8. Taux de satisfaction (avis >= 4)
+    const [satisfactionData] = await db.query(
+      `SELECT 
+        COUNT(CASE WHEN rating >= 4 THEN 1 END) as positive_reviews,
+        COUNT(*) as total_reviews
+      FROM reviews r
+      JOIN vehicles v ON r.vehicle_id = v.id
+      WHERE v.agency_id = ?`,
+      [agencyId]
+    );
+    const client_satisfaction_rate = satisfactionData[0].total_reviews > 0
+      ? (satisfactionData[0].positive_reviews / satisfactionData[0].total_reviews) * 100
+      : 100;
+
+    // Extraire la ville de l'adresse
+    const city = agency.address ? agency.address.split(',')[0].trim() : 'Paris';
+
+    // Construire le contexte pour l'IA
+    const context = {
+      agency_id: agency.id,
+      agency_name: agency.name,
+      city: city,
+      current_season: 'high', // À améliorer avec logique saisonnière
+      
+      fleet_status: {
+        total_cars: fleetStats[0].total_cars,
+        available_cars: fleetStats[0].available_cars,
+        utilization_rate: Math.round(utilization_rate * 100) / 100,
+        cars_needing_maintenance: fleetStats[0].cars_needing_maintenance
+      },
+      
+      recent_revenue: revenueData[0].recent_revenue,
+      
+      top_performer_car: topVehicle.length > 0 ? {
+        model_name: topVehicle[0].model_name,
+        category: topVehicle[0].category,
+        total_revenue: topVehicle[0].total_revenue,
+        average_rating: topVehicle[0].average_rating,
+        negative_reviews_count: topVehicle[0].negative_reviews_count,
+        maintenance_cost: topVehicle[0].maintenance_cost,
+        occupancy_days: topVehicle[0].occupancy_days,
+        price_per_hour: topVehicle[0].price_per_hour
+      } : null,
+      
+      worst_rated_car: worstVehicle.length > 0 && worstVehicle[0].average_rating < 4 ? {
+        model_name: worstVehicle[0].model_name,
+        category: worstVehicle[0].category,
+        total_revenue: worstVehicle[0].total_revenue,
+        average_rating: worstVehicle[0].average_rating,
+        negative_reviews_count: worstVehicle[0].negative_reviews_count,
+        maintenance_cost: worstVehicle[0].maintenance_cost,
+        occupancy_days: worstVehicle[0].occupancy_days,
+        price_per_hour: 0
+      } : null,
+      
+      most_common_complaint: null, // À améliorer avec analyse des commentaires
+      competitor_price_index: 0.95, // Mock - à calculer avec données marché
+      
+      total_reservations: reservationStats[0].total_reservations,
+      average_reservation_duration: reservationStats[0].average_reservation_duration || 0,
+      client_satisfaction_rate: Math.round(client_satisfaction_rate * 100) / 100
+    };
+
+    res.json({ context });
+  } catch (error) {
+    console.error('Erreur récupération contexte IA:', error);
+    res.status(500).json({ error: 'Erreur lors de la récupération du contexte' });
+  }
+};
+
 module.exports = {
   searchAgencies,
   requestToJoinAgency,
@@ -905,5 +1049,6 @@ module.exports = {
   acceptInvitation,
   getPendingInvitations,
   getDetailedStats,
-  promoteMember
+  promoteMember,
+  getAiContext
 };

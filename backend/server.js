@@ -2,10 +2,22 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const socketIo = require('socket.io');
+const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 
 // 🆕 IMPORT NETTOYAGE TOKENS
 const { cleanupExpiredTokens } = require('./utils/tokenManager');
+
+// Créer les dossiers uploads nécessaires
+const uploadDirs = ['uploads/agencies', 'uploads/documents', 'uploads/vehicles'];
+uploadDirs.forEach(dir => {
+  const fullPath = path.join(__dirname, dir);
+  if (!fs.existsSync(fullPath)) {
+    fs.mkdirSync(fullPath, { recursive: true });
+    console.log(`📁 Dossier créé: ${dir}`);
+  }
+});
 
 const app = express();
 const server = http.createServer(app);

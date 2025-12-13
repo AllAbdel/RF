@@ -18,6 +18,12 @@ const MessagesPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Ne rien faire si l'utilisateur n'est pas connecté
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+    
     loadConversations();
     
     // Connexion Socket.io
@@ -48,10 +54,21 @@ const MessagesPage = () => {
   }, [messages]);
 
   const loadConversations = async () => {
+    // Ne rien faire si l'utilisateur n'est pas connecté
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+    
     try {
       const response = await messageAPI.getConversations();
       setConversations(response.data.conversations);
     } catch (error) {
+      // Ignorer silencieusement les erreurs 401
+      if (error.response?.status === 401) {
+        setLoading(false);
+        return;
+      }
       console.error('Erreur chargement conversations:', error);
     } finally {
       setLoading(false);

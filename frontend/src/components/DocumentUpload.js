@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { clientDocumentAPI } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import '../styles/DocumentUpload.css';
 
 const DocumentUpload = ({ reservationId }) => {
+  const { user } = useAuth();
   const [files, setFiles] = useState({
     id_card: null,
     driving_license: null
@@ -17,14 +19,21 @@ const DocumentUpload = ({ reservationId }) => {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    // Ne rien faire si l'utilisateur n'est pas connecté
+    if (!user) return;
     loadMyDocuments();
-  }, []);
+  }, [user]);
 
   const loadMyDocuments = async () => {
+    // Ne rien faire si l'utilisateur n'est pas connecté
+    if (!user) return;
+    
     try {
       const response = await clientDocumentAPI.getMyDocuments();
       setMyDocuments(response.data.documents);
     } catch (error) {
+      // Ignorer silencieusement les erreurs 401
+      if (error.response?.status === 401) return;
       console.error('Erreur chargement documents:', error);
     }
   };

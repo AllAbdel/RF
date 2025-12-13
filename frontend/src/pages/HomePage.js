@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { vehicleAPI } from '../services/api';
 import VehicleCard from '../components/VehicleCard';
-import SearchBar from '../components/SearchBar';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import '../styles/HomePage.css';
@@ -164,8 +163,6 @@ const HomePage = () => {
       </section>
 
       <div className="home-content">
-        <SearchBar onFilterChange={handleSearch} />
-        
         <div className="vehicles-count">
           {filteredVehicles.length} véhicule{filteredVehicles.length > 1 ? 's' : ''} disponible{filteredVehicles.length > 1 ? 's' : ''}
         </div>
