@@ -167,11 +167,13 @@ const AgencyProfile = () => {
         <div className="form-section">
           <h2>Logo de l'agence</h2>
           <div className="logo-upload-section">
-            {logoPreview && (
-              <div className="logo-preview">
-                <img src={logoPreview} alt="Logo agence" />
-              </div>
-            )}
+            <div className="logo-preview">
+              <img 
+                src={logoPreview || '/default-logo.svg'} 
+                alt="Logo agence" 
+                onError={(e) => { e.target.src = '/default-logo.svg'; }}
+              />
+            </div>
             <div className="logo-upload-controls">
               <input
                 type="file"

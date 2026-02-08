@@ -49,12 +49,11 @@ const ReservationList = ({ reservations, onStatusUpdate, isAgency }) => {
           <div key={reservation.id} className="reservation-card">
             <div className="reservation-header">
               <div className="reservation-vehicle">
-                {reservation.vehicle_image && (
-                  <img 
-                    src={`http://localhost:5000${reservation.vehicle_image}`} 
-                    alt="Vehicle"
-                  />
-                )}
+                <img 
+                  src={reservation.vehicle_image ? `http://localhost:5000${reservation.vehicle_image}` : '/no-image.svg'} 
+                  alt="Vehicle"
+                  onError={(e) => { e.target.src = '/no-image.svg'; }}
+                />
                 <div>
                   <h3>{reservation.brand} {reservation.model}</h3>
                   {isAgency && (

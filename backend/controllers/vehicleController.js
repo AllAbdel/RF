@@ -129,11 +129,8 @@ const createVehicle = async (req, res) => {
 
     // Récupérer le fichier PDF s'il existe
     let termsPdfPath = null;
-    if (req.files) {
-      const termsPdfFile = req.files.find(f => f.fieldname === 'terms_pdf');
-      if (termsPdfFile) {
-        termsPdfPath = `/uploads/vehicles/terms/${termsPdfFile.filename}`;
-      }
+    if (req.files && req.files.terms_pdf && req.files.terms_pdf.length > 0) {
+      termsPdfPath = `/uploads/vehicles/terms/${req.files.terms_pdf[0].filename}`;
     }
 
     const [result] = await db.query(
@@ -145,15 +142,12 @@ const createVehicle = async (req, res) => {
     );
 
     // Gérer les images si elles sont uploadées
-    if (req.files && req.files.length > 0) {
-      for (let i = 0; i < req.files.length; i++) {
-        // Ignorer le fichier PDF dans le traitement des images
-        if (req.files[i].fieldname === 'images') {
-          await db.query(
-            'INSERT INTO vehicle_images (vehicle_id, image_url, is_primary) VALUES (?, ?, ?)',
-            [result.insertId, `/uploads/vehicles/${req.files[i].filename}`, i === 0]
-          );
-        }
+    if (req.files && req.files.images && req.files.images.length > 0) {
+      for (let i = 0; i < req.files.images.length; i++) {
+        await db.query(
+          'INSERT INTO vehicle_images (vehicle_id, image_url, is_primary) VALUES (?, ?, ?)',
+          [result.insertId, `/uploads/vehicles/${req.files.images[i].filename}`, i === 0]
+        );
       }
     }
 
@@ -177,8 +171,14 @@ const updateVehicle = async (req, res) => {
     } = req.body;
 
     console.log('🔄 Update vehicle:', id);
-    console.log('📝 Body:', req.body);
+    console.log('📝 Body:', JSON.stringify(req.body, null, 2));
     console.log('📁 Files:', req.files);
+    console.log('👤 User:', req.user);
+
+    if (!req.user || !req.user.agency_id) {
+      console.error('❌ User ou agency_id manquant');
+      return res.status(401).json({ error: 'Non authentifié ou agence non trouvée' });
+    }
 
     // Vérifier que le véhicule appartient à l'agence
     const [vehicles] = await db.query(
@@ -192,35 +192,39 @@ const updateVehicle = async (req, res) => {
 
     // Supprimer les images demandées
     if (imagesToDelete) {
-      const imageIds = JSON.parse(imagesToDelete);
-      console.log('🗑️ Images à supprimer:', imageIds);
-      
-      if (imageIds.length > 0) {
-        // Récupérer les chemins des images avant suppression (pour supprimer les fichiers physiques)
-        const [imagesToRemove] = await db.query(
-          'SELECT image_url FROM vehicle_images WHERE id IN (?)',
-          [imageIds]
-        );
+      try {
+        const imageIds = JSON.parse(imagesToDelete);
+        console.log('🗑️ Images à supprimer:', imageIds);
         
-        // Supprimer de la base de données
-        await db.query('DELETE FROM vehicle_images WHERE id IN (?)', [imageIds]);
-        
-        // TODO: Supprimer les fichiers physiques
-        const fs = require('fs');
-        const path = require('path');
-        imagesToRemove.forEach(img => {
-          const filePath = path.join(__dirname, '..', img.image_url);
-          if (fs.existsSync(filePath)) {
-            fs.unlinkSync(filePath);
-            console.log('✅ Fichier supprimé:', filePath);
-          }
-        });
+        if (Array.isArray(imageIds) && imageIds.length > 0) {
+          // Récupérer les chemins des images avant suppression (pour supprimer les fichiers physiques)
+          const [imagesToRemove] = await db.query(
+            'SELECT image_url FROM vehicle_images WHERE id IN (?) AND vehicle_id = ?',
+            [imageIds, id]
+          );
+          
+          // Supprimer de la base de données
+          await db.query('DELETE FROM vehicle_images WHERE id IN (?) AND vehicle_id = ?', [imageIds, id]);
+          
+          // Supprimer les fichiers physiques
+          const fs = require('fs');
+          const path = require('path');
+          imagesToRemove.forEach(img => {
+            const filePath = path.join(__dirname, '..', img.image_url);
+            if (fs.existsSync(filePath)) {
+              fs.unlinkSync(filePath);
+              console.log('✅ Fichier supprimé:', filePath);
+            }
+          });
+        }
+      } catch (parseError) {
+        console.error('⚠️ Erreur parsing imagesToDelete:', parseError);
       }
     }
 
     // Ajouter les nouvelles images
-    if (req.files && req.files.length > 0) {
-      const imageFiles = req.files.filter(f => f.fieldname === 'images');
+    if (req.files && req.files.images && req.files.images.length > 0) {
+      const imageFiles = req.files.images;
       console.log('➕ Nouvelles images:', imageFiles.length);
       
       for (const file of imageFiles) {
@@ -233,12 +237,10 @@ const updateVehicle = async (req, res) => {
 
     // Récupérer le nouveau fichier PDF s'il existe
     let termsPdfPath = vehicles[0].terms_pdf; // Conserver l'ancien si pas de nouveau
-    if (req.files) {
-      const termsPdfFile = req.files.find(f => f.fieldname === 'terms_pdf');
-      if (termsPdfFile) {
-        termsPdfPath = `/uploads/vehicles/terms/${termsPdfFile.filename}`;
-        // TODO: Supprimer l'ancien PDF si nécessaire
-      }
+    if (req.files && req.files.terms_pdf && req.files.terms_pdf.length > 0) {
+      const termsPdfFile = req.files.terms_pdf[0];
+      termsPdfPath = `/uploads/vehicles/terms/${termsPdfFile.filename}`;
+      // TODO: Supprimer l'ancien PDF si nécessaire
     }
 
     await db.query(
@@ -246,8 +248,23 @@ const updateVehicle = async (req, res) => {
        tank_capacity = ?, price_per_hour = ?, fuel_type = ?, description = ?, terms_pdf = ?,
        release_date = ?, location = ?, pickup_address = ?, return_address = ?, status = ?
        WHERE id = ?`,
-      [brand, model, seats, engine, tank_capacity, price_per_hour, 
-       fuel_type, description, termsPdfPath, release_date, location, pickup_address, return_address, status, id]
+      [
+        brand, 
+        model, 
+        seats || null, 
+        engine || null, 
+        tank_capacity || null, 
+        price_per_hour, 
+        fuel_type, 
+        description || null, 
+        termsPdfPath, 
+        release_date || null, 
+        location || null, 
+        pickup_address || null, 
+        return_address || null, 
+        status || 'available', 
+        id
+      ]
     );
 
     console.log('✅ Véhicule mis à jour avec succès');

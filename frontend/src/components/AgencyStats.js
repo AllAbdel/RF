@@ -485,7 +485,12 @@ const AgencyStats = () => {
           <div className="upcoming-list">
             {detailedStats.upcomingReservations.map((res) => (
               <div key={res.id} className="upcoming-item">
-                <img src={`http://localhost:5000${res.image}`} alt={`${res.brand} ${res.model}`} className="upcoming-vehicle-img" />
+                <img 
+                  src={res.image ? `http://localhost:5000${res.image}` : '/no-image.svg'} 
+                  alt={`${res.brand} ${res.model}`} 
+                  className="upcoming-vehicle-img" 
+                  onError={(e) => { e.target.src = '/no-image.svg'; }}
+                />
                 <div className="upcoming-details">
                   <h4>{res.brand} {res.model}</h4>
                   <p className="upcoming-client">{res.first_name} {res.last_name}</p>

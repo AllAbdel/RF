@@ -78,14 +78,11 @@ const MyReservations = ({ reservations, onCancel, onRefresh, onSubmitReview }) =
         return (
           <div key={reservation.id} className="my-reservation-card">
             <div className="reservation-image">
-              {reservation.vehicle_image ? (
-                <img 
-                  src={`http://localhost:5000${reservation.vehicle_image}`} 
-                  alt={`${reservation.brand} ${reservation.model}`}
-                />
-              ) : (
-                <div className="no-image">Pas d'image</div>
-              )}
+              <img 
+                src={reservation.vehicle_image ? `http://localhost:5000${reservation.vehicle_image}` : '/no-image.svg'} 
+                alt={`${reservation.brand} ${reservation.model}`}
+                onError={(e) => { e.target.src = '/no-image.svg'; }}
+              />
             </div>
 
             <div className="reservation-content">

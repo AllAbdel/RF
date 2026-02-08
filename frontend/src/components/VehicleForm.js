@@ -353,7 +353,11 @@ const VehicleForm = ({ vehicle, onSubmit, onCancel }) => {
               <div className="image-preview">
                 {existingImages.map((image) => (
                   <div key={image.id} className="preview-item">
-                    <img src={`http://localhost:5000${image.image_url}`} alt="Existing" />
+                    <img 
+                      src={`http://localhost:5000${image.image_url}`} 
+                      alt="Existing" 
+                      onError={(e) => { e.target.src = '/no-image.svg'; }}
+                    />
                     <button
                       type="button"
                       className="remove-img-btn"

@@ -121,6 +121,7 @@ const VehicleComparison = () => {
             <img 
               src={vehicle.primary_image ? `http://localhost:5000${vehicle.primary_image}` : '/no-image.svg'} 
               alt={vehicle.brand}
+              onError={(e) => { e.target.src = '/no-image.svg'; }}
             />
             <div className="comparison-info">
               <p className="vehicle-name">{vehicle.brand} {vehicle.model}</p>
@@ -155,6 +156,7 @@ const VehicleComparison = () => {
                         src={vehicle.primary_image ? `http://localhost:5000${vehicle.primary_image}` : '/no-image.svg'} 
                         alt={`${vehicle.brand} ${vehicle.model}`}
                         className="vehicle-header-img"
+                        onError={(e) => { e.target.src = '/no-image.svg'; }}
                       />
                       <h3>{vehicle.brand}</h3>
                       <p>{vehicle.model}</p>

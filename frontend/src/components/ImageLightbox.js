@@ -24,7 +24,11 @@ const ImageLightbox = ({ imageUrl, alt, onClose }) => {
         ×
       </button>
       <div className="lightbox-content" onClick={(e) => e.stopPropagation()}>
-        <img src={imageUrl} alt={alt} />
+        <img 
+          src={imageUrl} 
+          alt={alt} 
+          onError={(e) => { e.target.src = '/no-image.svg'; }}
+        />
       </div>
     </div>
   );

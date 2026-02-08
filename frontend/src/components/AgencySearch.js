@@ -89,13 +89,12 @@ const AgencySearch = ({ onSelectAgency, selectedAgency }) => {
               className="search-result-item"
               onClick={() => handleSelect(agency)}
             >
-              {agency.logo && (
-                <img
-                  src={`http://localhost:5000${agency.logo}`}
-                  alt={agency.name}
-                  className="agency-logo"
-                />
-              )}
+              <img
+                src={agency.logo ? `http://localhost:5000${agency.logo}` : '/default-logo.svg'}
+                alt={agency.name}
+                className="agency-logo"
+                onError={(e) => { e.target.src = '/default-logo.svg'; }}
+              />
               <div className="agency-info">
                 <strong>{agency.name}</strong>
                 <span>{agency.email}</span>
@@ -108,13 +107,12 @@ const AgencySearch = ({ onSelectAgency, selectedAgency }) => {
       {selectedAgency && (
         <div className="selected-agency">
           <div className="selected-agency-content">
-            {selectedAgency.logo && (
-              <img
-                src={`http://localhost:5000${selectedAgency.logo}`}
-                alt={selectedAgency.name}
-                className="agency-logo"
-              />
-            )}
+            <img
+              src={selectedAgency.logo ? `http://localhost:5000${selectedAgency.logo}` : '/default-logo.svg'}
+              alt={selectedAgency.name}
+              className="agency-logo"
+              onError={(e) => { e.target.src = '/default-logo.svg'; }}
+            />
             <div className="agency-info">
               <strong>{selectedAgency.name}</strong>
               <span>{selectedAgency.email}</span>

@@ -254,6 +254,7 @@ const DocumentValidation = () => {
                 src={`http://localhost:5000/uploads/documents/${selectedDoc.user_id}/${selectedDoc.file_path.split('\\').pop()}`}
                 alt="Document"
                 style={{ maxWidth: '100%', maxHeight: '70vh' }}
+                onError={(e) => { e.target.src = '/no-image.svg'; }}
               />
             </div>
             <div className="modal-actions">
