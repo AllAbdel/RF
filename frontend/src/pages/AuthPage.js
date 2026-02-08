@@ -51,7 +51,8 @@ const AuthPage = () => {
 
     try {
       if (isLogin) {
-        const result = await login(formData.email, formData.password, userType, twoFactorCode);
+        // Login unifié - pas besoin de spécifier le type d'utilisateur
+        const result = await login(formData.email, formData.password, twoFactorCode);
         
         // Gérer le cas où 2FA est requis
         if (result.requires2FA) {
@@ -62,11 +63,15 @@ const AuthPage = () => {
         }
         
         if (result.success) {
+          // Récupérer le user depuis le localStorage pour déterminer la redirection
+          const storedUser = JSON.parse(localStorage.getItem('user'));
+          const isClient = storedUser?.user_type === 'client';
+          
           // Rediriger vers la page de retour ou le dashboard approprié
           if (returnTo) {
             navigate(returnTo);
           } else {
-            navigate(userType === 'client' ? '/client' : '/agency');
+            navigate(isClient ? '/client' : '/agency');
           }
         } else {
           setError(result.error);
@@ -165,20 +170,23 @@ const AuthPage = () => {
           <p>{isLogin ? 'Connectez-vous à votre compte' : 'Créez votre compte'}</p>
         </div>
 
-        <div className="user-type-selector">
-          <button
-            className={`type-btn ${userType === 'client' ? 'active' : ''}`}
-            onClick={() => setUserType('client')}
-          >
-            Client
-          </button>
-          <button
-            className={`type-btn ${userType === 'agency_member' ? 'active' : ''}`}
-            onClick={() => setUserType('agency_member')}
-          >
-            Agence
-          </button>
-        </div>
+        {/* Sélecteur de type d'utilisateur - uniquement pour l'inscription */}
+        {!isLogin && (
+          <div className="user-type-selector">
+            <button
+              className={`type-btn ${userType === 'client' ? 'active' : ''}`}
+              onClick={() => setUserType('client')}
+            >
+              Client
+            </button>
+            <button
+              className={`type-btn ${userType === 'agency_member' ? 'active' : ''}`}
+              onClick={() => setUserType('agency_member')}
+            >
+              Agence
+            </button>
+          </div>
+        )}
 
         {error && <div className="error-message">{error}</div>}
 
@@ -310,30 +318,6 @@ const AuthPage = () => {
                   )}
                 </>
               )}
-
-              {userType === 'agency_member' && isLogin && (
-            <>
-              <div className="form-group">
-                <label>Nom de l'agence</label>
-                <input
-                  type="text"
-                  name="agency_name"
-                  value={formData.agency_name}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>Logo de l'agence</label>
-                <input
-                  type="file"
-                  name="logo"
-                  accept="image/*"
-                  onChange={(e) => setFormData({...formData, logo: e.target.files[0]})}
-                />
-              </div>
-            </>
-          )}
 
               <div className="form-group">
                 <label>Téléphone</label>

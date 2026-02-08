@@ -65,17 +65,16 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = async (email, password, userType, twoFactorToken = null) => {
+  const login = async (email, password, twoFactorToken = null) => {
     try {
       const payload = {
         email,
-        password,
-        user_type: userType
+        password
       };
       
       // Ajouter le code 2FA si fourni
       if (twoFactorToken) {
-        payload.twoFactorToken = twoFactorToken;
+        payload.twofa_code = twoFactorToken;
       }
       
       const response = await axios.post('/auth/login', payload);

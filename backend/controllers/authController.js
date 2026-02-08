@@ -171,7 +171,7 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { email, password, user_type, twofa_code } = req.body;
+    const { email, password, twofa_code } = req.body;
     const ipAddress = req.ip || req.connection.remoteAddress;
 
     // 🆕 VÉRIFIER ACTIVITÉ SUSPECTE
@@ -184,10 +184,10 @@ const login = async (req, res) => {
       });
     }
 
-    // Récupérer l'utilisateur
+    // Récupérer l'utilisateur par email uniquement (login unifié)
     const [users] = await db.query(
-      'SELECT * FROM users WHERE email = ? AND user_type = ?',
-      [email, user_type]
+      'SELECT * FROM users WHERE email = ?',
+      [email]
     );
 
     if (users.length === 0) {
