@@ -98,6 +98,20 @@ const MessagesPage = () => {
     }
   };
 
+  const handleDeleteMessage = async (messageId) => {
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce message ?')) {
+      return;
+    }
+
+    try {
+      await messageAPI.deleteMessage(messageId);
+      loadMessages(selectedConversation.id);
+    } catch (error) {
+      console.error('Erreur suppression message:', error);
+      alert('Erreur lors de la suppression du message');
+    }
+  };
+
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -202,39 +216,56 @@ const MessagesPage = () => {
               {messages.map((msg) => (
                 <div
                   key={msg.id}
-                  className={`message ${msg.sender_id === user.id ? 'sent' : 'received'}`}
+                  className={`message ${msg.sender_id === user.id ? 'sent' : 'received'} ${msg.deleted_at ? 'deleted' : ''}`}
                 >
                   <div className="message-content">
-                    {msg.message && <p>{msg.message}</p>}
-                    {msg.file_url && (
-                      <div className="message-file">
-                        {['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(
-                          msg.file_name?.split('.').pop()?.toLowerCase()
-                        ) ? (
-                          <div className="message-image-container">
-                            <img 
-                              src={`http://localhost:5000${msg.file_url}`} 
-                              alt={msg.file_name}
-                              className="message-image"
-                              onClick={() => window.open(`http://localhost:5000${msg.file_url}`, '_blank')}
-                            />
-                            <span className="image-filename">{msg.file_name}</span>
+                    {msg.deleted_at ? (
+                      <p className="deleted-message">
+                        <em>[Message supprimé par {msg.deleted_by_first_name} {msg.deleted_by_last_name}]</em>
+                      </p>
+                    ) : (
+                      <>
+                        {msg.message && <p>{msg.message}</p>}
+                        {msg.file_url && (
+                          <div className="message-file">
+                            {['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(
+                              msg.file_name?.split('.').pop()?.toLowerCase()
+                            ) ? (
+                              <div className="message-image-container">
+                                <img 
+                                  src={`http://localhost:5000${msg.file_url}`} 
+                                  alt={msg.file_name}
+                                  className="message-image"
+                                  onClick={() => window.open(`http://localhost:5000${msg.file_url}`, '_blank')}
+                                />
+                                <span className="image-filename">{msg.file_name}</span>
+                              </div>
+                            ) : (
+                              <a 
+                                href={`http://localhost:5000${msg.file_url}`} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                download={msg.file_name}
+                              >
+                                {getFileIcon(msg.file_name)} {msg.file_name}
+                              </a>
+                            )}
                           </div>
-                        ) : (
-                          <a 
-                            href={`http://localhost:5000${msg.file_url}`} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            download={msg.file_name}
-                          >
-                            {getFileIcon(msg.file_name)} {msg.file_name}
-                          </a>
                         )}
-                      </div>
+                      </>
                     )}
                   </div>
-                  <div className="message-time">
-                    {formatDate(msg.created_at)}
+                  <div className="message-footer">
+                    <span className="message-time">{formatDate(msg.created_at)}</span>
+                    {!msg.deleted_at && (
+                      <button 
+                        className="delete-message-btn"
+                        onClick={() => handleDeleteMessage(msg.id)}
+                        title="Supprimer ce message"
+                      >
+                        🗑️
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}

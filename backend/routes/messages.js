@@ -6,7 +6,8 @@ const {
   getOrCreateConversation,
   getConversations,
   getMessages,
-  sendMessage
+  sendMessage,
+  deleteMessage
 } = require('../controllers/messageController');
 const { authMiddleware } = require('../middleware/auth');
 
@@ -34,5 +35,6 @@ router.post('/conversation', authMiddleware, getOrCreateConversation);
 router.get('/conversations', authMiddleware, getConversations);
 router.get('/conversation/:conversation_id', authMiddleware, getMessages);
 router.post('/send', authMiddleware, upload.single('file'), sendMessage);
+router.delete('/:message_id', authMiddleware, deleteMessage);
 
 module.exports = router;

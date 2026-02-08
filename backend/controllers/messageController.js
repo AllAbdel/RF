@@ -85,9 +85,11 @@ const getMessages = async (req, res) => {
     }
 
     const [messages] = await db.query(
-      `SELECT m.*, u.first_name, u.last_name, u.user_type
+      `SELECT m.*, u.first_name, u.last_name, u.user_type,
+              du.first_name as deleted_by_first_name, du.last_name as deleted_by_last_name
        FROM messages m
        JOIN users u ON m.sender_id = u.id
+       LEFT JOIN users du ON m.deleted_by = du.id
        WHERE m.conversation_id = ?
        ORDER BY m.created_at ASC`,
       [conversation_id]
@@ -168,9 +170,55 @@ const sendMessage = async (req, res) => {
   }
 };
 
+const deleteMessage = async (req, res) => {
+  try {
+    const { message_id } = req.params;
+
+    // Récupérer le message et vérifier l'accès
+    const [messages] = await db.query(
+      `SELECT m.*, c.client_id, c.agency_id 
+       FROM messages m
+       JOIN conversations c ON m.conversation_id = c.id
+       WHERE m.id = ?`,
+      [message_id]
+    );
+
+    if (messages.length === 0) {
+      return res.status(404).json({ error: 'Message non trouvé' });
+    }
+
+    const message = messages[0];
+
+    // Vérifier que l'utilisateur a accès à cette conversation
+    const hasAccess = message.client_id === req.user.id || message.agency_id === req.user.agency_id;
+    if (!hasAccess) {
+      return res.status(403).json({ error: 'Accès non autorisé' });
+    }
+
+    // Marquer le message comme supprimé (soft delete)
+    await db.query(
+      'UPDATE messages SET deleted_at = NOW(), deleted_by = ?, message = "[Message supprimé]", file_url = NULL, file_name = NULL WHERE id = ?',
+      [req.user.id, message_id]
+    );
+
+    res.json({ 
+      message: 'Message supprimé avec succès',
+      deleted_by: {
+        id: req.user.id,
+        first_name: req.user.first_name,
+        last_name: req.user.last_name
+      }
+    });
+  } catch (error) {
+    console.error('Erreur suppression message:', error);
+    res.status(500).json({ error: 'Erreur lors de la suppression du message' });
+  }
+};
+
 module.exports = {
   getOrCreateConversation,
   getConversations,
   getMessages,
-  sendMessage
+  sendMessage,
+  deleteMessage
 };

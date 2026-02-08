@@ -163,7 +163,8 @@ export const messageAPI = {
   getOrCreateConversation: (agencyId) => axios.post('/messages/conversation', { agency_id: agencyId }),
   getConversations: () => axios.get('/messages/conversations'),
   getMessages: (conversationId) => axios.get(`/messages/conversation/${conversationId}`),
-  sendMessage: (data) => axios.post('/messages/send', data)
+  sendMessage: (data) => axios.post('/messages/send', data),
+  deleteMessage: (messageId) => axios.delete(`/messages/${messageId}`)
 };
 
 // Avis
