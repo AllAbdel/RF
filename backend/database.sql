@@ -8,6 +8,11 @@ CREATE TABLE agencies (
   email VARCHAR(255) UNIQUE NOT NULL,
   phone VARCHAR(20),
   address TEXT,
+  description TEXT,
+  website VARCHAR(255),
+  logo_url VARCHAR(500),
+  payment_link_paypal VARCHAR(500),
+  payment_link_stripe VARCHAR(500),
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -63,6 +68,7 @@ CREATE TABLE reservations (
   id INT PRIMARY KEY AUTO_INCREMENT,
   vehicle_id INT NOT NULL,
   client_id INT NOT NULL,
+  agency_id INT NOT NULL,
   start_date DATETIME NOT NULL,
   end_date DATETIME NOT NULL,
   total_price DECIMAL(10, 2) NOT NULL,
@@ -71,7 +77,8 @@ CREATE TABLE reservations (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE CASCADE,
-  FOREIGN KEY (client_id) REFERENCES users(id) ON DELETE CASCADE
+  FOREIGN KEY (client_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (agency_id) REFERENCES agencies(id) ON DELETE CASCADE
 );
 
 -- Table des avis
@@ -155,3 +162,82 @@ CREATE TABLE agency_join_requests (
 
 CREATE INDEX idx_status ON agency_join_requests(status);
 CREATE INDEX idx_agency_status ON agency_join_requests(agency_id, status);
+
+-- Table des documents clients
+CREATE TABLE client_documents (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  user_id INT NOT NULL,
+  document_type ENUM('identity', 'license', 'proof_of_address', 'other') NOT NULL,
+  file_path VARCHAR(500) NOT NULL,
+  original_filename VARCHAR(255),
+  status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+  rejection_reason TEXT,
+  technical_score DECIMAL(5,2) DEFAULT NULL,
+  format_score DECIMAL(5,2) DEFAULT NULL,
+  coherence_score DECIMAL(5,2) DEFAULT NULL,
+  is_screenshot BOOLEAN DEFAULT FALSE,
+  is_edited BOOLEAN DEFAULT FALSE,
+  is_duplicate BOOLEAN DEFAULT FALSE,
+  extracted_data JSON DEFAULT NULL,
+  validation_notes TEXT DEFAULT NULL,
+  uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  validated_at TIMESTAMP NULL,
+  validated_by INT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (validated_by) REFERENCES users(id) ON DELETE SET NULL
+);
+
+CREATE INDEX idx_client_docs_user ON client_documents(user_id);
+CREATE INDEX idx_client_docs_status ON client_documents(status);
+
+-- Table des tentatives de connexion (sécurité)
+CREATE TABLE login_attempts (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  email VARCHAR(255) NOT NULL,
+  ip_address VARCHAR(45),
+  user_agent TEXT,
+  success BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_login_email ON login_attempts(email);
+CREATE INDEX idx_login_ip ON login_attempts(ip_address);
+CREATE INDEX idx_login_created ON login_attempts(created_at);
+
+-- Table de la liste noire des tokens (sécurité)
+CREATE TABLE token_blacklist (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  token_jti VARCHAR(255) UNIQUE NOT NULL,
+  user_id INT,
+  expires_at TIMESTAMP NOT NULL,
+  reason VARCHAR(100),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+);
+
+CREATE INDEX idx_blacklist_jti ON token_blacklist(token_jti);
+CREATE INDEX idx_blacklist_expires ON token_blacklist(expires_at);
+
+-- Table des refresh tokens
+CREATE TABLE refresh_tokens (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  user_id INT NOT NULL,
+  token_hash VARCHAR(255) NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_refresh_user ON refresh_tokens(user_id);
+CREATE INDEX idx_refresh_expires ON refresh_tokens(expires_at);
+
+-- Table de l'historique des mots de passe
+CREATE TABLE password_history (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  user_id INT NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_password_user ON password_history(user_id);

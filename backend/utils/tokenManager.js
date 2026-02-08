@@ -2,8 +2,9 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'your-refresh-secret-key';
+// Utiliser des getters pour éviter les problèmes de cache de constantes
+const getJwtSecret = () => process.env.JWT_SECRET || 'dev-secret-key-change-in-production';
+const getJwtRefreshSecret = () => process.env.JWT_REFRESH_SECRET || 'dev-refresh-secret-key';
 
 // Durées d'expiration
 const ACCESS_TOKEN_EXPIRY = '24h'; // Réduit de 7j à 24h
@@ -22,7 +23,7 @@ const generateAccessToken = (user) => {
     jti: uuidv4() // JWT ID unique pour blacklist
   };
   
-  return jwt.sign(payload, JWT_SECRET, { 
+  return jwt.sign(payload, getJwtSecret(), { 
     expiresIn: ACCESS_TOKEN_EXPIRY 
   });
 };
@@ -37,7 +38,7 @@ const generateRefreshToken = (userId) => {
     jti: uuidv4()
   };
   
-  return jwt.sign(payload, JWT_REFRESH_SECRET, { 
+  return jwt.sign(payload, getJwtRefreshSecret(), { 
     expiresIn: REFRESH_TOKEN_EXPIRY 
   });
 };
@@ -47,7 +48,7 @@ const generateRefreshToken = (userId) => {
  */
 const verifyAccessToken = (token) => {
   try {
-    return jwt.verify(token, JWT_SECRET);
+    return jwt.verify(token, getJwtSecret());
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
       throw new Error('Token expiré');
@@ -61,7 +62,7 @@ const verifyAccessToken = (token) => {
  */
 const verifyRefreshToken = (token) => {
   try {
-    return jwt.verify(token, JWT_REFRESH_SECRET);
+    return jwt.verify(token, getJwtRefreshSecret());
   } catch (error) {
     if (error.name === 'TokenExpiredError') {
       throw new Error('Refresh token expiré');
@@ -197,10 +198,11 @@ const cleanupExpiredTokens = async (db) => {
       'UPDATE users SET verification_token = NULL, verification_token_expires = NULL WHERE verification_token_expires < NOW()'
     );
     
-    // Nettoyer reset tokens
-    await db.query(
-      'UPDATE users SET reset_password_token = NULL, reset_password_expires = NULL WHERE reset_password_expires < NOW()'
-    );
+    // Nettoyer reset tokens (si les colonnes existent)
+    // Note: Les colonnes reset_password_token et reset_password_expires n'existent pas encore
+    // await db.query(
+    //   'UPDATE users SET reset_password_token = NULL, reset_password_expires = NULL WHERE reset_password_expires < NOW()'
+    // );
     
     console.log('✅ Tokens expirés nettoyés');
   } catch (error) {

@@ -26,6 +26,10 @@ axios.interceptors.request.use(
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      // Debug: afficher les premiers caractères du token
+      console.log('🔑 Request to:', config.url, '- Token:', token.substring(0, 30) + '...');
+    } else {
+      console.log('⚠️ Request to:', config.url, '- No token in localStorage');
     }
     return config;
   },
@@ -33,6 +37,14 @@ axios.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+
+// Endpoints qui ne doivent pas déclencher de refresh ou de redirection
+const noRefreshEndpoints = ['/auth/profile', '/auth/refresh-token', '/auth/login', '/auth/register'];
+
+// Vérifier si l'URL correspond à un endpoint sans refresh
+const isNoRefreshEndpoint = (url) => {
+  return noRefreshEndpoints.some(endpoint => url?.includes(endpoint));
+};
 
 // Intercepteur pour gérer le refresh automatique des tokens
 axios.interceptors.response.use(
@@ -42,6 +54,12 @@ axios.interceptors.response.use(
 
     // Si erreur 401 et pas déjà en train de refresh
     if (error.response?.status === 401 && !originalRequest._retry) {
+      
+      // Ne pas tenter de refresh pour les endpoints d'authentification
+      // Cela évite les erreurs en console quand l'utilisateur n'est pas connecté
+      if (isNoRefreshEndpoint(originalRequest.url)) {
+        return Promise.reject(error);
+      }
       
       // Si déjà en train de refresh, mettre en queue
       if (isRefreshing) {
@@ -63,11 +81,11 @@ axios.interceptors.response.use(
       const refreshToken = localStorage.getItem('refreshToken');
       
       if (!refreshToken) {
-        // Pas de refresh token, déconnecter
+        // Pas de refresh token, nettoyer et rejeter silencieusement
+        isRefreshing = false;
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
-        window.location.href = '/auth';
         return Promise.reject(error);
       }
 
@@ -94,14 +112,18 @@ axios.interceptors.response.use(
         return axios(originalRequest);
         
       } catch (refreshError) {
-        // Refresh a échoué, déconnecter
+        // Refresh a échoué, nettoyer
         processQueue(refreshError, null);
         isRefreshing = false;
         
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
-        window.location.href = '/auth';
+        
+        // Ne rediriger que si on n'est pas déjà sur la page d'auth
+        if (!window.location.pathname.includes('/auth')) {
+          window.location.href = '/auth';
+        }
         
         return Promise.reject(refreshError);
       }

@@ -16,24 +16,50 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [refreshToken, setRefreshToken] = useState(localStorage.getItem('refreshToken'));
   const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
+  // Charger l'utilisateur uniquement au montage initial si un token existe
   useEffect(() => {
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      loadUser();
-    } else {
-      setLoading(false);
-    }
+    const initAuth = async () => {
+      const storedToken = localStorage.getItem('token');
+      if (storedToken) {
+        axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+        await loadUser();
+      } else {
+        setLoading(false);
+      }
+      setInitialized(true);
+    };
+    
+    initAuth();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  }, []); // Seulement au montage
+
+  // Mettre à jour le header Authorization quand le token change (après login)
+  useEffect(() => {
+    if (initialized && token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
+  }, [token, initialized]);
 
   const loadUser = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/auth/profile');
+      const response = await axios.get('/auth/profile');
       setUser(response.data.user);
     } catch (error) {
-      console.error('Erreur chargement utilisateur:', error);
-      logout();
+      // Erreur 401 = token invalide ou expiré, nettoyer silencieusement
+      // Ne pas afficher d'erreur en console pour les 401 (c'est normal si pas connecté)
+      if (error.response?.status !== 401) {
+        console.error('Erreur chargement utilisateur:', error);
+      }
+      // Nettoyer les tokens invalides sans appeler l'API de logout
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      setToken(null);
+      setRefreshToken(null);
+      setUser(null);
+      delete axios.defaults.headers.common['Authorization'];
     } finally {
       setLoading(false);
     }
@@ -52,7 +78,7 @@ export const AuthProvider = ({ children }) => {
         payload.twoFactorToken = twoFactorToken;
       }
       
-      const response = await axios.post('http://localhost:5000/api/auth/login', payload);
+      const response = await axios.post('/auth/login', payload);
       
       // Cas 1: 2FA requis
       if (response.data.requires2FA) {
@@ -96,7 +122,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (formData) => {
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/register', formData, {
+      const response = await axios.post('/auth/register', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       
@@ -133,7 +159,7 @@ export const AuthProvider = ({ children }) => {
     try {
       // Appeler le logout serveur pour blacklister le token
       if (token) {
-        await axios.post('http://localhost:5000/api/auth/logout');
+        await axios.post('/auth/logout');
       }
     } catch (error) {
       console.error('Erreur logout serveur:', error);

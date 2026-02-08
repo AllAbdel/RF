@@ -48,9 +48,10 @@ Start-Sleep -Seconds 1
 Write-Host "`n[3/3] Demarrage du backend..." -ForegroundColor Yellow
 
 $backendJob = Start-Job -ScriptBlock {
-    Set-Location "E:\Perso\RentFlow-V2\backend"
+    param($path)
+    Set-Location "$path\backend"
     node server.js
-}
+} -ArgumentList $PSScriptRoot
 
 Start-Sleep -Seconds 3
 
@@ -68,7 +69,7 @@ if ($backendPort) {
 Write-Host "`nDemarrage du frontend..." -ForegroundColor Yellow
 
 # Verifier que node_modules existe
-$frontendPath = "E:\Perso\RentFlow-V2\frontend"
+$frontendPath = "$PSScriptRoot\frontend"
 if (-not (Test-Path "$frontendPath\node_modules")) {
     Write-Host "node_modules manquant dans frontend" -ForegroundColor Red
     Write-Host "`nEXECUTEZ:" -ForegroundColor Yellow
@@ -79,10 +80,11 @@ if (-not (Test-Path "$frontendPath\node_modules")) {
 }
 
 $frontendJob = Start-Job -ScriptBlock {
-    Set-Location "E:\Perso\RentFlow-V2\frontend"
+    param($path)
+    Set-Location "$path\frontend"
     $env:BROWSER = "none"
     npm start 2>&1 | Out-Null
-}
+} -ArgumentList $PSScriptRoot
 
 Write-Host "Frontend en cours de demarrage..." -ForegroundColor Green
 Start-Sleep -Seconds 8

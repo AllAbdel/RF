@@ -1,51 +1,52 @@
 const jwt = require('jsonwebtoken');
 const db = require('../config/database');
-const { isTokenBlacklisted } = require('../utils/tokenManager');
 
+// Utiliser un getter pour éviter les problèmes de cache de constantes
+const getJwtSecret = () => process.env.JWT_SECRET || 'dev-secret-key-change-in-production';
+
+/**
+ * Middleware d'authentification simplifié et robuste
+ */
 const authMiddleware = async (req, res, next) => {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
+    const authHeader = req.headers.authorization;
     
-    if (!token) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ error: 'Token manquant' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const token = authHeader.split(' ')[1];
     
-    // 🆕 VÉRIFIER SI TOKEN EST BLACKLISTÉ
-    if (decoded.jti) {
-      const isBlacklisted = await isTokenBlacklisted(db, decoded.jti);
-      if (isBlacklisted) {
-        return res.status(401).json({ 
-          error: 'Token révoqué',
-          message: 'Votre session a expiré. Veuillez vous reconnecter.'
-        });
-      }
-    }
+    // Vérifier et décoder le token
+    const decoded = jwt.verify(token, getJwtSecret());
     
-    // 🆕 VÉRIFIER SI EMAIL EST VÉRIFIÉ (optionnel selon routes)
-    if (req.path !== '/verify-email' && req.path !== '/resend-verification') {
-      const [users] = await db.query('SELECT email_verified FROM users WHERE id = ?', [decoded.id]);
-      if (users.length > 0 && !users[0].email_verified) {
-        // On laisse passer mais on signale (certaines routes peuvent vouloir bloquer)
-        req.user = { ...decoded, emailVerified: false };
-        return next();
-      }
-    }
-    
+    // Attacher l'utilisateur à la requête
     req.user = decoded;
     next();
   } catch (error) {
+    console.log('❌ Auth error:', error.name, '-', error.message);
+    
     if (error.name === 'TokenExpiredError') {
       return res.status(401).json({ 
         error: 'Token expiré',
         message: 'Votre session a expiré. Veuillez vous reconnecter.'
       });
     }
-    return res.status(401).json({ error: 'Token invalide' });
+    
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ 
+        error: 'Token invalide',
+        message: 'Token de session invalide.'
+      });
+    }
+    
+    return res.status(401).json({ error: 'Erreur d\'authentification' });
   }
 };
 
+/**
+ * Vérifie que l'utilisateur est un membre d'agence
+ */
 const isAgencyMember = (req, res, next) => {
   if (req.user.user_type !== 'agency_member') {
     return res.status(403).json({ error: 'Accès réservé aux membres d\'agences' });
@@ -53,6 +54,9 @@ const isAgencyMember = (req, res, next) => {
   next();
 };
 
+/**
+ * Vérifie que l'utilisateur est un client
+ */
 const isClient = (req, res, next) => {
   if (req.user.user_type !== 'client') {
     return res.status(403).json({ error: 'Accès réservé aux clients' });
@@ -60,6 +64,9 @@ const isClient = (req, res, next) => {
   next();
 };
 
+/**
+ * Vérifie que l'utilisateur est admin ou super_admin
+ */
 const isAgencyAdmin = (req, res, next) => {
   if (req.user.user_type !== 'agency_member' || 
       (req.user.role !== 'admin' && req.user.role !== 'super_admin')) {
@@ -68,6 +75,9 @@ const isAgencyAdmin = (req, res, next) => {
   next();
 };
 
+/**
+ * Vérifie que l'utilisateur est super_admin
+ */
 const isSuperAdmin = (req, res, next) => {
   if (req.user.user_type !== 'agency_member' || req.user.role !== 'super_admin') {
     return res.status(403).json({ error: 'Accès réservé aux super administrateurs' });

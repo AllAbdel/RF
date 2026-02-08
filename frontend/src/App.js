@@ -1,5 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+// Importer api.js en premier pour configurer les intercepteurs axios
+import './services/api';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import HomePage from './pages/HomePage';
 import AuthPage from './pages/AuthPage';

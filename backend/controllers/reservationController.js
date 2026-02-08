@@ -22,7 +22,7 @@ const createReservation = async (req, res) => {
     }
 
     // Calculer le prix
-    const [vehicle] = await db.query('SELECT price_per_hour FROM vehicles WHERE id = ?', [vehicle_id]);
+    const [vehicle] = await db.query('SELECT price_per_hour, agency_id FROM vehicles WHERE id = ?', [vehicle_id]);
     if (vehicle.length === 0) {
       return res.status(404).json({ error: 'Véhicule non trouvé' });
     }
@@ -31,23 +31,19 @@ const createReservation = async (req, res) => {
     const end = new Date(end_date);
     const hours = Math.ceil((end - start) / (1000 * 60 * 60));
     const total_price = hours * vehicle[0].price_per_hour;
+    const agency_id = vehicle[0].agency_id;
 
     // Créer la réservation
     const [result] = await db.query(
-      `INSERT INTO reservations (vehicle_id, client_id, start_date, end_date, total_price)
-       VALUES (?, ?, ?, ?, ?)`,
-      [vehicle_id, req.user.id, start_date, end_date, total_price]
+      `INSERT INTO reservations (vehicle_id, client_id, agency_id, start_date, end_date, total_price)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [vehicle_id, req.user.id, agency_id, start_date, end_date, total_price]
     );
 
     // Créer une notification pour l'agence
-    const [vehicleInfo] = await db.query(
-      'SELECT agency_id FROM vehicles WHERE id = ?',
-      [vehicle_id]
-    );
-
     const [agencyMembers] = await db.query(
       'SELECT id FROM users WHERE agency_id = ?',
-      [vehicleInfo[0].agency_id]
+      [agency_id]
     );
 
     for (const member of agencyMembers) {
