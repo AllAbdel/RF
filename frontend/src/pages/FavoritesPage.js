@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import Header from '../components/Header';
 import '../styles/Favorites.css';
 
 export default function FavoritesPage() {
@@ -50,17 +51,22 @@ export default function FavoritesPage() {
 
   if (loading) {
     return (
-      <div className="favorites-page">
-        <div className="loading-spinner">
-          <div className="spinner"></div>
-          <p>Chargement de vos favoris...</p>
+      <>
+        <Header />
+        <div className="favorites-page">
+          <div className="loading-spinner">
+            <div className="spinner"></div>
+            <p>Chargement de vos favoris...</p>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="favorites-page">
+    <>
+      <Header />
+      <div className="favorites-page">
       <div className="favorites-header">
         <h1>
           <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
@@ -117,8 +123,8 @@ export default function FavoritesPage() {
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="#fbbf24">
                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                   </svg>
-                  <span>{vehicle.avg_rating?.toFixed(1) || '0.0'}</span>
-                  <span className="review-count">({vehicle.review_count} avis)</span>
+                  <span>{parseFloat(vehicle.avg_rating || 0).toFixed(1)}</span>
+                  <span className="review-count">({vehicle.review_count || 0} avis)</span>
                 </div>
                 
                 <div className="favorite-footer">
@@ -157,5 +163,6 @@ export default function FavoritesPage() {
         </div>
       )}
     </div>
+    </>
   );
 }

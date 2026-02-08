@@ -1,18 +1,55 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import '../styles/VehicleCard.css';
 
 const VehicleCard = ({ vehicle, onCompareToggle }) => {
   const navigate = useNavigate();
   const [imageError, setImageError] = useState(false);
   const [isCompared, setIsCompared] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [loadingFavorite, setLoadingFavorite] = useState(false);
 
   const defaultImage = '/no-image.svg';
+  const isAuthenticated = !!localStorage.getItem('token');
 
   useEffect(() => {
     const compared = JSON.parse(localStorage.getItem('comparedVehicles') || '[]');
     setIsCompared(compared.some(v => v.id === vehicle.id));
-  }, [vehicle.id]);
+    
+    // Vérifier si le véhicule est en favori
+    if (isAuthenticated) {
+      checkFavoriteStatus();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vehicle.id, isAuthenticated]);
+
+  const checkFavoriteStatus = async () => {
+    try {
+      const response = await axios.get(`/favorites/check/${vehicle.id}`);
+      setIsFavorite(response.data.isFavorite);
+    } catch (err) {
+      // Silencieux si non connecté
+    }
+  };
+
+  const handleFavoriteToggle = async (e) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      navigate('/auth');
+      return;
+    }
+    
+    setLoadingFavorite(true);
+    try {
+      const response = await axios.post(`/favorites/toggle/${vehicle.id}`);
+      setIsFavorite(response.data.isFavorite);
+    } catch (err) {
+      console.error('Erreur toggle favori:', err);
+    } finally {
+      setLoadingFavorite(false);
+    }
+  };
 
   const handleCompareToggle = (e) => {
     e.stopPropagation();
@@ -107,6 +144,14 @@ const VehicleCard = ({ vehicle, onCompareToggle }) => {
           alt={`${vehicle.brand} ${vehicle.model}`}
           onError={() => setImageError(true)}
         />
+        <button 
+          className={`favorite-btn ${isFavorite ? 'active' : ''}`}
+          onClick={handleFavoriteToggle}
+          disabled={loadingFavorite}
+          title={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+        >
+          {isFavorite ? '❤️' : '🤍'}
+        </button>
         {vehicle.status === 'rented' && remainingTime && (
           <div className="status-badge rented">
             Loué ({rentalDuration}) - Dispo dans {remainingTime}

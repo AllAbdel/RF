@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Header from '../components/Header';
 import 'leaflet/dist/leaflet.css';
 import '../styles/VehicleMap.css';
 
@@ -14,14 +15,16 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 });
 
-// Custom car icon
+// Custom car icon (SVG sans emoji pour compatibilité btoa)
+const carIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <circle cx="16" cy="16" r="14" fill="#3b82f6" stroke="#1d4ed8" stroke-width="2"/>
+  <path d="M8 18h16v4H8z M10 14l2-4h8l2 4z" fill="white"/>
+  <circle cx="11" cy="22" r="2" fill="#1d4ed8"/>
+  <circle cx="21" cy="22" r="2" fill="#1d4ed8"/>
+</svg>`;
+
 const carIcon = new L.Icon({
-  iconUrl: 'data:image/svg+xml;base64,' + btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="32" height="32">
-      <circle cx="12" cy="12" r="11" fill="#3b82f6" stroke="#1d4ed8" stroke-width="2"/>
-      <text x="12" y="17" text-anchor="middle" fill="white" font-size="12">🚗</text>
-    </svg>
-  `),
+  iconUrl: 'data:image/svg+xml;base64,' + btoa(carIconSvg),
   iconSize: [32, 32],
   iconAnchor: [16, 32],
   popupAnchor: [0, -32],
@@ -56,8 +59,11 @@ const VehicleMapPage = () => {
       setLoading(true);
       const response = await axios.get('http://localhost:5000/api/vehicles');
       
+      // L'API retourne { vehicles: [...] }
+      const vehiclesData = response.data.vehicles || response.data || [];
+      
       // Filtrer les véhicules avec coordonnées
-      const vehiclesWithLocation = response.data.filter(v => 
+      const vehiclesWithLocation = vehiclesData.filter(v => 
         v.latitude && v.longitude && 
         !isNaN(parseFloat(v.latitude)) && !isNaN(parseFloat(v.longitude))
       );
@@ -113,23 +119,31 @@ const VehicleMapPage = () => {
 
   if (loading) {
     return (
-      <div className="map-loading">
-        <div className="spinner"></div>
-        <p>Chargement de la carte...</p>
-      </div>
+      <>
+        <Header />
+        <div className="map-loading">
+          <div className="spinner"></div>
+          <p>Chargement de la carte...</p>
+        </div>
+      </>
     );
   }
 
   if (error) {
     return (
-      <div className="map-error">
-        <p>{error}</p>
-        <button onClick={fetchVehicles}>Réessayer</button>
-      </div>
+      <>
+        <Header />
+        <div className="map-error">
+          <p>{error}</p>
+          <button onClick={fetchVehicles}>Réessayer</button>
+        </div>
+      </>
     );
   }
 
   return (
+    <>
+    <Header />
     <div className="vehicle-map-page">
       <div className="map-sidebar">
         <h2>Véhicules disponibles</h2>
@@ -247,6 +261,7 @@ const VehicleMapPage = () => {
         </MapContainer>
       </div>
     </div>
+    </>
   );
 };
 

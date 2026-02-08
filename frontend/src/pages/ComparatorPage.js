@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import Header from '../components/Header';
 import '../styles/Comparator.css';
 
 export default function ComparatorPage() {
@@ -93,14 +94,11 @@ export default function ComparatorPage() {
   };
 
   return (
+    <>
+    <Header />
     <div className="comparator-page">
       <div className="comparator-header">
         <h1>
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <line x1="18" y1="20" x2="18" y2="10"/>
-            <line x1="12" y1="20" x2="12" y2="4"/>
-            <line x1="6" y1="20" x2="6" y2="14"/>
-          </svg>
           Comparateur de véhicules
         </h1>
         <p>Comparez jusqu'à 3 véhicules côte à côte</p>
@@ -275,5 +273,6 @@ export default function ComparatorPage() {
         </div>
       )}
     </div>
+    </>
   );
 }

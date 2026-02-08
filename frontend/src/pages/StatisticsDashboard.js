@@ -5,6 +5,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   AreaChart, Area
 } from 'recharts';
+import Header from '../components/Header';
 import '../styles/StatisticsDashboard.css';
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
@@ -39,19 +40,25 @@ const StatisticsDashboard = () => {
 
   if (loading) {
     return (
-      <div className="stats-loading">
-        <div className="spinner"></div>
-        <p>Chargement des statistiques...</p>
-      </div>
+      <>
+        <Header />
+        <div className="stats-loading">
+          <div className="spinner"></div>
+          <p>Chargement des statistiques...</p>
+        </div>
+      </>
     );
   }
 
   if (error) {
     return (
-      <div className="stats-error">
-        <p>{error}</p>
-        <button onClick={fetchStats}>Réessayer</button>
-      </div>
+      <>
+        <Header />
+        <div className="stats-error">
+          <p>{error}</p>
+          <button onClick={fetchStats}>Réessayer</button>
+        </div>
+      </>
     );
   }
 
@@ -84,6 +91,8 @@ const StatisticsDashboard = () => {
   }));
 
   return (
+    <>
+    <Header />
     <div className="statistics-dashboard">
       <div className="stats-header">
         <h1>Tableau de Bord Statistiques</h1>
@@ -281,6 +290,7 @@ const StatisticsDashboard = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

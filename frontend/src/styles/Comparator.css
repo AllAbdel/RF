@@ -262,14 +262,14 @@
 .best-value {
   position: relative;
   background: #f0fdf4 !important;
-  color: #166534;
+  color: #000000;
   font-weight: 600;
 }
 
 .best-badge {
   display: block;
   font-size: 0.7rem;
-  color: #16a34a;
+  color: #000000;
   font-weight: 500;
   margin-top: 4px;
 }
@@ -433,4 +433,35 @@
     width: 80px;
     height: 50px;
   }
+}
+
+/* Dark mode - force black text on light backgrounds */
+:root .comparator-page .comparison-table-wrapper,
+:root .comparator-page .comparison-table th,
+:root .comparator-page .comparison-table td {
+  color: #1e293b;
+}
+
+:root .comparator-page .vehicle-header h3 {
+  color: #1e293b;
+}
+
+:root .comparator-page .vehicle-header p {
+  color: #64748b;
+}
+
+:root .comparator-page .comparison-table .label-cell {
+  color: #475569;
+}
+
+:root .comparator-page .section-row td {
+  color: #475569;
+}
+
+:root .comparator-page .vehicle-item-info h4 {
+  color: #1e293b;
+}
+
+:root .comparator-page .vehicle-item-info p {
+  color: #64748b;
 }

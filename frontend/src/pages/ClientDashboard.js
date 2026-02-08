@@ -138,6 +138,24 @@ const ClientDashboard = () => {
           Mes documents
         </button>
         <button
+          className="nav-btn"
+          onClick={() => navigate('/favorites')}
+        >
+          Favoris
+        </button>
+        <button
+          className="nav-btn"
+          onClick={() => navigate('/comparator')}
+        >
+          Comparateur
+        </button>
+        <button
+          className="nav-btn"
+          onClick={() => navigate('/map')}
+        >
+          Carte
+        </button>
+        <button
           className={`nav-btn ${activeTab === 'messages' ? 'active' : ''}`}
           onClick={() => navigate('/messages')}
         >

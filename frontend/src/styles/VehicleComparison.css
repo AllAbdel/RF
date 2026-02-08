@@ -96,7 +96,7 @@
 
 .vehicle-price {
   font-size: 0.85rem;
-  color: white;
+  color: #000000;
   font-weight: 700;
   margin: 0;
 }
@@ -125,7 +125,7 @@
   width: 100%;
   padding: 0.875rem;
   background: var(--accent-gradient);
-  color: white !important;
+  color: #000000 !important;
   border: none;
   border-radius: var(--radius-md);
   font-weight: 700;

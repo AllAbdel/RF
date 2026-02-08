@@ -26,12 +26,12 @@
 }
 
 .compare-checkbox-container {
-  background: rgba(128, 128, 128, 0.3);
+  background: var(--accent-gradient);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   padding: 0.625rem 1rem;
   border-radius: var(--radius-md);
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -39,12 +39,12 @@
   transition: all 0.3s ease;
   cursor: pointer;
   width: 100%;
+  box-shadow: var(--shadow-sm);
 }
 
 .compare-checkbox-container:hover {
   transform: scale(1.05);
-  background: rgba(128, 128, 128, 0.5);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-accent);
 }
 
 .compare-checkbox {
@@ -114,6 +114,46 @@
   right: 0;
   height: 50%;
   background: linear-gradient(to top, rgba(0, 0, 0, 0.5), transparent);
+}
+
+/* Favorite Button */
+.favorite-btn {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.favorite-btn:hover {
+  transform: scale(1.1);
+  background: white;
+}
+
+.favorite-btn.active {
+  background: rgba(255, 255, 255, 0.95);
+  animation: heartBeat 0.3s ease;
+}
+
+.favorite-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@keyframes heartBeat {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
 }
 
 /* Badges */
@@ -447,4 +487,18 @@
   .vehicles-grid {
     grid-template-columns: repeat(3, 1fr);
   }
+}
+
+/* Dark mode - vehicle and agency names in white */
+:root .vehicle-header h3,
+:root .agency-name {
+  color: #ffffff !important;
+}
+
+[data-theme="light"] .vehicle-header h3 {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="light"] .agency-name {
+  color: var(--text-tertiary) !important;
 }
