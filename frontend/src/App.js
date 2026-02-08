@@ -24,6 +24,11 @@ import TwoFactorSetup from './pages/TwoFactorSetup';
 import Toast from './components/Toast';
 import ScrollToTop from './components/ScrollToTop';
 import VehicleComparison from './components/VehicleComparison';
+// Nouvelles pages
+import FavoritesPage from './pages/FavoritesPage';
+import ComparatorPage from './pages/ComparatorPage';
+import VehicleMapPage from './pages/VehicleMapPage';
+import StatisticsDashboard from './pages/StatisticsDashboard';
 
 import './styles/App.css';
 
@@ -105,6 +110,9 @@ function App() {
 
             {/* Route des détails de véhicule - accessible à tous */}
             <Route path="/vehicle/:id" element={<VehicleDetails />} />
+            
+            {/* Carte des véhicules - accessible à tous */}
+            <Route path="/map" element={<VehicleMapPage />} />
 
             {/* Pages publiques */}
             <Route path="/about" element={<AboutPage />} />
@@ -133,6 +141,36 @@ function App() {
               element={
                 <ProtectedRoute>
                   <MessagesPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Routes protégées - Favoris (clients) */}
+            <Route
+              path="/favorites"
+              element={
+                <ProtectedRoute requireClient>
+                  <FavoritesPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Routes protégées - Comparateur (clients) */}
+            <Route
+              path="/comparator"
+              element={
+                <ProtectedRoute requireClient>
+                  <ComparatorPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Routes protégées - Statistiques avancées (agences) */}
+            <Route
+              path="/statistics"
+              element={
+                <ProtectedRoute requireAgency>
+                  <StatisticsDashboard />
                 </ProtectedRoute>
               }
             />

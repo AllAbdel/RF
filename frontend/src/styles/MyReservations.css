@@ -4,6 +4,38 @@
   gap: 2rem;
 }
 
+.reservations-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.reservations-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.export-all-btn {
+  background: linear-gradient(135deg, var(--success), #059669);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.export-all-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
 .my-reservation-card {
   background: var(--bg-elevated);
   border-radius: var(--radius-lg);
@@ -162,6 +194,25 @@
 
 .documents-btn:hover {
   background: var(--accent-primary-hover);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.export-pdf-btn {
+  background: var(--success);
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.export-pdf-btn:hover {
+  background: #059669;
   box-shadow: var(--shadow-md);
   transform: translateY(-2px);
 }

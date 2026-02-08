@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import DocumentViewer from './DocumentViewer';
+import { generateReservationPDF, generateAllReservationsPDF } from '../utils/pdfExport';
 import '../styles/MyReservations.css';
 
 const MyReservations = ({ reservations, onCancel, onRefresh, onSubmitReview }) => {
@@ -72,6 +73,16 @@ const MyReservations = ({ reservations, onCancel, onRefresh, onSubmitReview }) =
 
   return (
     <div className="my-reservations">
+      <div className="reservations-header">
+        <h2>Mes Réservations ({reservations.length})</h2>
+        <button 
+          className="export-all-btn"
+          onClick={() => generateAllReservationsPDF(reservations)}
+          title="Exporter toutes les réservations en PDF"
+        >
+          📥 Exporter tout (PDF)
+        </button>
+      </div>
       {reservations.map((reservation) => {
         const statusInfo = getStatusInfo(reservation.status);
         
@@ -120,6 +131,13 @@ const MyReservations = ({ reservations, onCancel, onRefresh, onSubmitReview }) =
                     onClick={() => toggleDocuments(reservation.id)}
                   >
                     {showDocuments[reservation.id] ? '📁 Masquer documents' : '📄 Voir documents'}
+                  </button>
+                  <button
+                    className="export-pdf-btn"
+                    onClick={() => generateReservationPDF(reservation)}
+                    title="Exporter en PDF"
+                  >
+                    📥 PDF
                   </button>
                   {canCancel(reservation) && (
                     <button

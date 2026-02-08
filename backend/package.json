@@ -29,7 +29,8 @@
     "socket.io": "^4.7.2",
     "speakeasy": "^2.0.0",
     "tesseract.js": "^6.0.1",
-    "uuid": "^13.0.0"
+    "uuid": "^13.0.0",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"

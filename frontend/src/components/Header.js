@@ -27,6 +27,9 @@ const Header = () => {
               {isClient && (
                 <>
                   <Link to="/client" className="nav-link">Mes Réservations</Link>
+                  <Link to="/favorites" className="nav-link">Favoris</Link>
+                  <Link to="/comparator" className="nav-link">Comparateur</Link>
+                  <Link to="/map" className="nav-link">Carte</Link>
                   <Link to="/messages" className="nav-link">Messages</Link>
                 </>
               )}
@@ -35,6 +38,7 @@ const Header = () => {
                 <>
                   <Link to="/" className="nav-link">Recherche Véhicules</Link>
                   <Link to="/agency" className="nav-link">Dashboard</Link>
+                  <Link to="/statistics" className="nav-link">Statistiques</Link>
                   <Link to="/messages" className="nav-link">Messages</Link>
                 </>
               )}
