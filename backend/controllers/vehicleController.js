@@ -227,10 +227,20 @@ const updateVehicle = async (req, res) => {
       const imageFiles = req.files.images;
       console.log('➕ Nouvelles images:', imageFiles.length);
       
-      for (const file of imageFiles) {
+      // Vérifier s'il existe déjà une image primaire pour ce véhicule
+      const [existingPrimary] = await db.query(
+        'SELECT id FROM vehicle_images WHERE vehicle_id = ? AND is_primary = 1',
+        [id]
+      );
+      const hasPrimary = existingPrimary.length > 0;
+      
+      for (let i = 0; i < imageFiles.length; i++) {
+        const file = imageFiles[i];
+        // La première image devient primaire s'il n'y en a pas déjà une
+        const isPrimary = (!hasPrimary && i === 0) ? 1 : 0;
         await db.query(
-          'INSERT INTO vehicle_images (vehicle_id, image_url) VALUES (?, ?)',
-          [id, `/uploads/vehicles/${file.filename}`]
+          'INSERT INTO vehicle_images (vehicle_id, image_url, is_primary) VALUES (?, ?, ?)',
+          [id, `/uploads/vehicles/${file.filename}`, isPrimary]
         );
       }
     }
