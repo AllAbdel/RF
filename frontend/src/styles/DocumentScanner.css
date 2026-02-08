@@ -217,6 +217,31 @@
   transform: translateY(-1px);
 }
 
+/* ===== Error Message ===== */
+.scanner-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  color: #991b1b;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.scanner-error svg {
+  flex-shrink: 0;
+  color: #dc2626;
+  margin-top: 2px;
+}
+
+.scanner-error span {
+  flex: 1;
+}
+
 /* ===== Notice ===== */
 .scanner-notice {
   margin-top: 16px;

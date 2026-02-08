@@ -2,9 +2,22 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { v4: uuidv4 } = require('uuid');
 
-// Utiliser des getters pour éviter les problèmes de cache de constantes
-const getJwtSecret = () => process.env.JWT_SECRET || 'dev-secret-key-change-in-production';
-const getJwtRefreshSecret = () => process.env.JWT_REFRESH_SECRET || 'dev-refresh-secret-key';
+// 🔒 SÉCURITÉ: Fonctions pour récupérer les secrets JWT
+const getJwtSecret = () => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret && process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET non défini en production');
+  }
+  return secret || 'dev-only-secret-not-for-production';
+};
+
+const getJwtRefreshSecret = () => {
+  const secret = process.env.JWT_REFRESH_SECRET;
+  if (!secret && process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_REFRESH_SECRET non défini en production');
+  }
+  return secret || 'dev-only-refresh-secret-not-for-production';
+};
 
 // Durées d'expiration
 const ACCESS_TOKEN_EXPIRY = '24h'; // Réduit de 7j à 24h

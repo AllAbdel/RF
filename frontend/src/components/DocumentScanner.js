@@ -341,12 +341,75 @@ export default function DocumentScanner() {
   const [status, setStatus] = useState('IDLE'); // IDLE, SCANNING, ANALYZING, DONE
   const [progress, setProgress] = useState(0);
   const [scanResult, setScanResult] = useState(null);
+  const [error, setError] = useState(null);
+
+  // Dimensions minimales pour Tesseract (en pixels)
+  const MIN_WIDTH = 100;
+  const MIN_HEIGHT = 100;
+
+  /**
+   * Prépare l'image pour l'OCR en vérifiant les dimensions
+   * et en la redimensionnant si nécessaire
+   */
+  const prepareImageForOCR = (imageFile) => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const { width, height } = img;
+        
+        // Vérifier si l'image est trop petite
+        if (width < MIN_WIDTH || height < MIN_HEIGHT) {
+          // Calculer le facteur de redimensionnement
+          const scaleX = width < MIN_WIDTH ? MIN_WIDTH / width : 1;
+          const scaleY = height < MIN_HEIGHT ? MIN_HEIGHT / height : 1;
+          const scale = Math.max(scaleX, scaleY, 2); // Au moins x2 pour améliorer la qualité
+          
+          const newWidth = Math.round(width * scale);
+          const newHeight = Math.round(height * scale);
+          
+          // Créer un canvas pour redimensionner
+          const canvas = document.createElement('canvas');
+          canvas.width = newWidth;
+          canvas.height = newHeight;
+          const ctx = canvas.getContext('2d');
+          
+          // Utiliser un lissage de qualité pour l'upscale
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
+          ctx.drawImage(img, 0, 0, newWidth, newHeight);
+          
+          // Convertir en blob
+          canvas.toBlob((blob) => {
+            if (blob) {
+              console.log(`Image redimensionnée: ${width}x${height} → ${newWidth}x${newHeight}`);
+              resolve(blob);
+            } else {
+              reject(new Error('Impossible de redimensionner l\'image'));
+            }
+          }, 'image/png', 1.0);
+        } else {
+          // L'image est assez grande, utiliser telle quelle
+          resolve(imageFile);
+        }
+      };
+      
+      img.onerror = () => {
+        reject(new Error('Impossible de charger l\'image'));
+      };
+      
+      // Charger l'image depuis le fichier
+      img.src = URL.createObjectURL(imageFile);
+    });
+  };
 
   // OCR réel avec Tesseract.js
   const performOCR = async (imageFile) => {
     try {
+      // Préparer l'image (redimensionner si trop petite)
+      const preparedImage = await prepareImageForOCR(imageFile);
+      
       const { data: { text } } = await Tesseract.recognize(
-        imageFile,
+        preparedImage,
         'fra', // Langue française
         { 
           logger: m => {
@@ -367,10 +430,18 @@ export default function DocumentScanner() {
     if (!file) return;
     setStatus('SCANNING');
     setProgress(0);
+    setError(null);
     
     try {
       // Étape 1: OCR
       const text = await performOCR(file);
+      
+      // Vérifier si du texte a été extrait
+      if (!text || text.trim().length < 10) {
+        setError("Aucun texte lisible détecté. Assurez-vous que l'image est nette et bien éclairée.");
+        setStatus('IDLE');
+        return;
+      }
       
       setStatus('ANALYZING');
       
@@ -381,10 +452,18 @@ export default function DocumentScanner() {
         setStatus('DONE');
       }, 500);
 
-    } catch (error) {
-      console.error("Erreur d'analyse", error);
+    } catch (err) {
+      console.error("Erreur d'analyse", err);
       setStatus('IDLE');
-      alert("Erreur lors de la lecture du document. Veuillez réessayer avec une image de meilleure qualité.");
+      
+      // Message d'erreur adapté
+      if (err.message.includes('small') || err.message.includes('scale')) {
+        setError("L'image est trop petite ou de trop basse résolution. Utilisez un scan ou une photo de meilleure qualité (minimum 300x300 pixels recommandé).");
+      } else if (err.message.includes('charger')) {
+        setError("Impossible de charger l'image. Vérifiez que le fichier n'est pas corrompu.");
+      } else {
+        setError("Erreur lors de la lecture du document. Veuillez réessayer avec une image de meilleure qualité.");
+      }
     }
   };
 
@@ -394,12 +473,14 @@ export default function DocumentScanner() {
     setScanResult(null);
     setStatus('IDLE');
     setProgress(0);
+    setError(null);
   };
 
   const onFileSelect = (selectedFile) => {
     setFile(selectedFile);
     setScanResult(null);
     setStatus('IDLE');
+    setError(null);
     const reader = new FileReader();
     reader.onloadend = () => {
       setPreview(reader.result);
@@ -453,6 +534,18 @@ export default function DocumentScanner() {
                   </svg>
                 </button>
               )}
+            </div>
+          )}
+
+          {/* Affichage des erreurs */}
+          {error && (
+            <div className="scanner-error">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              <span>{error}</span>
             </div>
           )}
 

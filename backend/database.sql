@@ -288,3 +288,30 @@ CREATE TABLE password_history (
 );
 
 CREATE INDEX idx_password_user ON password_history(user_id);
+
+-- Table des favoris (véhicules sauvegardés)
+CREATE TABLE favorites (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  user_id INT NOT NULL,
+  vehicle_id INT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE CASCADE,
+  UNIQUE KEY unique_favorite (user_id, vehicle_id)
+);
+
+CREATE INDEX idx_favorites_user ON favorites(user_id);
+CREATE INDEX idx_favorites_vehicle ON favorites(vehicle_id);
+
+-- Table des abonnements push notifications
+CREATE TABLE push_subscriptions (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  user_id INT NOT NULL,
+  endpoint TEXT NOT NULL,
+  p256dh VARCHAR(255) NOT NULL,
+  auth VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_push_user ON push_subscriptions(user_id);

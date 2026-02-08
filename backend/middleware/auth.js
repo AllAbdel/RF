@@ -1,8 +1,15 @@
 const jwt = require('jsonwebtoken');
 const db = require('../config/database');
 
-// Utiliser un getter pour éviter les problèmes de cache de constantes
-const getJwtSecret = () => process.env.JWT_SECRET || 'dev-secret-key-change-in-production';
+// 🔒 SÉCURITÉ: Utiliser une fonction pour le secret JWT
+// En production, doit OBLIGATOIREMENT être défini via .env
+const getJwtSecret = () => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret && process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET non défini en production');
+  }
+  return secret || 'dev-only-secret-not-for-production';
+};
 
 /**
  * Middleware d'authentification simplifié et robuste
