@@ -5,7 +5,7 @@ import axios from 'axios';
 import VehicleCard from '../components/VehicleCard';
 import SearchBar from '../components/SearchBar';
 import MyReservations from '../components/MyReservations';
-import DocumentUpload from '../components/DocumentUpload';
+import ClientDocuments from '../components/ClientDocuments';
 import '../styles/Client.css';
 import { useNavigate } from 'react-router-dom';
 
@@ -195,7 +195,7 @@ const ClientDashboard = () => {
         )}
 
         {activeTab === 'documents' && (
-          <DocumentUpload />
+          <ClientDocuments />
         )}
       </main>
     </div>

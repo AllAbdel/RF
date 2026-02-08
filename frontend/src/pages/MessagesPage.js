@@ -208,14 +208,28 @@ const MessagesPage = () => {
                     {msg.message && <p>{msg.message}</p>}
                     {msg.file_url && (
                       <div className="message-file">
-                        <a 
-                          href={`http://localhost:5000${msg.file_url}`} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          download={msg.file_name}
-                        >
-                          {getFileIcon(msg.file_name)} {msg.file_name}
-                        </a>
+                        {['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(
+                          msg.file_name?.split('.').pop()?.toLowerCase()
+                        ) ? (
+                          <div className="message-image-container">
+                            <img 
+                              src={`http://localhost:5000${msg.file_url}`} 
+                              alt={msg.file_name}
+                              className="message-image"
+                              onClick={() => window.open(`http://localhost:5000${msg.file_url}`, '_blank')}
+                            />
+                            <span className="image-filename">{msg.file_name}</span>
+                          </div>
+                        ) : (
+                          <a 
+                            href={`http://localhost:5000${msg.file_url}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            download={msg.file_name}
+                          >
+                            {getFileIcon(msg.file_name)} {msg.file_name}
+                          </a>
+                        )}
                       </div>
                     )}
                   </div>
