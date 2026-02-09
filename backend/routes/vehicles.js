@@ -8,7 +8,8 @@ const {
   updateVehicle,
   deleteVehicle,
   getAgencyVehicles,
-  checkAvailability
+  checkAvailability,
+  getVehicleLocations
 } = require('../controllers/vehicleController');
 const { authMiddleware, isAgencyMember } = require('../middleware/auth');
 const { uploadVehicleImages, uploadVehicleTermsPdf } = require('../middleware/upload');
@@ -52,6 +53,7 @@ const handleUpload = (req, res, next) => {
 };
 
 router.get('/', getAllVehicles);
+router.get('/locations', getVehicleLocations);
 router.get('/agency', authMiddleware, isAgencyMember, getAgencyVehicles);
 router.get('/:id', getVehicleById);
 router.get('/:id/availability', checkAvailability);

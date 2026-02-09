@@ -138,6 +138,7 @@ export const vehicleAPI = {
   getAll: (params) => axios.get('/vehicles', { params }),
   getById: (id) => axios.get(`/vehicles/${id}`),
   getAgencyVehicles: () => axios.get('/vehicles/agency'),
+  getLocations: () => axios.get('/vehicles/locations'),
   create: (formData) => axios.post('/vehicles', formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   }),

@@ -156,6 +156,25 @@
   box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
 }
 
+.quick-location-badge.active {
+  background: var(--accent-gradient);
+  color: white;
+  border-color: var(--accent-primary);
+  box-shadow: var(--shadow-accent);
+}
+
+.quick-location-badge.clear-btn {
+  background: var(--bg-tertiary);
+  border-color: var(--border-tertiary);
+  color: var(--text-secondary);
+}
+
+.quick-location-badge.clear-btn:hover {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: white;
+}
+
 .search-input-group input {
   width: 200%;
   max-width: 100%;

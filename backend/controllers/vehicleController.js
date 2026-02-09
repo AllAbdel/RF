@@ -389,6 +389,33 @@ const checkAvailability = async (req, res) => {
   }
 };
 
+// Récupérer les localisations distinctes des véhicules
+const getVehicleLocations = async (req, res) => {
+  try {
+    const [locations] = await db.query(
+      `SELECT DISTINCT location FROM vehicles 
+       WHERE location IS NOT NULL AND location != '' 
+       AND status IN ('available', 'rented', 'reserved')
+       ORDER BY location ASC`
+    );
+    
+    // Extraire uniquement les noms de villes (avant la virgule si format "Ville, Pays")
+    const cities = locations
+      .map(l => {
+        const loc = l.location.trim();
+        // Si format "Ville, France" ou "Ville, Pays", garder juste la ville
+        const commaIndex = loc.indexOf(',');
+        return commaIndex > 0 ? loc.substring(0, commaIndex).trim() : loc;
+      })
+      .filter((city, index, self) => city && self.indexOf(city) === index); // Déduplique
+    
+    res.json({ locations: cities });
+  } catch (error) {
+    console.error('Erreur récupération localisations:', error);
+    res.status(500).json({ error: 'Erreur lors de la récupération des localisations' });
+  }
+};
+
 module.exports = {
   getAllVehicles,
   getVehicleById,
@@ -396,5 +423,6 @@ module.exports = {
   updateVehicle,
   deleteVehicle,
   getAgencyVehicles,
-  checkAvailability
+  checkAvailability,
+  getVehicleLocations
 };

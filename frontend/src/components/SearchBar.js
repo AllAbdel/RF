@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { vehicleAPI } from '../services/api';
 import '../styles/SearchBar.css';
 
 const SearchBar = ({ filters = {}, onFilterChange }) => {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [searchHistory, setSearchHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [availableLocations, setAvailableLocations] = useState([]);
   const [localFilters, setLocalFilters] = useState({
     search: filters.search || '',
     fuel_type: filters.fuel_type || '',
@@ -17,6 +19,18 @@ const SearchBar = ({ filters = {}, onFilterChange }) => {
   useEffect(() => {
     const history = JSON.parse(localStorage.getItem('searchHistory') || '[]');
     setSearchHistory(history);
+    
+    // Charger les localisations disponibles depuis la BDD
+    const loadLocations = async () => {
+      try {
+        const response = await vehicleAPI.getLocations();
+        setAvailableLocations(response.data.locations || []);
+      } catch (error) {
+        console.error('Erreur chargement localisations:', error);
+        setAvailableLocations([]);
+      }
+    };
+    loadLocations();
   }, []);
 
   const saveToHistory = (searchTerm) => {
@@ -142,65 +156,39 @@ const SearchBar = ({ filters = {}, onFilterChange }) => {
           </button>
         </div>
 
-        {/* Filtres géographiques */}
-        <div className="quick-location-filters">
-          <span className="quick-filter-label">Villes populaires :</span>
-          <button
-            type="button"
-            className="quick-location-badge"
-            onClick={() => {
-              const newFilters = { ...localFilters, location: 'Paris' };
-              setLocalFilters(newFilters);
-              onFilterChange(newFilters);
-            }}
-          >
-            Paris
-          </button>
-          <button
-            type="button"
-            className="quick-location-badge"
-            onClick={() => {
-              const newFilters = { ...localFilters, location: 'Lyon' };
-              setLocalFilters(newFilters);
-              onFilterChange(newFilters);
-            }}
-          >
-            Lyon
-          </button>
-          <button
-            type="button"
-            className="quick-location-badge"
-            onClick={() => {
-              const newFilters = { ...localFilters, location: 'Marseille' };
-              setLocalFilters(newFilters);
-              onFilterChange(newFilters);
-            }}
-          >
-            Marseille
-          </button>
-          <button
-            type="button"
-            className="quick-location-badge"
-            onClick={() => {
-              const newFilters = { ...localFilters, location: 'Toulouse' };
-              setLocalFilters(newFilters);
-              onFilterChange(newFilters);
-            }}
-          >
-            Toulouse
-          </button>
-          <button
-            type="button"
-            className="quick-location-badge"
-            onClick={() => {
-              const newFilters = { ...localFilters, location: 'Nice' };
-              setLocalFilters(newFilters);
-              onFilterChange(newFilters);
-            }}
-          >
-            Nice
-          </button>
-        </div>
+        {/* Filtres géographiques - Villes avec véhicules disponibles */}
+        {availableLocations.length > 0 && (
+          <div className="quick-location-filters">
+            <span className="quick-filter-label">Villes disponibles :</span>
+            {availableLocations.slice(0, 6).map((city) => (
+              <button
+                key={city}
+                type="button"
+                className={`quick-location-badge ${localFilters.location === city ? 'active' : ''}`}
+                onClick={() => {
+                  const newFilters = { ...localFilters, location: city };
+                  setLocalFilters(newFilters);
+                  onFilterChange(newFilters);
+                }}
+              >
+                {city}
+              </button>
+            ))}
+            {localFilters.location && (
+              <button
+                type="button"
+                className="quick-location-badge clear-btn"
+                onClick={() => {
+                  const newFilters = { ...localFilters, location: '' };
+                  setLocalFilters(newFilters);
+                  onFilterChange(newFilters);
+                }}
+              >
+                ✕ Toutes
+              </button>
+            )}
+          </div>
+        )}
 
         {showAdvanced && (
           <div className="search-advanced">

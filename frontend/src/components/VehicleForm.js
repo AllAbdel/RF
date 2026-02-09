@@ -74,8 +74,8 @@ const VehicleForm = ({ vehicle, onSubmit, onCancel }) => {
       ...prev,
       latitude: addressData.latitude,
       longitude: addressData.longitude,
-      // Auto-remplir la localisation avec la ville + France
-      location: addressData.location ? `${addressData.location}, France` : prev.location
+      // Auto-remplir la localisation avec uniquement la ville (sans le pays)
+      location: addressData.location || prev.location
     }));
   };
 
@@ -87,7 +87,7 @@ const VehicleForm = ({ vehicle, onSubmit, onCancel }) => {
         ...prev,
         latitude: addressData.latitude,
         longitude: addressData.longitude,
-        location: addressData.location ? `${addressData.location}, France` : prev.location
+        location: addressData.location || prev.location
       }));
     }
   };
