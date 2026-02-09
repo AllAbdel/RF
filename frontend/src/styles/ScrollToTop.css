@@ -1,7 +1,8 @@
 .scroll-to-top {
   position: fixed;
   bottom: 5.5rem;
-  right: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
   width: 50px;
   height: 50px;
   background: var(--accent-gradient);
@@ -23,27 +24,26 @@
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateX(-50%) translateY(20px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(-50%) translateY(0);
   }
 }
 
 .scroll-to-top:hover {
-  transform: translateY(-5px);
+  transform: translateX(-50%) translateY(-5px);
   box-shadow: 0 12px 32px rgba(99, 102, 241, 0.6);
 }
 
 .scroll-to-top:active {
-  transform: translateY(-2px);
+  transform: translateX(-50%) translateY(-2px);
 }
 
 @media (max-width: 768px) {
   .scroll-to-top {
     bottom: 1.5rem;
-    right: 1.5rem;
     width: 45px;
     height: 45px;
     font-size: 1.3rem;
