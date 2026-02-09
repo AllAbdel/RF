@@ -86,7 +86,6 @@ const ClientDashboard = () => {
         <main className="dashboard-content">
           {activeTab === 'reservations' && (
             <div className="reservations-section">
-              <h2>Mes réservations</h2>
               {loading ? (
                 <div className="loading">Chargement...</div>
               ) : (

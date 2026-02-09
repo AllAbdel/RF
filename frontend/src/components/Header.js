@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { FaBars, FaTimes, FaHome, FaCalendarAlt, FaFileAlt, FaHeart, FaBalanceScale, FaMap, FaEnvelope, FaCar, FaChartBar, FaUsers, FaUserPlus, FaCog, FaUserCircle, FaSignOutAlt, FaSignInAlt } from 'react-icons/fa';
+import { messageAPI } from '../services/api';
 import '../styles/Header.css';
 
 const Header = () => {
@@ -10,9 +11,29 @@ const Header = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [unreadMessages, setUnreadMessages] = useState(0);
   
   const currentTab = searchParams.get('tab');
   const isOnDashboard = location.pathname === '/client' || location.pathname === '/agency';
+
+  // Récupérer le nombre de messages non lus
+  useEffect(() => {
+    const fetchUnreadMessages = async () => {
+      if (isAuthenticated) {
+        try {
+          const response = await messageAPI.getConversations();
+          const total = response.data.conversations?.reduce((sum, conv) => sum + (conv.unread_count || 0), 0) || 0;
+          setUnreadMessages(total);
+        } catch (error) {
+          console.error('Erreur récupération messages non lus:', error);
+        }
+      }
+    };
+    fetchUnreadMessages();
+    // Rafraîchir toutes les 30 secondes
+    const interval = setInterval(fetchUnreadMessages, 30000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
 
   const handleLogout = () => {
     logout();
@@ -36,6 +57,19 @@ const Header = () => {
         <button className="burger-btn" onClick={() => setMenuOpen(!menuOpen)} aria-label="Menu">
           {menuOpen ? <FaTimes /> : <FaBars />}
         </button>
+
+        {isAuthenticated ? (
+          <div className="header-user-area">
+            <span className="header-user-name">{user?.first_name} {user?.last_name}</span>
+            <button onClick={handleLogout} className="header-logout-btn" title="Déconnexion">
+              <FaSignOutAlt />
+            </button>
+          </div>
+        ) : (
+          <Link to="/auth" className="header-login-btn" title="Connexion">
+            <FaSignInAlt />
+          </Link>
+        )}
 
         <nav className={`nav-menu ${menuOpen ? 'open' : ''}`}>
           {isAuthenticated && (
@@ -97,6 +131,7 @@ const Header = () => {
                   <Link to="/messages" className="nav-link" onClick={closeMenu}>
                     <FaEnvelope className="nav-icon" />
                     <span>Messages</span>
+                    {unreadMessages > 0 && <span className="nav-badge">{unreadMessages}</span>}
                   </Link>
                 </div>
               )}
@@ -176,11 +211,12 @@ const Header = () => {
                   <Link to="/messages" className="nav-link" onClick={closeMenu}>
                     <FaEnvelope className="nav-icon" />
                     <span>Messages</span>
+                    {unreadMessages > 0 && <span className="nav-badge">{unreadMessages}</span>}
                   </Link>
                 </div>
               )}
               
-              <div className="menu-section menu-footer">
+              <div className="menu-section menu-logout-section">
                 <button onClick={handleLogout} className="nav-link logout-link">
                   <FaSignOutAlt className="nav-icon" />
                   <span>Déconnexion</span>

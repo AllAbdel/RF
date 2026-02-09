@@ -62,6 +62,68 @@
   transform: translateX(-50%) scale(1.05);
 }
 
+/* Header User Area */
+.header-user-area {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+.header-user-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Header Logout Button */
+.header-logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 2px solid var(--danger);
+  border-radius: var(--radius-md);
+  font-size: 1.1rem;
+  color: var(--danger);
+  cursor: pointer;
+  padding: 0.5rem 0.7rem;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.header-logout-btn:hover {
+  background: var(--danger);
+  color: white;
+  transform: scale(1.05);
+}
+
+/* Header Login Button */
+.header-login-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-gradient);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 1.1rem;
+  color: white;
+  text-decoration: none;
+  cursor: pointer;
+  padding: 0.5rem 0.7rem;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.header-login-btn:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-accent);
+}
+
 /* Navigation Menu */
 .nav-menu {
   position: fixed;
@@ -201,6 +263,25 @@
   transform: scale(1.15);
 }
 
+/* Nav Badge for notifications */
+.nav-badge {
+  background: var(--danger);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-full);
+  margin-left: auto;
+  min-width: 20px;
+  text-align: center;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
 /* Auth Link in Menu */
 .auth-menu-link {
   background: var(--accent-gradient);
@@ -238,7 +319,14 @@
   color: inherit;
 }
 
-/* Menu Footer */
+/* Menu Logout Section (not at bottom) */
+.menu-logout-section {
+  margin-top: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-primary);
+}
+
+/* Menu Footer - kept for compatibility */
 .menu-footer {
   margin-top: auto;
   padding: 1.5rem 1rem;

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import { FaDownload, FaFolder, FaFileAlt, FaCheck, FaStar } from 'react-icons/fa';
 import DocumentViewer from './DocumentViewer';
 import { generateReservationPDF, generateAllReservationsPDF } from '../utils/pdfExport';
 import '../styles/MyReservations.css';
@@ -80,7 +81,7 @@ const MyReservations = ({ reservations, onCancel, onRefresh, onSubmitReview }) =
           onClick={() => generateAllReservationsPDF(reservations)}
           title="Exporter toutes les réservations en PDF"
         >
-          📥 Exporter tout (PDF)
+          <FaDownload /> Exporter tout (PDF)
         </button>
       </div>
       {reservations.map((reservation) => {
@@ -130,14 +131,14 @@ const MyReservations = ({ reservations, onCancel, onRefresh, onSubmitReview }) =
                     className="documents-btn"
                     onClick={() => toggleDocuments(reservation.id)}
                   >
-                    {showDocuments[reservation.id] ? '📁 Masquer documents' : '📄 Voir documents'}
+                    {showDocuments[reservation.id] ? <><FaFolder /> Masquer documents</> : <><FaFileAlt /> Voir documents</>}
                   </button>
                   <button
                     className="export-pdf-btn"
                     onClick={() => generateReservationPDF(reservation)}
                     title="Exporter en PDF"
                   >
-                    📥 PDF
+                    <FaDownload /> PDF
                   </button>
                   {canCancel(reservation) && (
                     <button
@@ -156,7 +157,7 @@ const MyReservations = ({ reservations, onCancel, onRefresh, onSubmitReview }) =
                     </button>
                   )}
                   {reservation.status === 'completed' && reservation.has_review && (
-                    <span className="already-reviewed">✓ Avis laissé</span>
+                    <span className="already-reviewed"><FaCheck /> Avis laissé</span>
                   )}
                 </div>
               </div>
@@ -191,7 +192,7 @@ const MyReservations = ({ reservations, onCancel, onRefresh, onSubmitReview }) =
                     className={`star-btn ${reviewData.rating >= star ? 'active' : ''}`}
                     onClick={() => setReviewData({ ...reviewData, rating: star })}
                   >
-                    ★
+                    <FaStar />
                   </button>
                 ))}
               </div>
