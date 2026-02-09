@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { FaBars, FaTimes } from 'react-icons/fa';
+import { FaBars, FaTimes, FaHome, FaCalendarAlt, FaFileAlt, FaHeart, FaBalanceScale, FaMap, FaEnvelope, FaCar, FaChartBar, FaUsers, FaUserPlus, FaCog, FaUserCircle, FaSignOutAlt, FaSignInAlt } from 'react-icons/fa';
 import '../styles/Header.css';
 
 const Header = () => {
@@ -38,120 +38,164 @@ const Header = () => {
         </button>
 
         <nav className={`nav-menu ${menuOpen ? 'open' : ''}`}>
-          <Link to="/" className="nav-link" onClick={closeMenu}>Accueil</Link>
+          {isAuthenticated && (
+            <div className="menu-user-header">
+              <div className="menu-user-avatar">
+                {user?.first_name?.charAt(0)}{user?.last_name?.charAt(0)}
+              </div>
+              <div className="menu-user-info">
+                <span className="menu-user-name">{user?.first_name} {user?.last_name}</span>
+                <span className="menu-user-role">
+                  {isClient ? 'Client' : isAgency ? 'Agence' : ''}
+                  {user?.role === 'admin' && ' - Admin'}
+                  {user?.role === 'super_admin' && ' - Super Admin'}
+                </span>
+              </div>
+            </div>
+          )}
+          
+          <div className="menu-section">
+            <Link to="/" className="nav-link" onClick={closeMenu}>
+              <FaHome className="nav-icon" />
+              <span>Accueil</span>
+            </Link>
+          </div>
           
           {isAuthenticated ? (
             <>
               {isClient && (
-                <>
+                <div className="menu-section">
+                  <span className="menu-section-title">Mon Espace</span>
                   <Link 
                     to="/client?tab=reservations" 
                     className={`nav-link ${isOnDashboard && isActiveTab('reservations') ? 'active' : ''}`}
                     onClick={closeMenu}
                   >
-                    Mes Réservations
+                    <FaCalendarAlt className="nav-icon" />
+                    <span>Mes Réservations</span>
                   </Link>
                   <Link 
                     to="/client?tab=documents" 
                     className={`nav-link ${isOnDashboard && isActiveTab('documents') ? 'active' : ''}`}
                     onClick={closeMenu}
                   >
-                    Mes Documents
+                    <FaFileAlt className="nav-icon" />
+                    <span>Mes Documents</span>
                   </Link>
-                  <Link to="/favorites" className="nav-link" onClick={closeMenu}>Favoris</Link>
-                  <Link to="/comparator" className="nav-link" onClick={closeMenu}>Comparateur</Link>
-                  <Link to="/map" className="nav-link" onClick={closeMenu}>Carte</Link>
-                  <Link to="/messages" className="nav-link" onClick={closeMenu}>Messages</Link>
-                </>
+                  <Link to="/favorites" className="nav-link" onClick={closeMenu}>
+                    <FaHeart className="nav-icon" />
+                    <span>Favoris</span>
+                  </Link>
+                  <Link to="/comparator" className="nav-link" onClick={closeMenu}>
+                    <FaBalanceScale className="nav-icon" />
+                    <span>Comparateur</span>
+                  </Link>
+                  <Link to="/map" className="nav-link" onClick={closeMenu}>
+                    <FaMap className="nav-icon" />
+                    <span>Carte</span>
+                  </Link>
+                  <Link to="/messages" className="nav-link" onClick={closeMenu}>
+                    <FaEnvelope className="nav-icon" />
+                    <span>Messages</span>
+                  </Link>
+                </div>
               )}
               
               {isAgency && (
-                <>
+                <div className="menu-section">
+                  <span className="menu-section-title">Gestion</span>
                   <Link 
                     to="/agency?tab=vehicles" 
                     className={`nav-link ${isOnDashboard && isActiveTab('vehicles') ? 'active' : ''}`}
                     onClick={closeMenu}
                   >
-                    Véhicules
+                    <FaCar className="nav-icon" />
+                    <span>Véhicules</span>
                   </Link>
                   <Link 
                     to="/agency?tab=reservations" 
                     className={`nav-link ${isOnDashboard && isActiveTab('reservations') ? 'active' : ''}`}
                     onClick={closeMenu}
                   >
-                    Réservations
+                    <FaCalendarAlt className="nav-icon" />
+                    <span>Réservations</span>
                   </Link>
                   <Link 
                     to="/agency?tab=stats" 
                     className={`nav-link ${isOnDashboard && isActiveTab('stats') ? 'active' : ''}`}
                     onClick={closeMenu}
                   >
-                    Statistiques
+                    <FaChartBar className="nav-icon" />
+                    <span>Statistiques</span>
                   </Link>
                   <Link 
                     to="/agency?tab=documents" 
                     className={`nav-link ${isOnDashboard && isActiveTab('documents') ? 'active' : ''}`}
                     onClick={closeMenu}
                   >
-                    Documents
+                    <FaFileAlt className="nav-icon" />
+                    <span>Documents</span>
                   </Link>
                   {(user?.role === 'admin' || user?.role === 'super_admin') && (
                     <>
+                      <span className="menu-section-title">Administration</span>
                       <Link 
                         to="/agency?tab=members" 
                         className={`nav-link ${isOnDashboard && isActiveTab('members') ? 'active' : ''}`}
                         onClick={closeMenu}
                       >
-                        Membres
+                        <FaUsers className="nav-icon" />
+                        <span>Membres</span>
                       </Link>
                       <Link 
                         to="/agency?tab=join-requests" 
                         className={`nav-link ${isOnDashboard && isActiveTab('join-requests') ? 'active' : ''}`}
                         onClick={closeMenu}
                       >
-                        Demandes
+                        <FaUserPlus className="nav-icon" />
+                        <span>Demandes</span>
                       </Link>
                       <Link 
                         to="/agency?tab=settings" 
                         className={`nav-link ${isOnDashboard && isActiveTab('settings') ? 'active' : ''}`}
                         onClick={closeMenu}
                       >
-                        Paramètres
+                        <FaCog className="nav-icon" />
+                        <span>Paramètres</span>
                       </Link>
                       <Link 
                         to="/agency?tab=profile" 
                         className={`nav-link ${isOnDashboard && isActiveTab('profile') ? 'active' : ''}`}
                         onClick={closeMenu}
                       >
-                        Profil
+                        <FaUserCircle className="nav-icon" />
+                        <span>Profil</span>
                       </Link>
                     </>
                   )}
-                  <Link to="/messages" className="nav-link" onClick={closeMenu}>Messages</Link>
-                </>
+                  <Link to="/messages" className="nav-link" onClick={closeMenu}>
+                    <FaEnvelope className="nav-icon" />
+                    <span>Messages</span>
+                  </Link>
+                </div>
               )}
+              
+              <div className="menu-section menu-footer">
+                <button onClick={handleLogout} className="nav-link logout-link">
+                  <FaSignOutAlt className="nav-icon" />
+                  <span>Déconnexion</span>
+                </button>
+              </div>
             </>
           ) : (
-            <Link to="/auth" className="auth-link" onClick={closeMenu}>
-              Connexion / Inscription
-            </Link>
+            <div className="menu-section">
+              <Link to="/auth" className="nav-link auth-menu-link" onClick={closeMenu}>
+                <FaSignInAlt className="nav-icon" />
+                <span>Connexion / Inscription</span>
+              </Link>
+            </div>
           )}
         </nav>
-        
-        {isAuthenticated ? (
-          <div className="user-menu">
-            <button onClick={handleLogout} className="logout-btn">
-              Déconnexion
-            </button>
-            <span className="user-name">
-              {user?.first_name} {user?.last_name}
-            </span>
-          </div>
-        ) : (
-          <Link to="/auth" className="auth-link-header">
-            Connexion
-          </Link>
-        )}
         
         {menuOpen && <div className="menu-overlay" onClick={closeMenu} />}
       </div>

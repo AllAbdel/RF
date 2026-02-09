@@ -4,6 +4,7 @@ import { messageAPI } from '../services/api';
 import socketService from '../services/socket';
 import '../styles/Messages.css';
 import { useNavigate } from 'react-router-dom';
+import { FaTrash, FaTimes, FaExclamationTriangle } from 'react-icons/fa';
 
 const MessagesPage = () => {
   const { user } = useAuth();
@@ -13,6 +14,7 @@ const MessagesPage = () => {
   const [newMessage, setNewMessage] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [deleteModal, setDeleteModal] = useState({ show: false, messageId: null });
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
@@ -99,17 +101,41 @@ const MessagesPage = () => {
   };
 
   const handleDeleteMessage = async (messageId) => {
-    if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce message ?')) {
-      return;
-    }
-
     try {
       await messageAPI.deleteMessage(messageId);
+      setDeleteModal({ show: false, messageId: null });
       loadMessages(selectedConversation.id);
     } catch (error) {
       console.error('Erreur suppression message:', error);
       alert('Erreur lors de la suppression du message');
     }
+  };
+
+  const openDeleteModal = (messageId) => {
+    setDeleteModal({ show: true, messageId });
+  };
+
+  const closeDeleteModal = () => {
+    setDeleteModal({ show: false, messageId: null });
+  };
+
+  const getInitials = (name) => {
+    if (!name) return '?';
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+    }
+    return name.charAt(0).toUpperCase();
+  };
+
+  const getAvatarColor = (name) => {
+    if (!name) return 'hsl(220, 70%, 50%)';
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const hue = hash % 360;
+    return `hsl(${hue}, 65%, 55%)`;
   };
 
   const handleFileSelect = (e) => {
@@ -162,30 +188,40 @@ const MessagesPage = () => {
               <p>Aucune conversation</p>
             </div>
           ) : (
-            conversations.map((conv) => (
-              <div
-                key={conv.id}
-                className={`conversation-item ${selectedConversation?.id === conv.id ? 'active' : ''}`}
-                onClick={() => setSelectedConversation(conv)}
-              >
-                <div className="conversation-avatar">
-                  {user.user_type === 'client' ? 'Agence' : 'Utilisateur'}
-                </div>
-                <div className="conversation-info">
-                  <div className="conversation-name">
-                    {user.user_type === 'client' 
-                      ? conv.agency_name 
-                      : `${conv.first_name} ${conv.last_name}`}
+            conversations.map((conv) => {
+              const displayName = user.user_type === 'client' 
+                ? conv.agency_name 
+                : `${conv.first_name} ${conv.last_name}`;
+              const initials = getInitials(displayName);
+              const avatarColor = getAvatarColor(displayName);
+              
+              return (
+                <div
+                  key={conv.id}
+                  className={`conversation-item ${selectedConversation?.id === conv.id ? 'active' : ''}`}
+                  onClick={() => setSelectedConversation(conv)}
+                >
+                  <div 
+                    className="conversation-avatar"
+                    style={{ background: avatarColor }}
+                  >
+                    <span className="avatar-initials">{initials}</span>
+                    <span className="avatar-status online"></span>
                   </div>
-                  <div className="conversation-last-message">
-                    {conv.last_message || 'Pas de messages'}
+                  <div className="conversation-info">
+                    <div className="conversation-name">
+                      {displayName}
+                    </div>
+                    <div className="conversation-last-message">
+                      {conv.last_message || 'Pas de messages'}
+                    </div>
                   </div>
+                  {conv.unread_count > 0 && (
+                    <div className="unread-badge">{conv.unread_count}</div>
+                  )}
                 </div>
-                {conv.unread_count > 0 && (
-                  <div className="unread-badge">{conv.unread_count}</div>
-                )}
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>
@@ -260,10 +296,10 @@ const MessagesPage = () => {
                     {!msg.deleted_at && (
                       <button 
                         className="delete-message-btn"
-                        onClick={() => handleDeleteMessage(msg.id)}
+                        onClick={() => openDeleteModal(msg.id)}
                         title="Supprimer ce message"
                       >
-                        🗑️
+                        <FaTrash />
                       </button>
                     )}
                   </div>
@@ -324,6 +360,33 @@ const MessagesPage = () => {
           </div>
         )}
       </div>
+
+      {/* Modal de confirmation de suppression */}
+      {deleteModal.show && (
+        <div className="delete-modal-overlay" onClick={closeDeleteModal}>
+          <div className="delete-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="delete-modal-close" onClick={closeDeleteModal}>
+              <FaTimes />
+            </button>
+            <div className="delete-modal-icon">
+              <FaExclamationTriangle />
+            </div>
+            <h3>Supprimer ce message ?</h3>
+            <p>Cette action est irréversible. Le message sera supprimé définitivement.</p>
+            <div className="delete-modal-actions">
+              <button className="delete-modal-cancel" onClick={closeDeleteModal}>
+                Annuler
+              </button>
+              <button 
+                className="delete-modal-confirm" 
+                onClick={() => handleDeleteMessage(deleteModal.messageId)}
+              >
+                <FaTrash /> Supprimer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

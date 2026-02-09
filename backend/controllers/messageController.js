@@ -1,4 +1,5 @@
 const db = require('../config/database');
+const logger = require('../utils/logger');
 
 const getOrCreateConversation = async (req, res) => {
   try {
@@ -26,7 +27,7 @@ const getOrCreateConversation = async (req, res) => {
 
     res.json({ conversation_id: conversationId });
   } catch (error) {
-    console.error('Erreur création conversation:', error);
+    logger.error('Erreur création conversation:', error);
     res.status(500).json({ error: 'Erreur lors de la création de la conversation' });
   }
 };
@@ -109,8 +110,15 @@ const getMessages = async (req, res) => {
 };
 
 const sendMessage = async (req, res) => {
+  console.log('=== DEBUG SEND MESSAGE ===');
+  console.log('req.body:', req.body);
+  console.log('req.file:', req.file);
+  console.log('req.user:', req.user);
+  
   try {
     const { conversation_id, message } = req.body;
+    console.log('conversation_id:', conversation_id, 'message:', message);
+    
     const file_url = req.file ? `/uploads/messages/${req.file.filename}` : null;
     const file_name = req.file ? req.file.originalname : null;
 
@@ -132,30 +140,35 @@ const sendMessage = async (req, res) => {
     // Mettre à jour la conversation
     await db.query('UPDATE conversations SET updated_at = NOW() WHERE id = ?', [conversation_id]);
 
-    // Créer une notification pour le destinataire
+    // Créer une notification pour le destinataire (non-bloquant)
     const conversation = conversations[0];
     
-    // Si l'expéditeur est un client, notifier tous les membres de l'agence
-    if (req.user.user_type === 'client') {
-      const [agencyMembers] = await db.query(
-        'SELECT id FROM users WHERE agency_id = ?',
-        [conversation.agency_id]
-      );
-      
-      for (const member of agencyMembers) {
+    try {
+      // Si l'expéditeur est un client, notifier tous les membres de l'agence
+      if (req.user.user_type === 'client') {
+        const [agencyMembers] = await db.query(
+          'SELECT id FROM users WHERE agency_id = ?',
+          [conversation.agency_id]
+        );
+        
+        for (const member of agencyMembers) {
+          await db.query(
+            `INSERT INTO notifications (user_id, type, title, message, related_id)
+             VALUES (?, 'new_message', 'Nouveau message', 'Vous avez reçu un nouveau message', ?)`,
+            [member.id, conversation_id]
+          );
+        }
+      } else {
+        // Notifier le client
         await db.query(
           `INSERT INTO notifications (user_id, type, title, message, related_id)
-           VALUES (?, 'new_message', 'Nouveau message', 'Vous avez reçu un nouveau message', ?)`,
-          [member.id, conversation_id]
+           VALUES (?, 'new_message', 'Nouveau message', 'Vous avez reçu un nouveau message de l\'agence', ?)`,
+          [conversation.client_id, conversation_id]
         );
       }
-    } else {
-      // Notifier le client
-      await db.query(
-        `INSERT INTO notifications (user_id, type, title, message, related_id)
-         VALUES (?, 'new_message', 'Nouveau message', 'Vous avez reçu un nouveau message de l\'agence', ?)`,
-        [conversation.client_id, conversation_id]
-      );
+    } catch (notifError) {
+      // Les notifications ne doivent pas bloquer l'envoi du message
+      logger.warn('Erreur création notification:', notifError.message);
     }
 
     res.status(201).json({
@@ -165,7 +178,7 @@ const sendMessage = async (req, res) => {
       file_name
     });
   } catch (error) {
-    console.error('Erreur envoi message:', error);
+    logger.error('Erreur envoi message:', error);
     res.status(500).json({ error: 'Erreur lors de l\'envoi du message' });
   }
 };

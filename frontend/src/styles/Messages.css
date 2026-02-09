@@ -156,9 +156,10 @@
 }
 
 .conversation-item.active {
-  background: var(--accent-primary-light);
-  border-color: var(--accent-primary-border);
-  box-shadow: var(--shadow-md);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.1) 100%);
+  border-color: var(--accent-primary);
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.25), inset 0 0 0 1px rgba(99, 102, 241, 0.3);
+  transform: translateX(8px);
 }
 
 .conversation-item.active::before {
@@ -166,26 +167,51 @@
   transform: scaleY(1);
 }
 
+.conversation-item.active .conversation-name {
+  color: var(--accent-primary);
+}
+
+.conversation-item.active .conversation-avatar {
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+  transform: scale(1.05);
+}
+
 .conversation-avatar {
-  width: 80px;
-  height: 48px;
-  border-radius: 8px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
   background: var(--accent-gradient);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.95rem;
-  padding: 0 0.5rem;
   margin-right: 1rem;
   flex-shrink: 0;
-  box-shadow: var(--shadow-accent);
+  box-shadow: var(--shadow-md);
   position: relative;
-  color: white;
-  font-weight: 700;
+  transition: all 0.3s ease;
 }
 
-.conversation-avatar::after {
-  content: none;
+.avatar-initials {
+  color: white;
+  font-weight: 700;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.avatar-status {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 3px solid var(--bg-elevated);
+  background: var(--text-muted);
+}
+
+.avatar-status.online {
+  background: #22c55e;
 }
 
 .conversation-info {
@@ -335,7 +361,7 @@
 }
 
 .messages-topbar h3 {
-  margin: 0;
+  margin: 90px;
   margin-bottom: 1rem; /* Ajout d'une marge à gauche */
   text-align-last: center;
   font-size: 1.25rem;
@@ -517,11 +543,15 @@
   background: transparent;
   border: none;
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   opacity: 0;
-  transition: opacity 0.2s ease;
-  padding: 2px 6px;
-  border-radius: 4px;
+  transition: all 0.2s ease;
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .message:hover .delete-message-btn {
@@ -530,7 +560,9 @@
 
 .delete-message-btn:hover {
   opacity: 1 !important;
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--danger);
+  transform: scale(1.1);
 }
 
 /* Deleted message styling */
@@ -736,4 +768,155 @@
   .message-input-form {
     padding: 1rem;
   }
+
+  .delete-modal {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+}
+
+/* Delete Confirmation Modal */
+.delete-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.delete-modal {
+  background: var(--bg-elevated);
+  border-radius: var(--radius-xl);
+  padding: 2rem;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  position: relative;
+  animation: slideUp 0.3s ease;
+  border: 1px solid var(--border-primary);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.delete-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: var(--bg-secondary);
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.delete-modal-close:hover {
+  background: var(--danger);
+  color: white;
+  transform: rotate(90deg);
+}
+
+.delete-modal-icon {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  color: var(--danger);
+  font-size: 2rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.delete-modal h3 {
+  margin: 0 0 0.75rem;
+  font-size: 1.4rem;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.delete-modal p {
+  margin: 0 0 1.5rem;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.delete-modal-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.delete-modal-cancel {
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  border: 2px solid var(--border-secondary);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.delete-modal-cancel:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--text-muted);
+}
+
+.delete-modal-confirm {
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  border: none;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+.delete-modal-confirm:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
 }
