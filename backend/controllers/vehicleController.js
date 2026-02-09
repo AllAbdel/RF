@@ -1,5 +1,20 @@
 const db = require('../config/database');
 
+// Fonctions helper pour nettoyer les valeurs
+const cleanValue = (val) => {
+  if (val === undefined || val === null || val === 'undefined' || val === 'null' || val === '') {
+    return null;
+  }
+  return val;
+};
+
+const cleanNumeric = (val) => {
+  const cleaned = cleanValue(val);
+  if (cleaned === null) return null;
+  const num = parseFloat(cleaned);
+  return isNaN(num) ? null : num;
+};
+
 const getAllVehicles = async (req, res) => {
   try {
     const { search, fuel_type, min_price, max_price, location, sort } = req.query;
@@ -124,7 +139,8 @@ const createVehicle = async (req, res) => {
   try {
     const {
       brand, model, seats, engine, tank_capacity, price_per_hour,
-      fuel_type, description, release_date, location, pickup_address, return_address
+      fuel_type, description, release_date, location, pickup_address, return_address,
+      latitude, longitude
     } = req.body;
 
     // Récupérer le fichier PDF s'il existe
@@ -135,10 +151,12 @@ const createVehicle = async (req, res) => {
 
     const [result] = await db.query(
       `INSERT INTO vehicles (agency_id, brand, model, seats, engine, tank_capacity, 
-       price_per_hour, fuel_type, description, terms_pdf, release_date, location, pickup_address, return_address)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [req.user.agency_id, brand, model, seats, engine, tank_capacity, 
-       price_per_hour, fuel_type, description, termsPdfPath, release_date, location, pickup_address, return_address]
+       price_per_hour, fuel_type, description, terms_pdf, release_date, location, pickup_address, return_address, latitude, longitude)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [req.user.agency_id, brand, model, cleanNumeric(seats), cleanValue(engine), cleanNumeric(tank_capacity), 
+       price_per_hour, fuel_type, cleanValue(description), termsPdfPath, cleanValue(release_date), cleanValue(location), cleanValue(pickup_address), cleanValue(return_address), 
+       cleanNumeric(latitude), 
+       cleanNumeric(longitude)]
     );
 
     // Gérer les images si elles sont uploadées
@@ -167,6 +185,7 @@ const updateVehicle = async (req, res) => {
     const {
       brand, model, seats, engine, tank_capacity, price_per_hour,
       fuel_type, description, release_date, location, pickup_address, return_address, status,
+      latitude, longitude,
       imagesToDelete
     } = req.body;
 
@@ -256,23 +275,26 @@ const updateVehicle = async (req, res) => {
     await db.query(
       `UPDATE vehicles SET brand = ?, model = ?, seats = ?, engine = ?, 
        tank_capacity = ?, price_per_hour = ?, fuel_type = ?, description = ?, terms_pdf = ?,
-       release_date = ?, location = ?, pickup_address = ?, return_address = ?, status = ?
+       release_date = ?, location = ?, pickup_address = ?, return_address = ?, status = ?,
+       latitude = ?, longitude = ?
        WHERE id = ?`,
       [
         brand, 
         model, 
-        seats || null, 
-        engine || null, 
-        tank_capacity || null, 
+        cleanNumeric(seats), 
+        cleanValue(engine), 
+        cleanNumeric(tank_capacity), 
         price_per_hour, 
         fuel_type, 
-        description || null, 
+        cleanValue(description), 
         termsPdfPath, 
-        release_date || null, 
-        location || null, 
-        pickup_address || null, 
-        return_address || null, 
-        status || 'available', 
+        cleanValue(release_date), 
+        cleanValue(location), 
+        cleanValue(pickup_address), 
+        cleanValue(return_address), 
+        status || 'available',
+        cleanNumeric(latitude),
+        cleanNumeric(longitude),
         id
       ]
     );
@@ -281,6 +303,10 @@ const updateVehicle = async (req, res) => {
     res.json({ message: 'Véhicule mis à jour avec succès' });
   } catch (error) {
     console.error('❌ Erreur mise à jour véhicule:', error);
+    console.error('❌ Stack:', error.stack);
+    console.error('❌ Message:', error.message);
+    console.error('❌ SQL:', error.sql);
+    res.status(500).json({ error: 'Erreur lors de la mise à jour du véhicule', details: error.message });
     res.status(500).json({ error: 'Erreur lors de la mise à jour du véhicule' });
   }
 };

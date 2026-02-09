@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import AddressAutocomplete from './AddressAutocomplete';
 import '../styles/VehicleForm.css';
 
 const VehicleForm = ({ vehicle, onSubmit, onCancel }) => {
@@ -15,6 +16,8 @@ const VehicleForm = ({ vehicle, onSubmit, onCancel }) => {
     location: '',
     pickup_address: '',
     return_address: '',
+    latitude: '',
+    longitude: '',
     status: 'available'
   });
   const [images, setImages] = useState([]);
@@ -22,6 +25,15 @@ const VehicleForm = ({ vehicle, onSubmit, onCancel }) => {
   const [imagesToDelete, setImagesToDelete] = useState([]);
   const [termsPdf, setTermsPdf] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  // Helper pour formater une date en yyyy-MM-dd pour l'input
+  const formatDateForInput = (dateValue) => {
+    if (!dateValue) return '';
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) return dateValue;
+    const date = new Date(dateValue);
+    if (isNaN(date.getTime())) return '';
+    return date.toISOString().split('T')[0];
+  };
 
   useEffect(() => {
     if (vehicle) {
@@ -34,10 +46,12 @@ const VehicleForm = ({ vehicle, onSubmit, onCancel }) => {
         price_per_hour: vehicle.price_per_hour || '',
         fuel_type: vehicle.fuel_type || 'essence',
         description: vehicle.description || '',
-        release_date: vehicle.release_date || '',
+        release_date: formatDateForInput(vehicle.release_date),
         location: vehicle.location || '',
         pickup_address: vehicle.pickup_address || '',
         return_address: vehicle.return_address || '',
+        latitude: vehicle.latitude || '',
+        longitude: vehicle.longitude || '',
         status: vehicle.status || 'available'
       });
       
@@ -53,6 +67,29 @@ const VehicleForm = ({ vehicle, onSubmit, onCancel }) => {
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+
+  const handleAddressSelect = (addressData, fieldName) => {
+    setFormData(prev => ({
+      ...prev,
+      latitude: addressData.latitude,
+      longitude: addressData.longitude,
+      // Auto-remplir la localisation avec la ville + France
+      location: addressData.location ? `${addressData.location}, France` : prev.location
+    }));
+  };
+
+  const handleReturnAddressSelect = (addressData) => {
+    // Pour l'adresse de retour, on ne met à jour que si pas déjà de coordonnées
+    // (on garde les coordonnées de l'adresse de récupération par défaut)
+    if (!formData.latitude || !formData.longitude) {
+      setFormData(prev => ({
+        ...prev,
+        latitude: addressData.latitude,
+        longitude: addressData.longitude,
+        location: addressData.location ? `${addressData.location}, France` : prev.location
+      }));
+    }
   };
 
   const handleImageChange = (e) => {
@@ -93,14 +130,48 @@ const VehicleForm = ({ vehicle, onSubmit, onCancel }) => {
     setTermsPdf(null);
   };
 
+  // Helper pour formater une date en yyyy-MM-dd
+  const formatDateForSubmit = (dateValue) => {
+    if (!dateValue) return '';
+    // Si c'est déjà au format yyyy-MM-dd, le retourner tel quel
+    if (/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
+      return dateValue;
+    }
+    // Sinon, parser et formater
+    const date = new Date(dateValue);
+    if (isNaN(date.getTime())) return '';
+    return date.toISOString().split('T')[0];
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     const submitData = new FormData();
     Object.keys(formData).forEach(key => {
-      submitData.append(key, formData[key]);
+      let value = formData[key];
+      
+      // Formater la date au bon format
+      if (key === 'release_date' && value) {
+        value = formatDateForSubmit(value);
+      }
+      
+      // Ne pas envoyer les valeurs vides/null/undefined pour latitude/longitude
+      if ((key === 'latitude' || key === 'longitude')) {
+        if (value && value !== '' && value !== 'null' && value !== 'undefined') {
+          submitData.append(key, value);
+        }
+        return;
+      }
+      // Pour les autres champs, envoyer même si vide
+      submitData.append(key, value === null || value === undefined ? '' : value);
     });
+    
+    // Log pour debug
+    console.log('📤 Form data being sent:');
+    for (let pair of submitData.entries()) {
+      console.log(`  ${pair[0]}: ${pair[1]}`);
+    }
     
     images.forEach(image => {
       submitData.append('images', image);
@@ -275,26 +346,33 @@ const VehicleForm = ({ vehicle, onSubmit, onCancel }) => {
           </div>
 
           <div className="form-row">
-            <div className="form-group">
-              <label>Adresse de récupération *</label>
-              <input
-                type="text"
+            <div className="form-group address-group">
+              <AddressAutocomplete
+                label="Adresse de récupération"
                 name="pickup_address"
                 value={formData.pickup_address}
                 onChange={handleChange}
-                placeholder="Adresse complète de récupération"
+                onSelect={handleAddressSelect}
+                placeholder="Rechercher une adresse..."
                 required
               />
+              {formData.latitude && formData.longitude && (
+                <div className="coordinates-info">
+                  <span className="coord-badge">
+                    📍 {parseFloat(formData.latitude).toFixed(4)}, {parseFloat(formData.longitude).toFixed(4)}
+                  </span>
+                </div>
+              )}
             </div>
 
-            <div className="form-group">
-              <label>Adresse de dépôt/retour *</label>
-              <input
-                type="text"
+            <div className="form-group address-group">
+              <AddressAutocomplete
+                label="Adresse de dépôt/retour"
                 name="return_address"
                 value={formData.return_address}
                 onChange={handleChange}
-                placeholder="Adresse complète de retour"
+                onSelect={handleReturnAddressSelect}
+                placeholder="Rechercher une adresse de retour..."
                 required
               />
             </div>
