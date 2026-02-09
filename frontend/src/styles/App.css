@@ -7,8 +7,8 @@
 }
 
 /* Animated Background - Only in Light Theme */
-[data-theme="light"] .App::before,
-[data-theme="light"] .App::after {
+[data-theme^="light"] .App::before,
+[data-theme^="light"] .App::after {
   content: '';
   position: fixed;
   z-index: 0;
@@ -16,7 +16,7 @@
 }
 
 /* Car-themed animated shapes for light theme */
-[data-theme="light"] .App::before {
+[data-theme^="light"] .App::before {
   width: 800px;
   height: 800px;
   top: -200px;
@@ -26,7 +26,7 @@
   animation: float 20s ease-in-out infinite;
 }
 
-[data-theme="light"] .App::after {
+[data-theme^="light"] .App::after {
   width: 600px;
   height: 600px;
   bottom: -150px;
@@ -37,7 +37,7 @@
 }
 
 /* Subtle tire track patterns */
-[data-theme="light"] .dashboard-content::before {
+[data-theme^="light"] .dashboard-content::before {
   content: '';
   position: fixed;
   top: 0;
@@ -56,7 +56,7 @@
   pointer-events: none;
 }
 
-[data-theme="light"] .dashboard-content::after {
+[data-theme^="light"] .dashboard-content::after {
   content: '';
   position: fixed;
   top: 0;
@@ -94,9 +94,9 @@
 }
 
 /* Ensure content is above background */
-[data-theme="light"] .dashboard-header,
-[data-theme="light"] .dashboard-nav,
-[data-theme="light"] .dashboard-content > * {
+[data-theme^="light"] .dashboard-header,
+[data-theme^="light"] .dashboard-nav,
+[data-theme^="light"] .dashboard-content > * {
   position: relative;
   z-index: 1;
 }
@@ -184,14 +184,9 @@
   border-color: var(--accent-primary);
 }
 
-/* Color selector - only visible in dark mode */
+/* Color selector */
 .theme-colors-section {
   transition: all var(--transition-base);
-}
-
-[data-theme="light"] .theme-colors-section {
-  opacity: 0.3;
-  pointer-events: none;
 }
 
 .theme-colors {

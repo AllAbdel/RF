@@ -112,7 +112,7 @@
   width: 100%;
 }
 
-[data-theme="light"] .auth-header h1 {
+[data-theme^="light"] .auth-header h1 {
   -webkit-text-fill-color: var(--text-primary);
   background: none;
 }
@@ -199,7 +199,7 @@
   box-shadow: var(--shadow-accent);
 }
 
-[data-theme="light"] .type-btn.active {
+[data-theme^="light"] .type-btn.active {
   color: black !important;
 }
 
@@ -264,7 +264,7 @@
   border: none;
 }
 
-[data-theme="light"] .submit-btn {
+[data-theme^="light"] .submit-btn {
   color: black !important;
 }
 

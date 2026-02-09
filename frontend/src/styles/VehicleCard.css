@@ -338,7 +338,7 @@
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-[data-theme="light"] .price-amount {
+[data-theme^="light"] .price-amount {
   color: var(--text-primary);
 }
 
@@ -348,7 +348,7 @@
   font-weight: 500;
 }
 
-[data-theme="light"] .price-unit {
+[data-theme^="light"] .price-unit {
   color: var(--text-secondary);
 }
 
@@ -495,10 +495,10 @@
   color: #ffffff !important;
 }
 
-[data-theme="light"] .vehicle-header h3 {
+[data-theme^="light"] .vehicle-header h3 {
   color: var(--text-primary) !important;
 }
 
-[data-theme="light"] .agency-name {
+[data-theme^="light"] .agency-name {
   color: var(--text-tertiary) !important;
 }

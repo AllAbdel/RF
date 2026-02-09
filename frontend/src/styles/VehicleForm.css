@@ -238,7 +238,7 @@
   box-shadow: var(--shadow-accent);
 }
 
-[data-theme="light"] .submit-btn {
+[data-theme^="light"] .submit-btn {
   color: white;
 }
 
@@ -363,7 +363,7 @@
   font-weight: 500;
 }
 
-[data-theme="light"] .coord-badge {
+[data-theme^="light"] .coord-badge {
   background: #ecfdf5;
   border-color: #a7f3d0;
   color: #059669;

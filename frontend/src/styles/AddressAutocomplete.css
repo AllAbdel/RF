@@ -129,13 +129,13 @@
 }
 
 /* Light mode adjustments */
-[data-theme="light"] .address-suggestions {
+[data-theme^="light"] .address-suggestions {
   background: white;
   border-color: #e2e8f0;
 }
 
-[data-theme="light"] .suggestion-item:hover,
-[data-theme="light"] .suggestion-item.selected {
+[data-theme^="light"] .suggestion-item:hover,
+[data-theme^="light"] .suggestion-item.selected {
   background: #f1f5f9;
 }
 

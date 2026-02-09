@@ -3,28 +3,36 @@ import React, { useState, useEffect } from 'react';
 const ThemeSwitcher = () => {
   const [showMenu, setShowMenu] = useState(false);
   const [themeMode, setThemeMode] = useState('dark'); // 'light' or 'dark'
-  const [themeColor, setThemeColor] = useState('orange'); // Only for dark mode
+  const [darkThemeColor, setDarkThemeColor] = useState('orange');
+  const [lightThemeColor, setLightThemeColor] = useState('orange');
 
   // Load theme preferences from localStorage on mount
   useEffect(() => {
     const savedMode = localStorage.getItem('themeMode') || 'dark';
-    const savedColor = localStorage.getItem('themeColor') || 'orange';
+    const savedDarkColor = localStorage.getItem('darkThemeColor') || localStorage.getItem('themeColor') || 'orange';
+    const savedLightColor = localStorage.getItem('lightThemeColor') || 'orange';
     
     setThemeMode(savedMode);
-    setThemeColor(savedColor);
-    applyTheme(savedMode, savedColor);
+    setDarkThemeColor(savedDarkColor);
+    setLightThemeColor(savedLightColor);
+    applyTheme(savedMode, savedDarkColor, savedLightColor);
   }, []);
 
   // Apply theme to document
-  const applyTheme = (mode, color) => {
-    // Light mode always uses default (orange) - no color customization
+  const applyTheme = (mode, darkColor, lightColor) => {
     if (mode === 'light') {
-      document.documentElement.setAttribute('data-theme', 'light');
+      // Light mode with color customization
+      if (lightColor === 'orange') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      } else {
+        document.documentElement.setAttribute('data-theme', `light-${lightColor}`);
+      }
     } else {
-      // Dark mode can have different colors
-      document.documentElement.removeAttribute('data-theme');
-      if (color !== 'orange') {
-        document.documentElement.setAttribute('data-theme', color);
+      // Dark mode with color customization
+      if (darkColor === 'orange') {
+        document.documentElement.removeAttribute('data-theme');
+      } else {
+        document.documentElement.setAttribute('data-theme', darkColor);
       }
     }
   };
@@ -33,16 +41,25 @@ const ThemeSwitcher = () => {
   const handleModeChange = (mode) => {
     setThemeMode(mode);
     localStorage.setItem('themeMode', mode);
-    applyTheme(mode, themeColor);
+    applyTheme(mode, darkThemeColor, lightThemeColor);
   };
 
-  // Handle color change (only works in dark mode)
+  // Handle color change
   const handleColorChange = (color) => {
     if (themeMode === 'dark') {
-      setThemeColor(color);
-      localStorage.setItem('themeColor', color);
-      applyTheme(themeMode, color);
+      setDarkThemeColor(color);
+      localStorage.setItem('darkThemeColor', color);
+      applyTheme(themeMode, color, lightThemeColor);
+    } else {
+      setLightThemeColor(color);
+      localStorage.setItem('lightThemeColor', color);
+      applyTheme(themeMode, darkThemeColor, color);
     }
+  };
+
+  // Get current active color based on mode
+  const getCurrentColor = () => {
+    return themeMode === 'dark' ? darkThemeColor : lightThemeColor;
   };
 
   return (
@@ -67,50 +84,40 @@ const ThemeSwitcher = () => {
 
           <div className="theme-colors-section">
             <div className="theme-menu-header">
-              Couleur d'accent {themeMode === 'light' && '(Mode sombre uniquement)'}
+              Couleur d'accent
             </div>
             <div className="theme-colors">
               <button
-                className={`color-option ${themeColor === 'orange' ? 'active' : ''}`}
+                className={`color-option ${getCurrentColor() === 'orange' ? 'active' : ''}`}
                 data-theme="orange"
                 onClick={() => handleColorChange('orange')}
                 title="Orange"
-                disabled={themeMode === 'light'}
               />
               <button
-                className={`color-option ${themeColor === 'blue' ? 'active' : ''}`}
+                className={`color-option ${getCurrentColor() === 'blue' ? 'active' : ''}`}
                 data-theme="blue"
                 onClick={() => handleColorChange('blue')}
                 title="Bleu"
-                disabled={themeMode === 'light'}
               />
               <button
-                className={`color-option ${themeColor === 'purple' ? 'active' : ''}`}
+                className={`color-option ${getCurrentColor() === 'purple' ? 'active' : ''}`}
                 data-theme="purple"
                 onClick={() => handleColorChange('purple')}
                 title="Violet"
-                disabled={themeMode === 'light'}
               />
               <button
-                className={`color-option ${themeColor === 'green' ? 'active' : ''}`}
+                className={`color-option ${getCurrentColor() === 'green' ? 'active' : ''}`}
                 data-theme="green"
                 onClick={() => handleColorChange('green')}
                 title="Vert"
-                disabled={themeMode === 'light'}
               />
               <button
-                className={`color-option ${themeColor === 'red' ? 'active' : ''}`}
+                className={`color-option ${getCurrentColor() === 'red' ? 'active' : ''}`}
                 data-theme="red"
                 onClick={() => handleColorChange('red')}
                 title="Rouge"
-                disabled={themeMode === 'light'}
               />
             </div>
-            {themeMode === 'light' && (
-              <p className="color-disabled-note">
-                Le mode clair utilise toujours la couleur orange
-              </p>
-            )}
           </div>
         </div>
       )}
