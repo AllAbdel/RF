@@ -3,6 +3,12 @@
   background-color: var(--bg-primary);
 }
 
+.agency-dashboard .dashboard-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
 .vehicles-section,
 .reservations-section {
   animation: slideUp var(--transition-base);

@@ -3,6 +3,16 @@
   background-color: var(--bg-primary);
 }
 
+.client-dashboard.no-header {
+  padding-top: 0;
+}
+
+.client-dashboard .dashboard-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
 .no-results {
   text-align: center;
   padding: 4rem 2rem;

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { agencyAPI, vehicleAPI, reservationAPI } from '../services/api';
+import Header from '../components/Header';
 import VehicleForm from '../components/VehicleForm';
 import VehicleList from '../components/VehicleList';
 import ReservationList from '../components/ReservationList';
@@ -11,12 +13,11 @@ import AgencySettings from '../components/AgencySettings';
 import DocumentScanner from '../components/DocumentScanner';
 import AgencyProfile from '../components/AgencyProfile';
 import '../styles/Agency.css';
-import { useNavigate } from 'react-router-dom';
 
 const AgencyDashboard = () => {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('vehicles');
+  const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'vehicles';
   const [vehicles, setVehicles] = useState([]);
   const [reservations, setReservations] = useState([]);
   const [stats, setStats] = useState(null);
@@ -93,89 +94,7 @@ const AgencyDashboard = () => {
 
   return (
     <div className="agency-dashboard">
-      <header className="dashboard-header">
-        <div className="header-content">
-          <h1>{user?.agency_name || 'Mon Agence'}</h1>
-          <div className="header-actions">
-            <span className="user-info">
-              {user?.first_name} {user?.last_name} 
-              {user?.role === 'super_admin' && ' (Super Admin)'}
-              {user?.role === 'admin' && ' (Admin)'}
-            </span>
-            <button className="logout-btn" onClick={logout}>
-              Déconnexion
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <nav className="dashboard-nav">
-        <button
-          className="nav-btn"
-          onClick={() => navigate('/')}
-        >
-          Accueil
-        </button>
-        <button
-          className={`nav-btn ${activeTab === 'vehicles' ? 'active' : ''}`}
-          onClick={() => setActiveTab('vehicles')}
-        >
-          Véhicules
-        </button>
-        <button
-          className={`nav-btn ${activeTab === 'reservations' ? 'active' : ''}`}
-          onClick={() => setActiveTab('reservations')}
-        >
-          Réservations
-        </button>
-        <button
-          className={`nav-btn ${activeTab === 'stats' ? 'active' : ''}`}
-          onClick={() => setActiveTab('stats')}
-        >
-          Statistiques
-        </button>
-        <button
-          className={`nav-btn ${activeTab === 'documents' ? 'active' : ''}`}
-          onClick={() => setActiveTab('documents')}
-        >
-          Documents
-        </button>
-        {(user?.role === 'admin' || user?.role === 'super_admin') && (
-          <>
-            <button
-              className={`nav-btn ${activeTab === 'members' ? 'active' : ''}`}
-              onClick={() => setActiveTab('members')}
-            >
-              Membres
-            </button>
-            <button
-              className={`nav-btn ${activeTab === 'join-requests' ? 'active' : ''}`}
-              onClick={() => setActiveTab('join-requests')}
-            >
-              Demandes d'adhésion
-            </button>
-            <button
-              className={`nav-btn ${activeTab === 'settings' ? 'active' : ''}`}
-              onClick={() => setActiveTab('settings')}
-            >
-              Paramètres
-            </button>
-            <button
-              className={`nav-btn ${activeTab === 'profile' ? 'active' : ''}`}
-              onClick={() => setActiveTab('profile')}
-            >
-              Profil
-            </button>
-          </>
-        )}
-        <button
-          className={`nav-btn ${activeTab === 'messages' ? 'active' : ''}`}
-          onClick={() => navigate('/messages')}
-          style={{ marginLeft: 'auto' }}
-        >
-          Messages
-        </button>
-      </nav>
+      <Header />
 
       <main className="dashboard-content">
         {loading ? (

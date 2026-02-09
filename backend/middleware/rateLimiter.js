@@ -1,4 +1,5 @@
 const rateLimit = require('express-rate-limit');
+const logger = require('../utils/logger');
 
 // Mode développement : limites plus souples
 const isDevelopment = process.env.NODE_ENV === 'development';
@@ -145,7 +146,7 @@ const logLoginAttempt = async (db, email, ipAddress, success) => {
       'DELETE FROM login_attempts WHERE attempted_at < DATE_SUB(NOW(), INTERVAL 30 DAY)'
     );
   } catch (error) {
-    console.error('Erreur log tentative connexion:', error);
+    logger.error('Erreur log tentative connexion', { error: error.message });
   }
 };
 
@@ -177,7 +178,7 @@ const checkSuspiciousActivity = async (db, email, ipAddress) => {
     
     return { isSuspicious: false, failedAttempts: failedCount };
   } catch (error) {
-    console.error('Erreur vérification activité suspecte:', error);
+    logger.error('Erreur vérification activité suspecte', { error: error.message });
     return { isSuspicious: false, failedAttempts: 0 };
   }
 };

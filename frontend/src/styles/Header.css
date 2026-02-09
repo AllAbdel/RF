@@ -71,6 +71,15 @@
   width: 80%;
 }
 
+.nav-link.active {
+  color: var(--accent-primary);
+  background: var(--bg-tertiary);
+}
+
+.nav-link.active::after {
+  width: 80%;
+}
+
 .auth-link {
   background: var(--accent-gradient);
   color: white;

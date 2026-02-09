@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../config/database');
+const logger = require('../utils/logger');
 const { validatePasswordStrength, checkPasswordHistory, addToPasswordHistory } = require('../utils/passwordValidator');
 const { 
   generateAccessToken, 
@@ -122,12 +123,12 @@ const register = async (req, res) => {
     if (!isDevelopment) {
       try {
         await sendVerificationEmail(email, first_name, verificationToken);
-        console.log(`✅ Email de vérification envoyé à ${email}`);
+        logger.info('Email de vérification envoyé', { email });
       } catch (emailError) {
-        console.error('⚠️ Erreur envoi email vérification:', emailError);
+        logger.error('Erreur envoi email vérification', { email, error: emailError.message });
       }
     } else {
-      console.log(`🔧 MODE DEV: Email auto-vérifié pour ${email}`);
+      logger.debug('MODE DEV: Email auto-vérifié', { email });
     }
 
     // 🆕 GÉNÉRER ACCESS TOKEN ET REFRESH TOKEN
@@ -164,7 +165,7 @@ const register = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Erreur inscription:', error);
+    logger.error('Erreur inscription', { error: error.message });
     res.status(500).json({ error: 'Erreur lors de l\'inscription' });
   }
 };
@@ -239,7 +240,7 @@ const login = async (req, res) => {
 
       // Si code backup utilisé, prévenir l'utilisateur
       if (verification.method === 'backup' && verification.remainingCodes < 3) {
-        console.log(`⚠️ Utilisateur ${user.id} a ${verification.remainingCodes} codes de secours restants`);
+        logger.warn('Codes de secours faibles', { userId: user.id, remainingCodes: verification.remainingCodes });
       }
     }
 
@@ -269,7 +270,7 @@ const login = async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Erreur connexion:', error);
+    logger.error('Erreur connexion', { error: error.message });
     res.status(500).json({ error: 'Erreur lors de la connexion' });
   }
 };
@@ -295,7 +296,7 @@ const getProfile = async (req, res) => {
 
     res.json({ user });
   } catch (error) {
-    console.error('Erreur récupération profil:', error);
+    logger.error('Erreur récupération profil', { error: error.message, userId: req.user?.id });
     res.status(500).json({ error: 'Erreur lors de la récupération du profil' });
   }
 };
@@ -335,7 +336,7 @@ const verifyEmail = async (req, res) => {
       success: true
     });
   } catch (error) {
-    console.error('Erreur vérification email:', error);
+    logger.error('Erreur vérification email', { error: error.message });
     res.status(500).json({ error: 'Erreur lors de la vérification de l\'email' });
   }
 };
@@ -377,7 +378,7 @@ const resendVerificationEmail = async (req, res) => {
       success: true
     });
   } catch (error) {
-    console.error('Erreur renvoi email:', error);
+    logger.error('Erreur renvoi email', { error: error.message });
     res.status(500).json({ error: 'Erreur lors du renvoi de l\'email' });
   }
 };
@@ -416,7 +417,7 @@ const requestPasswordReset = async (req, res) => {
       success: true
     });
   } catch (error) {
-    console.error('Erreur demande réinitialisation:', error);
+    logger.error('Erreur demande réinitialisation', { error: error.message });
     res.status(500).json({ error: 'Erreur lors de la demande de réinitialisation' });
   }
 };
@@ -486,7 +487,7 @@ const resetPassword = async (req, res) => {
       success: true
     });
   } catch (error) {
-    console.error('Erreur réinitialisation mot de passe:', error);
+    logger.error('Erreur réinitialisation mot de passe', { error: error.message });
     res.status(500).json({ error: 'Erreur lors de la réinitialisation du mot de passe' });
   }
 };
@@ -525,7 +526,7 @@ const refreshAccessToken = async (req, res) => {
       message: 'Token rafraîchi avec succès'
     });
   } catch (error) {
-    console.error('Erreur refresh token:', error);
+    logger.error('Erreur refresh token', { error: error.message });
     res.status(401).json({ error: 'Refresh token invalide ou expiré' });
   }
 };
@@ -551,7 +552,7 @@ const logout = async (req, res) => {
       success: true
     });
   } catch (error) {
-    console.error('Erreur logout:', error);
+    logger.error('Erreur logout', { error: error.message });
     res.status(500).json({ error: 'Erreur lors de la déconnexion' });
   }
 };
@@ -619,7 +620,7 @@ const changePassword = async (req, res) => {
       requiresRelogin: true
     });
   } catch (error) {
-    console.error('Erreur changement mot de passe:', error);
+    logger.error('Erreur changement mot de passe', { error: error.message });
     res.status(500).json({ error: 'Erreur lors du changement de mot de passe' });
   }
 };

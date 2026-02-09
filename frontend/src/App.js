@@ -28,7 +28,6 @@ import VehicleComparison from './components/VehicleComparison';
 import FavoritesPage from './pages/FavoritesPage';
 import ComparatorPage from './pages/ComparatorPage';
 import VehicleMapPage from './pages/VehicleMapPage';
-import StatisticsDashboard from './pages/StatisticsDashboard';
 
 import './styles/App.css';
 
@@ -161,16 +160,6 @@ function App() {
               element={
                 <ProtectedRoute requireClient>
                   <ComparatorPage />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* Routes protégées - Statistiques avancées (agences) */}
-            <Route
-              path="/statistics"
-              element={
-                <ProtectedRoute requireAgency>
-                  <StatisticsDashboard />
                 </ProtectedRoute>
               }
             />

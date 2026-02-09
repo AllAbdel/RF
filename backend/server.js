@@ -7,17 +7,20 @@ const compression = require('compression');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
+// 📋 LOGGER STRUCTURÉ
+const logger = require('./utils/logger');
+
 // 🆕 IMPORT NETTOYAGE TOKENS
 const { cleanupExpiredTokens } = require('./utils/tokenManager');
 
 // 🔒 VÉRIFICATION JWT_SECRET AU DÉMARRAGE
 if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
-  console.error('❌ ERREUR CRITIQUE: JWT_SECRET manquant ou trop court (min 32 caractères)');
-  console.error('   Ajoutez JWT_SECRET=votre_secret_de_32_caracteres_minimum dans .env');
+  logger.error('ERREUR CRITIQUE: JWT_SECRET manquant ou trop court (min 32 caractères)');
+  logger.error('Ajoutez JWT_SECRET=votre_secret_de_32_caracteres_minimum dans .env');
   if (process.env.NODE_ENV === 'production') {
     process.exit(1);
   } else {
-    console.warn('⚠️  MODE DEV: Utilisation d\'un secret temporaire (NE PAS UTILISER EN PRODUCTION)');
+    logger.warn('MODE DEV: Utilisation d\'un secret temporaire (NE PAS UTILISER EN PRODUCTION)');
   }
 }
 
@@ -59,7 +62,7 @@ io.use((socket, next) => {
 // 🆕 NETTOYAGE AUTOMATIQUE DES TOKENS EXPIRÉS
 // Exécuter toutes les 6 heures
 setInterval(async () => {
-  console.log('🧹 Nettoyage des tokens expirés...');
+  logger.info('Nettoyage des tokens expirés...');
   await cleanupExpiredTokens(require('./config/database'));
 }, 6 * 60 * 60 * 1000);
 
@@ -84,6 +87,20 @@ app.use(express.json({ limit: '10mb' })); // Limite taille JSON
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/uploads', express.static('uploads'));
 
+// 📋 HTTP REQUEST LOGGING
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    logger.http(`${req.method} ${req.originalUrl}`, {
+      status: res.statusCode,
+      duration: `${duration}ms`,
+      ip: req.ip
+    });
+  });
+  next();
+});
+
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/vehicles', require('./routes/vehicles'));
@@ -101,16 +118,16 @@ const userSockets = new Map();
 const db = require('./config/database');
 
 io.on('connection', (socket) => {
-  console.log('Nouvelle connexion Socket.io:', socket.id, socket.user ? `(user ${socket.user.id})` : '(non auth)');
+  logger.debug('Nouvelle connexion Socket.io', { socketId: socket.id, userId: socket.user?.id || 'non auth' });
 
   socket.on('register', (userId) => {
     // 🔒 Vérifier que l'utilisateur s'enregistre avec son propre ID
     if (socket.user && socket.user.id !== userId) {
-      console.warn(`⚠️ Tentative d'usurpation: user ${socket.user.id} essaie de s'enregistrer comme ${userId}`);
+      logger.warn('Tentative d\'usurpation socket', { realUserId: socket.user.id, attemptedUserId: userId });
       return;
     }
     userSockets.set(userId, socket.id);
-    console.log(`Utilisateur ${userId} enregistré avec socket ${socket.id}`);
+    logger.debug('Utilisateur enregistré sur socket', { userId, socketId: socket.id });
   });
 
   socket.on('join_conversation', async (conversationId) => {
@@ -122,16 +139,16 @@ io.on('connection', (socket) => {
           [conversationId, socket.user.id, socket.user.agency_id]
         );
         if (conv.length === 0) {
-          console.warn(`⚠️ Accès refusé: user ${socket.user.id} tente de rejoindre conversation ${conversationId}`);
+          logger.warn('Accès conversation refusé', { userId: socket.user.id, conversationId });
           socket.emit('error', { message: 'Accès non autorisé à cette conversation' });
           return;
         }
       } catch (err) {
-        console.error('Erreur vérification conversation:', err);
+        logger.error('Erreur vérification conversation', { error: err.message, conversationId });
       }
     }
     socket.join(`conversation_${conversationId}`);
-    console.log(`Socket ${socket.id} a rejoint la conversation ${conversationId}`);
+    logger.debug('Socket a rejoint conversation', { socketId: socket.id, conversationId });
   });
 
   socket.on('send_message', (data) => {
@@ -146,7 +163,7 @@ io.on('connection', (socket) => {
     for (const [userId, socketId] of userSockets.entries()) {
       if (socketId === socket.id) {
         userSockets.delete(userId);
-        console.log(`Utilisateur ${userId} déconnecté`);
+        logger.debug('Utilisateur déconnecté', { userId });
         break;
       }
     }
@@ -165,14 +182,14 @@ app.use((req, res) => {
 
 // Middleware de gestion des erreurs
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  logger.error('Erreur serveur', { error: err.message, stack: err.stack, url: req.originalUrl });
   res.status(500).json({ error: 'Erreur serveur interne' });
 });
 
 const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, () => {
-  console.log(`Serveur démarré sur le port ${PORT}`);
+  logger.info(`Serveur démarré sur le port ${PORT}`, { env: process.env.NODE_ENV || 'development' });
 });
 
 module.exports = { app, io };

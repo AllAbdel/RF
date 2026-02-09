@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const db = require('../config/database');
+const logger = require('../utils/logger');
 
 // 🔒 SÉCURITÉ: Utiliser une fonction pour le secret JWT
 // En production, doit OBLIGATOIREMENT être défini via .env
@@ -31,7 +32,7 @@ const authMiddleware = async (req, res, next) => {
     req.user = decoded;
     next();
   } catch (error) {
-    console.log('❌ Auth error:', error.name, '-', error.message);
+    logger.debug('Auth error', { type: error.name, message: error.message });
     
     if (error.name === 'TokenExpiredError') {
       return res.status(401).json({ 
@@ -80,7 +81,7 @@ const isAgencyMember = async (req, res, next) => {
     
     next();
   } catch (error) {
-    console.error('❌ isAgencyMember error:', error);
+    logger.error('isAgencyMember error', { error: error.message });
     return res.status(500).json({ error: 'Erreur vérification membre agence' });
   }
 };
