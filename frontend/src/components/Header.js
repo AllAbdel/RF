@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { FaBars, FaTimes, FaHome, FaCalendarAlt, FaFileAlt, FaHeart, FaBalanceScale, FaMap, FaEnvelope, FaCar, FaChartBar, FaUsers, FaUserPlus, FaCog, FaUserCircle, FaSignOutAlt, FaSignInAlt } from 'react-icons/fa';
+import { FaBars, FaTimes, FaHome, FaCalendarAlt, FaFileAlt, FaHeart, FaBalanceScale, FaMap, FaEnvelope, FaCar, FaChartBar, FaUsers, FaUserPlus, FaCog, FaUserCircle, FaSignOutAlt, FaSignInAlt, FaBuilding, FaShieldAlt } from 'react-icons/fa';
 import { messageAPI } from '../services/api';
 import '../styles/Header.css';
 
 const Header = () => {
-  const { isAuthenticated, isClient, isAgency, user, logout } = useAuth();
+  const { isAuthenticated, isClient, isAgency, isSiteAdmin, user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
@@ -80,9 +80,9 @@ const Header = () => {
               <div className="menu-user-info">
                 <span className="menu-user-name">{user?.first_name} {user?.last_name}</span>
                 <span className="menu-user-role">
-                  {isClient ? 'Client' : isAgency ? 'Agence' : ''}
-                  {user?.role === 'admin' && ' - Admin'}
-                  {user?.role === 'super_admin' && ' - Super Admin'}
+                  {isSiteAdmin ? 'Administrateur' : isClient ? 'Client' : isAgency ? 'Agence' : ''}
+                  {user?.role === 'admin' && !isSiteAdmin && ' - Admin'}
+                  {user?.role === 'super_admin' && !isSiteAdmin && ' - Super Admin'}
                 </span>
               </div>
             </div>
@@ -132,6 +132,10 @@ const Header = () => {
                     <FaEnvelope className="nav-icon" />
                     <span>Messages</span>
                     {unreadMessages > 0 && <span className="nav-badge">{unreadMessages}</span>}
+                  </Link>
+                  <Link to="/create-agency" className="nav-link" onClick={closeMenu}>
+                    <FaBuilding className="nav-icon" />
+                    <span>Créer une agence</span>
                   </Link>
                 </div>
               )}
@@ -212,6 +216,16 @@ const Header = () => {
                     <FaEnvelope className="nav-icon" />
                     <span>Messages</span>
                     {unreadMessages > 0 && <span className="nav-badge">{unreadMessages}</span>}
+                  </Link>
+                </div>
+              )}
+
+              {isSiteAdmin && (
+                <div className="menu-section">
+                  <span className="menu-section-title">Administration</span>
+                  <Link to="/admin" className="nav-link" onClick={closeMenu}>
+                    <FaShieldAlt className="nav-icon" />
+                    <span>Panel Admin</span>
                   </Link>
                 </div>
               )}

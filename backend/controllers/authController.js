@@ -26,7 +26,7 @@ const { logLoginAttempt, checkSuspiciousActivity } = require('../middleware/rate
 
 const register = async (req, res) => {
   try {
-    const { email, password, first_name, last_name, phone, birth_date, license_date, user_type, agency_name, pending_agency_join } = req.body;
+    const { email, password, first_name, last_name, phone, birth_date, license_date } = req.body;
 
     // Vérifier si l'utilisateur existe déjà
     const [existingUser] = await db.query('SELECT id FROM users WHERE email = ?', [email]);
@@ -44,12 +44,8 @@ const register = async (req, res) => {
       });
     }
 
-    // Validation pour les clients : âge minimum et permis (sauf si c'est une demande d'adhésion à une agence)
-    if (user_type === 'client' && pending_agency_join !== 'true') {
-      if (!birth_date || !license_date) {
-        return res.status(400).json({ error: 'La date de naissance et la date d\'obtention du permis sont obligatoires pour les clients' });
-      }
-
+    // Validation : âge minimum et permis
+    if (birth_date && license_date) {
       const today = new Date();
       const birthDateObj = new Date(birth_date);
       const licenseDateObj = new Date(license_date);
@@ -80,17 +76,8 @@ const register = async (req, res) => {
     // Hasher le mot de passe
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    let agencyId = null;
-
-    // Si c'est un membre d'agence, créer l'agence
-    if (user_type === 'agency_member') {
-      const logoPath = req.file ? `/uploads/agencies/${req.file.filename}` : null;
-      const [agencyResult] = await db.query(
-        'INSERT INTO agencies (name, email, logo) VALUES (?, ?, ?)',
-        [agency_name, email, logoPath]
-      );
-      agencyId = agencyResult.insertId;
-    }
+    // Tout le monde s'inscrit en tant que client
+    const user_type = 'client';
 
     // 🆕 GÉNÉRATION TOKEN DE VÉRIFICATION EMAIL
     const verificationToken = generateVerificationToken();
@@ -108,8 +95,8 @@ const register = async (req, res) => {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         email, hashedPassword, first_name, last_name, phone, 
-        birth_date || null, license_date || null, user_type, agencyId, 
-        user_type === 'agency_member' ? 'super_admin' : 'member',
+        birth_date || null, license_date || null, user_type, null, 
+        'member',
         emailVerified, verificationToken, verificationExpires
       ]
     );
@@ -136,8 +123,8 @@ const register = async (req, res) => {
       id: userId,
       email,
       user_type,
-      agency_id: agencyId,
-      role: user_type === 'agency_member' ? 'super_admin' : 'member'
+      agency_id: null,
+      role: 'member'
     };
     
     const accessToken = generateAccessToken(user);
@@ -159,8 +146,8 @@ const register = async (req, res) => {
         first_name,
         last_name,
         user_type,
-        agency_id: agencyId,
-        role: user.role,
+        agency_id: null,
+        role: 'member',
         email_verified: emailVerified
       }
     });

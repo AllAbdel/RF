@@ -185,6 +185,7 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: !!user,
     isClient: user?.user_type === 'client',
     isAgency: user?.user_type === 'agency_member',
+    isSiteAdmin: user?.user_type === 'site_admin',
     isAdmin: user?.role === 'admin' || user?.role === 'super_admin',
     isSuperAdmin: user?.role === 'super_admin'
   };

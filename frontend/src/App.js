@@ -28,12 +28,14 @@ import VehicleComparison from './components/VehicleComparison';
 import FavoritesPage from './pages/FavoritesPage';
 import ComparatorPage from './pages/ComparatorPage';
 import VehicleMapPage from './pages/VehicleMapPage';
+import AdminDashboard from './pages/AdminDashboard';
+import CreateAgencyPage from './pages/CreateAgencyPage';
 
 import './styles/App.css';
 
 // Composant pour protéger les routes
-const ProtectedRoute = ({ children, requireClient, requireAgency }) => {
-  const { isAuthenticated, isClient, isAgency, loading } = useAuth();
+const ProtectedRoute = ({ children, requireClient, requireAgency, requireSiteAdmin }) => {
+  const { isAuthenticated, isClient, isAgency, isSiteAdmin, loading } = useAuth();
 
   if (loading) {
     return (
@@ -45,6 +47,10 @@ const ProtectedRoute = ({ children, requireClient, requireAgency }) => {
   }
 
   if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (requireSiteAdmin && !isSiteAdmin) {
     return <Navigate to="/" replace />;
   }
 
@@ -61,7 +67,7 @@ const ProtectedRoute = ({ children, requireClient, requireAgency }) => {
 
 // Composant pour rediriger les utilisateurs authentifiés
 const AuthRedirect = ({ children }) => {
-  const { isAuthenticated, isClient, loading } = useAuth();
+  const { isAuthenticated, isClient, isSiteAdmin, loading } = useAuth();
 
   if (loading) {
     return (
@@ -73,6 +79,7 @@ const AuthRedirect = ({ children }) => {
   }
 
   if (isAuthenticated) {
+    if (isSiteAdmin) return <Navigate to="/admin" replace />;
     return <Navigate to={isClient ? '/client' : '/agency'} replace />;
   }
 
@@ -180,6 +187,26 @@ function App() {
               element={
                 <ProtectedRoute requireAgency>
                   <AgencyDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Routes Admin */}
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute requireSiteAdmin>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Créer une agence (clients) */}
+            <Route
+              path="/create-agency"
+              element={
+                <ProtectedRoute>
+                  <CreateAgencyPage />
                 </ProtectedRoute>
               }
             />

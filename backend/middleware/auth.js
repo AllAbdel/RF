@@ -117,10 +117,21 @@ const isSuperAdmin = (req, res, next) => {
   next();
 };
 
+/**
+ * Vérifie que l'utilisateur est un admin du site (site_admin)
+ */
+const isSiteAdmin = (req, res, next) => {
+  if (req.user.user_type !== 'site_admin') {
+    return res.status(403).json({ error: 'Accès réservé à l\'administrateur du site' });
+  }
+  next();
+};
+
 module.exports = {
   authMiddleware,
   isAgencyMember,
   isClient,
   isAgencyAdmin,
-  isSuperAdmin
+  isSuperAdmin,
+  isSiteAdmin
 };

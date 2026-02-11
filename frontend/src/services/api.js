@@ -219,6 +219,18 @@ export const clientDocumentAPI = {
   download: (documentId) => axios.get(`/client-documents/${documentId}/download`, { responseType: 'blob' })
 };
 
+// Admin du site
+export const siteAdminAPI = {
+  getStats: () => axios.get('/admin/stats'),
+  getAgencyRequests: (status) => axios.get('/admin/agency-requests', { params: status ? { status } : {} }),
+  approveRequest: (requestId, notes) => axios.post(`/admin/agency-requests/${requestId}/approve`, { admin_notes: notes }),
+  rejectRequest: (requestId, notes) => axios.post(`/admin/agency-requests/${requestId}/reject`, { admin_notes: notes }),
+  getMyAgencyRequest: () => axios.get('/admin/my-agency-request'),
+  submitAgencyRequest: (formData) => axios.post('/admin/agency-request', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+};
+
 const api = {
   vehicleAPI,
   reservationAPI,
@@ -227,7 +239,8 @@ const api = {
   notificationAPI,
   agencyAPI,
   documentAPI,
-  clientDocumentAPI
+  clientDocumentAPI,
+  siteAdminAPI
 };
 
 export default api;

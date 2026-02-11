@@ -110,6 +110,7 @@ app.use('/api', require('./routes/reviews'));
 app.use('/api/agency', require('./routes/agency'));
 app.use('/api/documents', require('./routes/documents'));
 app.use('/api/client-documents', require('./routes/clientDocuments'));
+app.use('/api/admin', require('./routes/admin'));
 app.use('/api/favorites', require('./routes/favorites'));
 app.use('/api/push', require('./routes/push'));
 
