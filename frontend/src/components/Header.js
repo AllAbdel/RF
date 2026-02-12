@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { FaBars, FaTimes, FaHome, FaCalendarAlt, FaFileAlt, FaHeart, FaBalanceScale, FaMap, FaEnvelope, FaCar, FaChartBar, FaUsers, FaUserPlus, FaCog, FaUserCircle, FaSignOutAlt, FaSignInAlt, FaBuilding, FaShieldAlt } from 'react-icons/fa';
+import { FaBars, FaTimes, FaHome, FaCalendarAlt, FaFileAlt, FaHeart, FaBalanceScale, FaMap, FaEnvelope, FaCar, FaChartBar, FaUsers, FaUserPlus, FaCog, FaUserCircle, FaSignOutAlt, FaSignInAlt, FaBuilding, FaShieldAlt, FaHeadset } from 'react-icons/fa';
 import { messageAPI } from '../services/api';
 import '../styles/Header.css';
 
@@ -54,22 +54,49 @@ const Header = () => {
           <span className="logo-text">Rentflow</span>
         </Link>
 
-        <button className="burger-btn" onClick={() => setMenuOpen(!menuOpen)} aria-label="Menu">
-          {menuOpen ? <FaTimes /> : <FaBars />}
-        </button>
+        {/* Navigation directe visible sur desktop */}
+        <nav className="header-nav-desktop">
+          <Link to="/" className="header-nav-link">
+            Louer un véhicule
+          </Link>
+          {isAuthenticated && isClient && (
+            <Link to="/client?tab=reservations" className="header-nav-link header-nav-link-accent">
+              Mes Réservations
+            </Link>
+          )}
+          {isAuthenticated && isAgency && (
+            <Link to="/agency?tab=reservations" className="header-nav-link header-nav-link-accent">
+              Mes Réservations
+            </Link>
+          )}
+          <Link to="/messages" className="header-nav-link">
+            Assistance
+          </Link>
+        </nav>
 
+        {/* Zone utilisateur à droite */}
         {isAuthenticated ? (
           <div className="header-user-area">
-            <span className="header-user-name">{user?.first_name} {user?.last_name}</span>
+            <span className="header-user-name">{user?.first_name}</span>
+            <Link to={isClient ? "/client?tab=profile" : isAgency ? "/agency?tab=profile" : "/admin"} className="header-profile-btn" title="Mon Profil">
+              <FaUserCircle />
+            </Link>
             <button onClick={handleLogout} className="header-logout-btn" title="Déconnexion">
               <FaSignOutAlt />
             </button>
           </div>
         ) : (
-          <Link to="/auth" className="header-login-btn" title="Connexion">
-            <FaSignInAlt />
-          </Link>
+          <div className="header-user-area">
+            <Link to="/auth" className="header-login-btn" title="Connexion">
+              <FaSignInAlt />
+              <span>Connexion</span>
+            </Link>
+          </div>
         )}
+
+        <button className="burger-btn" onClick={() => setMenuOpen(!menuOpen)} aria-label="Menu">
+          {menuOpen ? <FaTimes /> : <FaBars />}
+        </button>
 
         <nav className={`nav-menu ${menuOpen ? 'open' : ''}`}>
           {isAuthenticated && (

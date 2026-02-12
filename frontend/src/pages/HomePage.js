@@ -129,8 +129,11 @@ const HomePage = () => {
       <div className="home-page">
         <Header />
         <section className="hero-section">
-          <h2>Trouvez votre véhicule idéal</h2>
-          <p>Réservez en quelques clics parmi des centaines de véhicules disponibles</p>
+          <div className="hero-overlay"></div>
+          <div className="hero-content">
+            <h1>Trouvez votre <span className="hero-highlight">véhicule idéal</span></h1>
+            <p>Réservez en quelques clics parmi des centaines de véhicules disponibles<br />pour tous vos déplacements professionnels ou personnels.</p>
+          </div>
         </section>
         <div className="home-content">
           <div className="skeleton-loading">
@@ -159,8 +162,11 @@ const HomePage = () => {
       <Header />
 
       <section className="hero-section">
-        <h2>Trouvez votre véhicule idéal</h2>
-        <p>Réservez en quelques clics parmi des centaines de véhicules disponibles</p>
+        <div className="hero-overlay"></div>
+        <div className="hero-content">
+          <h1>Trouvez votre <span className="hero-highlight">véhicule idéal</span></h1>
+          <p>Réservez en quelques clics parmi des centaines de véhicules disponibles<br />pour tous vos déplacements professionnels ou personnels.</p>
+        </div>
       </section>
 
       <div className="home-content">

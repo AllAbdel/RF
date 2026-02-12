@@ -12,11 +12,12 @@
 .header-container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 1rem 2%;
+  padding: 0.8rem 2%;
   display: flex;
   justify-content: space-between;
   align-items: center;
   position: relative;
+  gap: 1rem;
 }
 
 .logo {
@@ -28,12 +29,45 @@
 }
 
 .logo-text {
-  font-size: 2rem;
+  font-size: 1.8rem;
   font-weight: 800;
   background: var(--accent-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+/* Desktop Navigation */
+.header-nav-desktop {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  justify-content: center;
+}
+
+.header-nav-link {
+  padding: 0.6rem 1.2rem;
+  color: var(--text-primary);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: var(--radius-md);
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.header-nav-link:hover {
+  background: var(--bg-secondary);
+  color: var(--accent-primary);
+}
+
+.header-nav-link-accent {
+  color: var(--accent-primary);
+}
+
+.header-nav-link-accent:hover {
+  background: rgba(99, 102, 241, 0.1);
 }
 
 /* Burger Button */
@@ -49,17 +83,15 @@
   cursor: pointer;
   padding: 0.6rem 0.8rem;
   z-index: 1002;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
   transition: all 0.3s ease;
+  order: 4;
 }
 
 .burger-btn:hover {
   background: var(--accent-primary);
   color: white;
   border-color: var(--accent-primary);
-  transform: translateX(-50%) scale(1.05);
+  transform: scale(1.05);
 }
 
 /* Header User Area */
@@ -68,16 +100,40 @@
   align-items: center;
   gap: 0.6rem;
   flex-shrink: 0;
+  order: 3;
 }
 
 .header-user-name {
   font-weight: 600;
   font-size: 0.9rem;
   color: var(--text-primary);
-  max-width: 200px;
+  max-width: 120px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Header Profile Button */
+.header-profile-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 2px solid var(--accent-primary);
+  border-radius: var(--radius-md);
+  font-size: 1.1rem;
+  color: var(--accent-primary);
+  cursor: pointer;
+  padding: 0.5rem 0.7rem;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+.header-profile-btn:hover {
+  background: var(--accent-primary);
+  color: white;
+  transform: scale(1.05);
 }
 
 /* Header Logout Button */
@@ -107,14 +163,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.5rem;
   background: var(--accent-gradient);
   border: none;
   border-radius: var(--radius-md);
-  font-size: 1.1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
   color: white;
   text-decoration: none;
   cursor: pointer;
-  padding: 0.5rem 0.7rem;
+  padding: 0.6rem 1.2rem;
   transition: all 0.3s ease;
   flex-shrink: 0;
 }
@@ -122,6 +180,25 @@
 .header-login-btn:hover {
   transform: scale(1.05);
   box-shadow: var(--shadow-accent);
+}
+
+/* Responsive - Hide desktop nav on mobile */
+@media (max-width: 900px) {
+  .header-nav-desktop {
+    display: none;
+  }
+  
+  .header-user-name {
+    display: none;
+  }
+  
+  .header-login-btn span {
+    display: none;
+  }
+  
+  .header-login-btn {
+    padding: 0.5rem 0.7rem;
+  }
 }
 
 /* Navigation Menu */
