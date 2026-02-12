@@ -7,6 +7,8 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import ShareButton from '../components/ShareButton';
 import ImageLightbox from '../components/ImageLightbox';
+import { FiArrowLeft, FiShare2, FiDownload, FiCheckCircle, FiStar, FiMapPin, FiFlag, FiUsers, FiCalendar, FiLock, FiSettings } from 'react-icons/fi';
+import { MdLocalGasStation } from 'react-icons/md';
 import '../styles/VehicleDetails.css';
 
 const VehicleDetails = () => {
@@ -119,6 +121,8 @@ const VehicleDetails = () => {
     }
   };
 
+  
+
   const calculateTotalPrice = () => {
     if (!reservationData.start_date || !reservationData.end_date || !vehicle) {
       return 0;
@@ -142,270 +146,282 @@ const VehicleDetails = () => {
       <Header />
       
       <div className="vehicle-details-wrapper">
-        <button className="back-btn" onClick={() => navigate(-1)}>
-          Retour
-        </button>
+        {/* Breadcrumb */}
+        <div className="vd-breadcrumb">
+          <button className="vd-back-link" onClick={() => navigate(-1)}><FiArrowLeft className="vd-back-icon" /> Retour aux résultats</button>
+          <div className="vd-breadcrumb-trail">
+            <span onClick={() => navigate('/')} style={{cursor:'pointer'}}>Accueil</span>
+            <span className="vd-sep">›</span>
+            <span>Véhicules</span>
+            <span className="vd-sep">›</span>
+            <span className="vd-current">{vehicle.brand} {vehicle.model}</span>
+          </div>
+        </div>
 
-      <div className="vehicle-details-container">
-        <div className="vehicle-left-column">
-          <div className="vehicle-images">
-            <div className="main-image" onClick={() => images.length > 0 && setShowLightbox(true)} style={{ cursor: images.length > 0 ? 'zoom-in' : 'default' }}>
-              {images.length > 0 ? (
-                <img 
-                  src={`http://localhost:5000${images[selectedImage]?.image_url}`} 
-                  alt={vehicle.brand}
-                  onError={(e) => { e.target.src = '/no-image.svg'; }}
-                />
-              ) : (
-                <img src="/no-image.svg" alt="Pas d'image" />
-              )}
-              {images.length > 0 && (
-                <div className="zoom-hint">Cliquer pour agrandir</div>
-              )}
-            </div>
-            
-            {images.length > 1 && (
-              <div className="image-thumbnails">
-                {images.map((img, index) => (
-                  <img
-                    key={img.id}
-                    src={`http://localhost:5000${img.image_url}`}
-                    alt={`${vehicle.brand} ${index + 1}`}
-                    className={selectedImage === index ? 'active' : ''}
-                    onClick={() => setSelectedImage(index)}
+        <div className="vd-layout">
+          {/* LEFT COLUMN - Images & Description */}
+          <div className="vd-left">
+            <div className="vd-gallery">
+              <div className="vd-main-image" onClick={() => images.length > 0 && setShowLightbox(true)} style={{ cursor: images.length > 0 ? 'zoom-in' : 'default' }}>
+                {images.length > 0 ? (
+                  <img 
+                    src={`http://localhost:5000${images[selectedImage]?.image_url}`} 
+                    alt={vehicle.brand}
                     onError={(e) => { e.target.src = '/no-image.svg'; }}
                   />
-                ))}
+                ) : (
+                  <img src="/no-image.svg" alt="Pas d'image" />
+                )}
+              </div>
+              
+              {images.length > 1 && (
+                <div className="vd-thumbnails">
+                  {images.map((img, index) => (
+                    <img
+                      key={img.id}
+                      src={`http://localhost:5000${img.image_url}`}
+                      alt={`${vehicle.brand} ${index + 1}`}
+                      className={selectedImage === index ? 'active' : ''}
+                      onClick={() => setSelectedImage(index)}
+                      onError={(e) => { e.target.src = '/no-image.svg'; }}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* About section */}
+            {vehicle.description && (
+              <div className="vd-section">
+                <h3>À propos de ce véhicule</h3>
+                <p className="vd-description-text">{vehicle.description}</p>
               </div>
             )}
-          </div>
 
-          {vehicle.description && (
-            <div className="vehicle-description">
-              <h3>Description</h3>
-              <p>{vehicle.description}</p>
-            </div>
-          )}
+            {/* Rental conditions */}
+            {(vehicle.rental_conditions || vehicle.rental_conditions_pdf) && (
+              <div className="vd-section vd-conditions">
+                <h3><FiDownload style={{verticalAlign:'middle'}} /> Conditions de location de l'agence</h3>
+                
+                {vehicle.rental_conditions && (
+                  <div className="vd-conditions-list">
+                    {vehicle.rental_conditions.split('\n').map((condition, index) => (
+                      condition.trim() && (
+                        <div key={index} className="vd-condition-item">
+                          <FiCheckCircle className="vd-check" />
+                          <span>{condition.trim()}</span>
+                        </div>
+                      )
+                    ))}
+                  </div>
+                )}
+                
+                {vehicle.rental_conditions_pdf && (
+                  <div className="vd-pdf-link">
+                    <a 
+                      href={`http://localhost:5000${vehicle.rental_conditions_pdf}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="vd-pdf-btn"
+                    >
+                      Voir les conditions générales complètes ›
+                    </a>
+                  </div>
+                )}
+              </div>
+            )}
 
-          {(vehicle.rental_conditions || vehicle.rental_conditions_pdf) && (
-            <div className="rental-conditions">
-              <h3>Conditions de location de l'agence</h3>
-              
-              {vehicle.rental_conditions && (
-                <div className="conditions-content">
-                  {vehicle.rental_conditions.split('\n').map((condition, index) => (
-                    condition.trim() && (
-                      <div key={index} className="condition-item">
-                        <span className="condition-bullet">✓</span>
-                        <span className="condition-text">{condition.trim()}</span>
+            {/* Reviews */}
+            {reviews.length > 0 && (
+              <div className="vd-section">
+                <h2>Avis clients ({reviews.length})</h2>
+                <div className="vd-reviews-list">
+                  {reviews.map((review) => (
+                      <div key={review.id} className="vd-review-card">
+                      <div className="vd-review-header">
+                        <span className="vd-review-author">{review.first_name} {review.last_name}</span>
+                        <span className="vd-review-rating"><FiStar style={{color:'#f6c84c'}} /> {review.rating}/5</span>
                       </div>
-                    )
+                      {review.comment && <p className="vd-review-comment">{review.comment}</p>}
+                      <span className="vd-review-date">
+                        {new Date(review.created_at).toLocaleDateString('fr-FR')}
+                      </span>
+                    </div>
                   ))}
                 </div>
+              </div>
+            )}
+          </div>
+
+          {/* RIGHT COLUMN - Sticky Sidebar */}
+          <div className="vd-right">
+            <div className="vd-sidebar">
+              {/* Title + Rating */}
+                <div className="vd-sidebar-header">
+                <div className="vd-sidebar-title-row">
+                  <h1>{vehicle.brand} {vehicle.model}</h1>
+                  <div style={{display:'flex',alignItems:'center',gap:'0.5rem'}}>
+                    {vehicle.avg_rating && (
+                      <span className="vd-rating-badge"><FiStar style={{verticalAlign:'middle'}} /> {parseFloat(vehicle.avg_rating).toFixed(1)}</span>
+                    )}
+                    
+                  </div>
+                </div>
+                <p className="vd-agency-name">
+                  Proposé par <strong>{vehicle.agency_name}</strong>
+                </p>
+              </div>
+
+              {/* Price */}
+              <div className="vd-price-block">
+                <span className="vd-price-amount">{vehicle.price_per_hour}€</span>
+                <span className="vd-price-unit">/ heure</span>
+              </div>
+
+              {/* Specs */}
+              <div className="vd-specs">
+                <h4>CARACTÉRISTIQUES</h4>
+                <div className="vd-specs-grid">
+                  <div className="vd-spec">
+                    <FiUsers className="vd-spec-icon" />
+                    <div>
+                      <small>Places</small>
+                      <strong>{vehicle.seats}</strong>
+                    </div>
+                  </div>
+                  <div className="vd-spec">
+                    <MdLocalGasStation className="vd-spec-icon" />
+                    <div>
+                      <small>Carburant</small>
+                      <strong>{getFuelIcon(vehicle.fuel_type)}</strong>
+                    </div>
+                  </div>
+                  <div className="vd-spec">
+                    <FiSettings className="vd-spec-icon" />
+                    <div>
+                      <small>Moteur</small>
+                      <strong>{vehicle.engine || 'N/A'}</strong>
+                    </div>
+                  </div>
+                  <div className="vd-spec">
+                    <FiCalendar className="vd-spec-icon" />
+                    <div>
+                      <small>Année</small>
+                      <strong>{vehicle.release_date ? new Date(vehicle.release_date).getFullYear() : 'N/A'}</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Addresses */}
+              <div className="vd-addresses">
+                <div className="vd-address">
+                  <FiMapPin className="vd-address-icon" />
+                  <div>
+                    <strong>Prise en charge</strong>
+                    <p>{vehicle.pickup_address || vehicle.location}</p>
+                  </div>
+                </div>
+                <div className="vd-address">
+                  <FiMapPin className="vd-address-icon" />
+                  <div>
+                    <strong>Retour</strong>
+                    <p>{vehicle.return_address || vehicle.location}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action buttons */}
+              <div className="vd-actions">
+                <button 
+                  className="vd-reserve-btn"
+                  onClick={() => {
+                    if (reservations.length > 0) {
+                      showToast('Ce véhicule est actuellement réservé', 'warning');
+                      return;
+                    }
+                    if (!isAuthenticated) {
+                      navigate('/auth', { state: { returnTo: `/vehicle/${id}` } });
+                    } else {
+                      setShowReservationForm(!showReservationForm);
+                    }
+                  }}
+                  disabled={reservations.length > 0}
+                >
+                  {reservations.length > 0 ? 'Déjà réservé' : (showReservationForm ? 'Annuler' : 'Continuer vers la réservation ›')}
+                </button>
+                <button className="vd-contact-btn" onClick={handleContactAgency}>
+                  Contacter l'agence
+                </button>
+                <div style={{marginTop:'0.5rem'}}>
+                  <ShareButton vehicle={vehicle} />
+                </div>
+                {!isAuthenticated && (
+                  <p className="vd-disclaimer"><FiLock style={{verticalAlign:'middle'}} /> Aucun montant ne sera débité pour le moment.</p>
+                )}
+                {isAuthenticated && !showReservationForm && (
+                  <p className="vd-disclaimer"><FiLock style={{verticalAlign:'middle'}} /> Aucun montant ne sera débité pour le moment.</p>
+                )}
+              </div>
+
+              {reservations.length > 0 && (
+                <div className="vd-reserved-info">
+                  <p><FiLock style={{verticalAlign:'middle'}} /> Ce véhicule est actuellement réservé</p>
+                  <ul>
+                    {reservations.map((res, idx) => (
+                      <li key={idx}>
+                        Jusqu'au {new Date(res.end_date).toLocaleDateString('fr-FR', { 
+                          day: '2-digit', month: '2-digit', year: 'numeric',
+                          hour: '2-digit', minute: '2-digit'
+                        })}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
-              
-              {vehicle.rental_conditions_pdf && (
-                <div className="pdf-download">
-                  {!vehicle.rental_conditions && (
-                    <p style={{ marginBottom: '1rem', color: 'var(--text-secondary)' }}>
-                      Les conditions de location sont disponibles en PDF ci-dessous
-                    </p>
+
+              {showReservationForm && isClient && reservations.length === 0 && (
+                <form className="vd-reservation-form" onSubmit={handleReservation}>
+                  <h3>Réserver ce véhicule</h3>
+                  
+                  <div className="vd-form-group">
+                    <label>Date et heure de début</label>
+                    <input
+                      type="datetime-local"
+                      value={reservationData.start_date}
+                      onChange={(e) => setReservationData({...reservationData, start_date: e.target.value})}
+                      required
+                      min={new Date().toISOString().slice(0, 16)}
+                    />
+                  </div>
+
+                  <div className="vd-form-group">
+                    <label>Date et heure de fin</label>
+                    <input
+                      type="datetime-local"
+                      value={reservationData.end_date}
+                      onChange={(e) => setReservationData({...reservationData, end_date: e.target.value})}
+                      required
+                      min={reservationData.start_date || new Date().toISOString().slice(0, 16)}
+                    />
+                  </div>
+
+                  {reservationData.start_date && reservationData.end_date && (
+                    <div className="vd-total-price">
+                      <span>Prix total estimé :</span>
+                      <span className="vd-total-value">{calculateTotalPrice()}€</span>
+                    </div>
                   )}
-                  <a 
-                    href={`http://localhost:5000${vehicle.rental_conditions_pdf}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="download-pdf-btn"
-                  >
-                    📄 Voir/Télécharger les conditions (PDF)
-                  </a>
-                </div>
+
+                  <button type="submit" className="vd-submit-btn">
+                    Confirmer la réservation
+                  </button>
+                </form>
               )}
-            </div>
-          )}
-        </div>
-
-        <div className="vehicle-info-details">
-          <div className="vehicle-header-details">
-            <h1>{vehicle.brand} {vehicle.model}</h1>
-            <p className="agency-name">Agence: {vehicle.agency_name}</p>
-            {vehicle.avg_rating && (
-              <div className="rating">
-                {`${parseFloat(vehicle.avg_rating).toFixed(1)}/5`} ({vehicle.review_count} avis)
-              </div>
-            )}
-          </div>
-
-          <div className="vehicle-price">
-            <span className="price-amount">{vehicle.price_per_hour}€</span>
-            <span className="price-unit">/heure</span>
-          </div>
-
-          <div className="vehicle-specs-details">
-            <div className="spec-item">
-              <span className="spec-label">Places</span>
-              <span className="spec-value">{vehicle.seats}</span>
-            </div>
-            <div className="spec-item">
-              <span className="spec-label">Carburant</span>
-              <span className="spec-value">{getFuelIcon(vehicle.fuel_type)}</span>
-            </div>
-            <div className="spec-item">
-              <span className="spec-label">Moteur</span>
-              <span className="spec-value">{vehicle.engine || 'N/A'}</span>
-            </div>
-            <div className="spec-item">
-              <span className="spec-label">Réservoir</span>
-              <span className="spec-value">{vehicle.tank_capacity ? `${vehicle.tank_capacity}L` : 'N/A'}</span>
-            </div>
-            <div className="spec-item">
-              <span className="spec-label">Localisation</span>
-              <span className="spec-value">{vehicle.location}</span>
-            </div>
-            <div className="spec-item">
-              <span className="spec-label">Année</span>
-              <span className="spec-value">{vehicle.release_date ? new Date(vehicle.release_date).getFullYear() : 'N/A'}</span>
-            </div>
-          </div>
-
-          <div className="vehicle-addresses">
-            <h3>Adresses de prise en charge</h3>
-            <div className="address-info">
-              <div className="address-item">
-                <strong>Récupération :</strong>
-                <p>{vehicle.pickup_address || vehicle.location}</p>
-              </div>
-              <div className="address-item">
-                <strong>Dépôt/Retour :</strong>
-                <p>{vehicle.return_address || vehicle.location}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="vehicle-actions">
-            <button 
-              className="reserve-btn"
-              onClick={() => {
-                if (reservations.length > 0) {
-                  showToast('Ce véhicule est actuellement réservé', 'warning');
-                  return;
-                }
-                if (!isAuthenticated) {
-                  navigate('/auth', { state: { returnTo: `/vehicle/${id}` } });
-                } else {
-                  setShowReservationForm(!showReservationForm);
-                }
-              }}
-              disabled={reservations.length > 0}
-              style={{
-                opacity: reservations.length > 0 ? 0.5 : 1,
-                cursor: reservations.length > 0 ? 'not-allowed' : 'pointer'
-              }}
-            >
-              {reservations.length > 0 ? 'Déjà réservé' : (showReservationForm ? 'Annuler' : 'Réserver')}
-            </button>
-            <button 
-              className="contact-btn" 
-              onClick={handleContactAgency}
-            >
-              Contacter l'agence
-            </button>
-            <ShareButton vehicle={vehicle} />
-            {!isAuthenticated && (
-              <p className="login-message">
-                Connectez-vous pour réserver ce véhicule
-              </p>
-            )}
-            {reservations.length > 0 && (
-              <div className="reserved-info">
-                <p>Ce véhicule est actuellement réservé</p>
-                <ul>
-                  {reservations.map((res, idx) => (
-                    <li key={idx}>
-                      Jusqu'au {new Date(res.end_date).toLocaleDateString('fr-FR', { 
-                        day: '2-digit', 
-                        month: '2-digit', 
-                        year: 'numeric', 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                      })}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-
-          {showReservationForm && isClient && reservations.length === 0 && (
-            <form className="reservation-form" onSubmit={handleReservation}>
-              <h3>Réserver ce véhicule</h3>
               
-              <div className="form-group">
-                <label>Date et heure de début</label>
-                <input
-                  type="datetime-local"
-                  value={reservationData.start_date}
-                  onChange={(e) => setReservationData({
-                    ...reservationData,
-                    start_date: e.target.value
-                  })}
-                  required
-                  min={new Date().toISOString().slice(0, 16)}
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Date et heure de fin</label>
-                <input
-                  type="datetime-local"
-                  value={reservationData.end_date}
-                  onChange={(e) => setReservationData({
-                    ...reservationData,
-                    end_date: e.target.value
-                  })}
-                  required
-                  min={reservationData.start_date || new Date().toISOString().slice(0, 16)}
-                />
-              </div>
-
-              {reservationData.start_date && reservationData.end_date && (
-                <div className="total-price">
-                  <span>Prix total estimé :</span>
-                  <span className="price-value">{calculateTotalPrice()}€</span>
-                </div>
-              )}
-
-              <button type="submit" className="submit-reservation-btn">
-                Confirmer la réservation
-              </button>
-            </form>
-          )}
-        </div>
-      </div>
-
-      {reviews.length > 0 && (
-        <div className="reviews-section">
-          <h2>Avis clients ({reviews.length})</h2>
-          <div className="reviews-list">
-            {reviews.map((review) => (
-              <div key={review.id} className="review-card">
-                <div className="review-header">
-                  <span className="review-author">
-                    {review.first_name} {review.last_name}
-                  </span>
-                  <span className="review-rating">
-                    {`${review.rating}/5`}
-                  </span>
-                </div>
-                {review.comment && <p className="review-comment">{review.comment}</p>}
-                <span className="review-date">
-                  {new Date(review.created_at).toLocaleDateString('fr-FR')}
-                </span>
-              </div>
-            ))}
+            </div>
           </div>
         </div>
-      )}
       </div>
 
       {showLightbox && images.length > 0 && (
